@@ -13,7 +13,10 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<StoreCubit>();
-    final isMobile = MediaQuery.of(context).size.width < 1050;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 1050;
+    final isSmallMobile = screenWidth < 480;
+    final isTinyMobile = screenWidth < 360;
 
     return Container(
       decoration: BoxDecoration(
@@ -34,7 +37,7 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
           // ==========================================
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 7),
+            padding: EdgeInsets.symmetric(horizontal: isSmallMobile ? 12 : 24, vertical: 7),
             color: AppTheme.rose950,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -81,22 +84,24 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    InkWell(
-                      onTap: () => cubit.navigateTo(AppView.contact),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.location_on_outlined, size: 13, color: AppTheme.rose200),
-                          const SizedBox(width: 4),
-                          Text(
-                            state.isBangla ? 'অর্ডার ট্র্যাক' : 'Track Order',
-                            style: const TextStyle(color: AppTheme.gold300, fontSize: 11.5, fontWeight: FontWeight.w500),
-                          ),
-                        ],
+                    if (!isTinyMobile) ...[
+                      InkWell(
+                        onTap: () => cubit.navigateTo(AppView.contact),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.location_on_outlined, size: 13, color: AppTheme.rose200),
+                            const SizedBox(width: 4),
+                            Text(
+                              state.isBangla ? 'অর্ডার ট্র্যাক' : 'Track Order',
+                              style: const TextStyle(color: AppTheme.gold300, fontSize: 11.5, fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 14),
-                    Text('|', style: TextStyle(color: Colors.white.withValues(alpha: 0.3))),
-                    const SizedBox(width: 14),
+                      const SizedBox(width: 10),
+                      Text('|', style: TextStyle(color: Colors.white.withValues(alpha: 0.3))),
+                      const SizedBox(width: 10),
+                    ],
                     // Language Switcher
                     Container(
                       padding: const EdgeInsets.all(2),
@@ -164,89 +169,100 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
           // ==========================================
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: EdgeInsets.symmetric(horizontal: isSmallMobile ? 12 : 24),
               child: Row(
                 children: [
                   // Mobile Drawer Button
                   if (isMobile)
                     IconButton(
-                      icon: const Icon(Icons.menu_rounded, color: AppTheme.textDark, size: 26),
+                      icon: const Icon(Icons.menu_rounded, color: AppTheme.textDark, size: 24),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                       onPressed: () => Scaffold.of(context).openDrawer(),
                     ),
 
                   // Brand Logo
-                  InkWell(
-                    onTap: () => cubit.navigateTo(AppView.home),
-                    borderRadius: BorderRadius.circular(8),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            gradient: AppTheme.logoGradient,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppTheme.rose600.withValues(alpha: 0.35),
-                                blurRadius: 8,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: const Center(
-                            child: Text(
-                              'R',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                                fontFamily: 'Playfair Display',
+                  Flexible(
+                    child: InkWell(
+                      onTap: () => cubit.navigateTo(AppView.home),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: isSmallMobile ? 30 : 40,
+                            height: isSmallMobile ? 30 : 40,
+                            decoration: BoxDecoration(
+                              gradient: AppTheme.logoGradient,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppTheme.rose600.withValues(alpha: 0.35),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Text(
+                                'R',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: isSmallMobile ? 15 : 20,
+                                  fontFamily: 'Playfair Display',
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 10),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            RichText(
-                              text: TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: state.isBangla ? 'রূপসী' : 'RUPOSHI',
-                                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                          letterSpacing: 1.8,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 21,
-                                          color: AppTheme.textDark,
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text: state.isBangla ? 'রূপসী' : 'RUPOSHI',
+                                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                                letterSpacing: isTinyMobile ? 1.0 : 1.5,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: isTinyMobile ? 15 : (isSmallMobile ? 17 : 21),
+                                                color: AppTheme.textDark,
+                                              ),
                                         ),
-                                  ),
-                                  const TextSpan(
-                                    text: '.',
-                                    style: TextStyle(
-                                      color: AppTheme.rose600,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 24,
+                                        const TextSpan(
+                                          text: '.',
+                                          style: TextStyle(
+                                            color: AppTheme.rose600,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                                Text(
+                                  'INTERNATIONAL',
+                                  style: TextStyle(
+                                    fontSize: isTinyMobile ? 6.5 : (isSmallMobile ? 7.5 : 9.5),
+                                    letterSpacing: isTinyMobile ? 1.0 : (isSmallMobile ? 1.4 : 2.4),
+                                    fontWeight: FontWeight.w700,
+                                    color: AppTheme.gold600,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
                             ),
-                            const Text(
-                              'INTERNATIONAL',
-                              style: TextStyle(
-                                fontSize: 9.5,
-                                letterSpacing: 2.4,
-                                fontWeight: FontWeight.w700,
-                                color: AppTheme.gold600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
 
@@ -321,44 +337,52 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
                       ),
                     ),
 
-                  const SizedBox(width: 14),
+                  const SizedBox(width: 8),
 
-                  // Account Sign In Pill
-                  IconButton(
-                    tooltip: state.isCustomerLoggedIn
-                        ? 'Logged in (${state.customerPhone})'
-                        : 'Customer Account',
-                    icon: Icon(
-                      state.isCustomerLoggedIn ? Icons.verified_user : Icons.person_outline_rounded,
-                      color: state.isCustomerLoggedIn ? AppTheme.rose600 : AppTheme.textDark,
-                      size: 22,
-                    ),
-                    onPressed: () => _showOtpAuthDialog(context, cubit, state),
-                  ),
-
-                  // Wishlist Icon with Badge
-                  Stack(
-                    children: [
-                      IconButton(
-                        tooltip: 'Wishlist',
-                        icon: const Icon(Icons.favorite_border_rounded, color: AppTheme.textDark, size: 22),
-                        onPressed: () => cubit.navigateTo(AppView.shop),
+                  // Account Sign In Pill (hidden on tiny screens < 360px, available in drawer)
+                  if (!isTinyMobile)
+                    IconButton(
+                      tooltip: state.isCustomerLoggedIn
+                          ? 'Logged in (${state.customerPhone})'
+                          : 'Customer Account',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                      icon: Icon(
+                        state.isCustomerLoggedIn ? Icons.verified_user : Icons.person_outline_rounded,
+                        color: state.isCustomerLoggedIn ? AppTheme.rose600 : AppTheme.textDark,
+                        size: isSmallMobile ? 20 : 22,
                       ),
-                      if (state.wishlistIds.isNotEmpty)
-                        Positioned(
-                          right: 6,
-                          top: 6,
-                          child: CircleAvatar(
-                            radius: 8,
-                            backgroundColor: AppTheme.rose600,
-                            child: Text(
-                              '${state.wishlistIds.length}',
-                              style: const TextStyle(fontSize: 9.5, color: Colors.white, fontWeight: FontWeight.bold),
+                      onPressed: () => _showOtpAuthDialog(context, cubit, state),
+                    ),
+
+                  // Wishlist Icon with Badge (show on >= 480px, in drawer on small mobile)
+                  if (!isSmallMobile)
+                    Stack(
+                      children: [
+                        IconButton(
+                          tooltip: 'Wishlist',
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                          icon: const Icon(Icons.favorite_border_rounded, color: AppTheme.textDark, size: 22),
+                          onPressed: () => cubit.navigateTo(AppView.shop),
+                        ),
+                        if (state.wishlistIds.isNotEmpty)
+                          Positioned(
+                            right: 4,
+                            top: 4,
+                            child: CircleAvatar(
+                              radius: 7,
+                              backgroundColor: AppTheme.rose600,
+                              child: Text(
+                                '${state.wishlistIds.length}',
+                                style: const TextStyle(fontSize: 8.5, color: Colors.white, fontWeight: FontWeight.bold),
+                              ),
                             ),
                           ),
-                        ),
-                    ],
-                  ),
+                      ],
+                    ),
+
+                  const SizedBox(width: 4),
 
                   // Shopping Bag Button
                   Builder(
@@ -366,7 +390,10 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
                       onTap: () => Scaffold.of(ctx).openEndDrawer(),
                       borderRadius: BorderRadius.circular(24),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isTinyMobile ? 8 : (isSmallMobile ? 10 : 14),
+                          vertical: isSmallMobile ? 7 : 8,
+                        ),
                         decoration: BoxDecoration(
                           color: AppTheme.rose600,
                           borderRadius: BorderRadius.circular(24),
@@ -381,29 +408,31 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 18),
-                            const SizedBox(width: 6),
-                            Text(
-                              '৳${state.grandTotal.toStringAsFixed(0)}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                              ),
-                            ),
-                            if (state.totalCartUnits > 0) ...[
+                            Icon(Icons.shopping_bag_outlined, color: Colors.white, size: isSmallMobile ? 16 : 18),
+                            if (!isSmallMobile) ...[
                               const SizedBox(width: 6),
+                              Text(
+                                '৳${state.grandTotal.toStringAsFixed(0)}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                            if (state.totalCartUnits > 0) ...[
+                              const SizedBox(width: 5),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                                 decoration: const BoxDecoration(
                                   color: Colors.white,
                                   shape: BoxShape.circle,
                                 ),
                                 child: Text(
                                   '${state.totalCartUnits}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: AppTheme.rose600,
-                                    fontSize: 10,
+                                    fontSize: isSmallMobile ? 9 : 10,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),

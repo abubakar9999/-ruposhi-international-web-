@@ -134,13 +134,25 @@ class BeautyBlogView extends StatelessWidget {
 
               const SizedBox(height: 40),
 
-              // Blog Grid
-              Wrap(
-                spacing: 24,
-                runSpacing: 24,
-                children: sampleArticles.map((article) {
-                  return Container(
-                    width: isMobile ? double.infinity : 360,
+              // Blog Grid (Adaptive for Mobile, Tablet, Desktop)
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final available = constraints.maxWidth;
+                  final double cardWidth;
+                  if (available < 650) {
+                    cardWidth = available;
+                  } else if (available < 1050) {
+                    cardWidth = (available - 20) / 2;
+                  } else {
+                    cardWidth = (available - 2 * 24) / 3;
+                  }
+
+                  return Wrap(
+                    spacing: available < 1050 ? 20 : 24,
+                    runSpacing: 24,
+                    children: sampleArticles.map((article) {
+                      return Container(
+                        width: cardWidth,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
@@ -173,21 +185,25 @@ class BeautyBlogView extends StatelessWidget {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                    decoration: BoxDecoration(
-                                      color: AppTheme.rose50,
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      article.category,
-                                      style: const TextStyle(
-                                        fontSize: 10.5,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppTheme.rose700,
+                                  Flexible(
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.rose50,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        article.category,
+                                        style: const TextStyle(
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppTheme.rose700,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                   ),
+                                  const SizedBox(width: 8),
                                   Text(
                                     article.readTime,
                                     style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
@@ -238,7 +254,9 @@ class BeautyBlogView extends StatelessWidget {
                     ),
                   );
                 }).toList(),
-              ),
+              );
+            },
+          ),
             ],
           ),
         ),

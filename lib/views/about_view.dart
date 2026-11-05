@@ -83,32 +83,50 @@ class AboutUsView extends StatelessWidget {
 
               const SizedBox(height: 48),
 
-              // Trust Pillars Cards
-              const Wrap(
-                spacing: 24,
-                runSpacing: 24,
-                children: [
-                  _AboutCard(
-                    icon: Icons.flight_takeoff,
-                    title: 'Air-Freighted Direct',
-                    desc: 'Never transported via humid, hot sea containers. We fly all inventory via temperature-controlled air cargo directly from Seoul, Paris, London, and New York.',
-                  ),
-                  _AboutCard(
-                    icon: Icons.ac_unit,
-                    title: '20°C Dhaka Warehousing',
-                    desc: 'Our modern central fulfillment warehouse in Dhaka maintains strict 18-22°C climate conditioning to protect sensitive active ingredients like Niacinamide and Peptides.',
-                  ),
-                  _AboutCard(
-                    icon: Icons.verified_user,
-                    title: 'BSTI & Batch Record',
-                    desc: 'Every consignment undergoes customs compliance and BSTI verification. Customers can verify genuine batch numbers directly with manufacturer registries.',
-                  ),
-                  _AboutCard(
-                    icon: Icons.storefront,
-                    title: '350+ Salon & B2B Partners',
-                    desc: 'We are the wholesale backbone supplying top dermatologists, premium beauty salons, and registered pharmacies across all 64 districts in Bangladesh.',
-                  ),
-                ],
+              // Trust Pillars Cards (Adaptive for Mobile, Tablet, Desktop)
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final available = constraints.maxWidth;
+                  final double cardWidth;
+                  if (available < 550) {
+                    cardWidth = available;
+                  } else if (available < 900) {
+                    cardWidth = (available - 20) / 2;
+                  } else {
+                    cardWidth = (available - 3 * 20) / 4;
+                  }
+
+                  return Wrap(
+                    spacing: 20,
+                    runSpacing: 20,
+                    children: [
+                      _AboutCard(
+                        icon: Icons.flight_takeoff,
+                        title: 'Air-Freighted Direct',
+                        desc: 'Never transported via humid, hot sea containers. We fly all inventory via temperature-controlled air cargo directly from Seoul, Paris, London, and New York.',
+                        width: cardWidth,
+                      ),
+                      _AboutCard(
+                        icon: Icons.ac_unit,
+                        title: '20°C Dhaka Warehousing',
+                        desc: 'Our modern central fulfillment warehouse in Dhaka maintains strict 18-22°C climate conditioning to protect sensitive active ingredients like Niacinamide and Peptides.',
+                        width: cardWidth,
+                      ),
+                      _AboutCard(
+                        icon: Icons.verified_user,
+                        title: 'BSTI & Batch Record',
+                        desc: 'Every consignment undergoes customs compliance and BSTI verification. Customers can verify genuine batch numbers directly with manufacturer registries.',
+                        width: cardWidth,
+                      ),
+                      _AboutCard(
+                        icon: Icons.storefront,
+                        title: '350+ Salon & B2B Partners',
+                        desc: 'We are the wholesale backbone supplying top dermatologists, premium beauty salons, and registered pharmacies across all 64 districts in Bangladesh.',
+                        width: cardWidth,
+                      ),
+                    ],
+                  );
+                },
               ),
 
               const SizedBox(height: 48),
@@ -175,17 +193,19 @@ class _AboutCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String desc;
+  final double? width;
 
   const _AboutCard({
     required this.icon,
     required this.title,
     required this.desc,
+    this.width,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 270,
+      width: width ?? 270,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,

@@ -58,6 +58,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
   Widget build(BuildContext context) {
     final cubit = context.read<StoreCubit>();
     final isMobile = MediaQuery.of(context).size.width < 900;
+    final isSmallMobile = MediaQuery.of(context).size.width < 420;
     final p = widget.product;
     final isWishlisted = widget.state.isWishlisted(p.id);
 
@@ -132,7 +133,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                       children: [
                         // Image Card
                         Container(
-                          height: 480,
+                          height: isMobile ? 360 : 480,
                           width: double.infinity,
                           decoration: BoxDecoration(
                             color: Colors.white,
@@ -162,10 +163,11 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                               ),
                               // Badges
                               Positioned(
-                                top: 16,
-                                left: 16,
+                                top: 12,
+                                left: 12,
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  constraints: BoxConstraints(maxWidth: isSmallMobile ? 180 : 300),
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                   decoration: BoxDecoration(
                                     color: Colors.white.withValues(alpha: 0.94),
                                     borderRadius: BorderRadius.circular(20),
@@ -179,14 +181,17 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Text(p.countryFlag, style: const TextStyle(fontSize: 14)),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        'Imported from ${p.originCountry}',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
-                                          color: AppTheme.darkPlum,
+                                      Text(p.countryFlag, style: const TextStyle(fontSize: 13)),
+                                      const SizedBox(width: 5),
+                                      Flexible(
+                                        child: Text(
+                                          'Imported from ${p.originCountry}',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 11.5,
+                                            color: AppTheme.darkPlum,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
                                     ],
@@ -195,14 +200,14 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                               ),
                               // Wishlist Button
                               Positioned(
-                                top: 16,
-                                right: 16,
+                                top: 12,
+                                right: 12,
                                 child: InkWell(
                                   onTap: () => cubit.toggleWishlist(p.id),
                                   borderRadius: BorderRadius.circular(20),
                                   child: Container(
-                                    width: 42,
-                                    height: 42,
+                                    width: 40,
+                                    height: 40,
                                     decoration: BoxDecoration(
                                       color: Colors.white.withValues(alpha: 0.92),
                                       shape: BoxShape.circle,
@@ -216,7 +221,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                                     child: Icon(
                                       isWishlisted ? Icons.favorite : Icons.favorite_border_rounded,
                                       color: isWishlisted ? Colors.redAccent : AppTheme.darkPlum,
-                                      size: 22,
+                                      size: 20,
                                     ),
                                   ),
                                 ),
@@ -229,14 +234,16 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
 
                         // Trust Badges Under Image
                         Container(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: AppTheme.borderSubtle),
                           ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          child: const Wrap(
+                            alignment: WrapAlignment.spaceAround,
+                            spacing: 12,
+                            runSpacing: 10,
                             children: [
                               _MiniTrust(icon: Icons.shield_outlined, label: '100% Authentic'),
                               _MiniTrust(icon: Icons.ac_unit, label: '20°C Stored'),
@@ -256,7 +263,10 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Brand & Category
-                        Row(
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 10,
+                          runSpacing: 4,
                           children: [
                             Text(
                               p.brand.toUpperCase(),
@@ -267,7 +277,6 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                                 letterSpacing: 1.5,
                               ),
                             ),
-                            const SizedBox(width: 10),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
@@ -296,9 +305,11 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                         const SizedBox(height: 12),
 
                         // Ratings & Reviews Count
-                        Row(
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
                             Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: List.generate(
                                 5,
                                 (i) => const Icon(Icons.star_rounded, size: 18, color: AppTheme.goldAccent),
@@ -320,44 +331,45 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
 
                         // Pricing Box
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           decoration: BoxDecoration(
                             color: AppTheme.softBlush,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: AppTheme.borderSubtle),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          child: Wrap(
+                            alignment: WrapAlignment.spaceBetween,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 12,
+                            runSpacing: 10,
                             children: [
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Row(
-                                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                                    textBaseline: TextBaseline.alphabetic,
+                                  Wrap(
+                                    crossAxisAlignment: WrapCrossAlignment.center,
+                                    spacing: 8,
+                                    runSpacing: 4,
                                     children: [
                                       Text(
                                         '৳${p.retailPrice.toStringAsFixed(0)} BDT',
-                                        style: const TextStyle(
-                                          fontSize: 28,
+                                        style: TextStyle(
+                                          fontSize: isSmallMobile ? 22 : 26,
                                           fontWeight: FontWeight.w800,
                                           color: AppTheme.darkPlum,
                                         ),
                                       ),
-                                      if (p.oldPrice != null) ...[
-                                        const SizedBox(width: 10),
+                                      if (p.oldPrice != null)
                                         Text(
                                           '৳${p.oldPrice!.toStringAsFixed(0)}',
                                           style: TextStyle(
-                                            fontSize: 16,
+                                            fontSize: 15,
                                             decoration: TextDecoration.lineThrough,
                                             color: Colors.grey.shade400,
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
-                                      ],
-                                      if (p.discountPercent > 0) ...[
-                                        const SizedBox(width: 8),
+                                      if (p.discountPercent > 0)
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                           decoration: BoxDecoration(
@@ -373,9 +385,9 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                                             ),
                                           ),
                                         ),
-                                      ],
                                     ],
                                   ),
+                                  const SizedBox(height: 3),
                                   Text(
                                     'Inclusive of all import taxes & VAT',
                                     style: TextStyle(fontSize: 11.5, color: Colors.grey.shade600),
@@ -484,16 +496,16 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                         ],
 
                         // Quantity Selector & Action Buttons
-                        Row(
-                          children: [
-                            // Quantity Box
-                            Container(
+                        Builder(
+                          builder: (context) {
+                            final quantityBox = Container(
                               decoration: BoxDecoration(
                                 border: Border.all(color: AppTheme.borderSubtle),
                                 borderRadius: BorderRadius.circular(25),
                                 color: Colors.white,
                               ),
                               child: Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   IconButton(
                                     icon: const Icon(Icons.remove, size: 16),
@@ -516,38 +528,63 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                                   ),
                                 ],
                               ),
-                            ),
-                            const SizedBox(width: 16),
-                            // Add to Bag Button
-                            Expanded(
-                              child: ElevatedButton.icon(
-                                onPressed: () {
-                                  cubit.addToCart(p, qty: _quantity, option: _selectedOption);
-                                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      backgroundColor: AppTheme.midnightPlum,
-                                      behavior: SnackBarBehavior.floating,
-                                      content: Text('Added $_quantity x ${p.name} to your Beauty Bag!'),
-                                      action: SnackBarAction(
-                                        label: 'Open Bag',
-                                        textColor: AppTheme.goldLight,
-                                        onPressed: () => Scaffold.of(context).openEndDrawer(),
-                                      ),
+                            );
+
+                            final addToBagButton = ElevatedButton.icon(
+                              onPressed: () {
+                                cubit.addToCart(p, qty: _quantity, option: _selectedOption);
+                                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    backgroundColor: AppTheme.midnightPlum,
+                                    behavior: SnackBarBehavior.floating,
+                                    content: Text('Added $_quantity x ${p.name} to your Beauty Bag!'),
+                                    action: SnackBarAction(
+                                      label: 'Open Bag',
+                                      textColor: AppTheme.goldLight,
+                                      onPressed: () => Scaffold.of(context).openEndDrawer(),
                                     ),
-                                  );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                ),
-                                icon: const Icon(Icons.shopping_bag_outlined, size: 20),
-                                label: Text(
-                                  widget.state.isBangla ? 'ব্যাগে যোগ করুন' : 'Add to Beauty Bag',
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                                ),
+                                  ),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 16),
                               ),
-                            ),
-                          ],
+                              icon: const Icon(Icons.shopping_bag_outlined, size: 20),
+                              label: Text(
+                                widget.state.isBangla ? 'ব্যাগে যোগ করুন' : 'Add to Beauty Bag',
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                              ),
+                            );
+
+                            if (isSmallMobile) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Quantity: ',
+                                        style: TextStyle(fontWeight: FontWeight.w600, color: Colors.grey.shade700),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      quantityBox,
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  addToBagButton,
+                                ],
+                              );
+                            }
+
+                            return Row(
+                              children: [
+                                quantityBox,
+                                const SizedBox(width: 16),
+                                Expanded(child: addToBagButton),
+                              ],
+                            );
+                          },
                         ),
 
                         const SizedBox(height: 12),
@@ -589,36 +626,41 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                 ),
                 child: Column(
                   children: [
-                    // Tab Bar
+                    // Tab Bar (Horizontally scrollable for mobile)
                     Container(
+                      width: double.infinity,
                       padding: const EdgeInsets.all(8),
                       decoration: const BoxDecoration(
                         color: AppTheme.softBlush,
                         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                       ),
-                      child: Row(
-                        children: [
-                          _TabPill(
-                            label: widget.state.isBangla ? 'বিবরণ ও ফলাফল' : 'Description & Benefits',
-                            isActive: _activeInfoTab == 0,
-                            onTap: () => setState(() => _activeInfoTab = 0),
-                          ),
-                          _TabPill(
-                            label: widget.state.isBangla ? 'উপাদান তালিকা' : 'Ingredients',
-                            isActive: _activeInfoTab == 1,
-                            onTap: () => setState(() => _activeInfoTab = 1),
-                          ),
-                          _TabPill(
-                            label: widget.state.isBangla ? 'ব্যবহার বিধি' : 'How to Use',
-                            isActive: _activeInfoTab == 2,
-                            onTap: () => setState(() => _activeInfoTab = 2),
-                          ),
-                          _TabPill(
-                            label: widget.state.isBangla ? 'আমদানি সত্যতা' : 'Batch Authenticity',
-                            isActive: _activeInfoTab == 3,
-                            onTap: () => setState(() => _activeInfoTab = 3),
-                          ),
-                        ],
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _TabPill(
+                              label: widget.state.isBangla ? 'বিবরণ ও ফলাফল' : 'Description & Benefits',
+                              isActive: _activeInfoTab == 0,
+                              onTap: () => setState(() => _activeInfoTab = 0),
+                            ),
+                            _TabPill(
+                              label: widget.state.isBangla ? 'উপাদান তালিকা' : 'Ingredients',
+                              isActive: _activeInfoTab == 1,
+                              onTap: () => setState(() => _activeInfoTab = 1),
+                            ),
+                            _TabPill(
+                              label: widget.state.isBangla ? 'ব্যবহার বিধি' : 'How to Use',
+                              isActive: _activeInfoTab == 2,
+                              onTap: () => setState(() => _activeInfoTab = 2),
+                            ),
+                            _TabPill(
+                              label: widget.state.isBangla ? 'আমদানি সত্যতা' : 'Batch Authenticity',
+                              isActive: _activeInfoTab == 3,
+                              onTap: () => setState(() => _activeInfoTab = 3),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
 
@@ -661,7 +703,9 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                     children: [
                       const Icon(Icons.check_circle, size: 16, color: AppTheme.primaryRose),
                       const SizedBox(width: 8),
-                      Text(b, style: const TextStyle(fontSize: 13.5)),
+                      Expanded(
+                        child: Text(b, style: const TextStyle(fontSize: 13.5)),
+                      ),
                     ],
                   ),
                 ),
@@ -770,13 +814,24 @@ class _TransparencyRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
-        Text(
-          value,
-          style: TextStyle(
-            fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
-            fontSize: 13.5,
-            color: valueColor ?? AppTheme.darkPlum,
+        Flexible(
+          child: Text(
+            title,
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            style: TextStyle(
+              fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+              fontSize: 13.5,
+              color: valueColor ?? AppTheme.darkPlum,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
@@ -797,32 +852,30 @@ class _TabPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: isActive ? Colors.white : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: isActive
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 4,
-                    ),
-                  ]
-                : null,
-          ),
-          child: Center(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontWeight: isActive ? FontWeight.bold : FontWeight.w600,
-                fontSize: 13,
-                color: isActive ? AppTheme.primaryRose : Colors.grey.shade700,
-              ),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: isActive ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 4,
+                  ),
+                ]
+              : null,
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontWeight: isActive ? FontWeight.bold : FontWeight.w600,
+              fontSize: 13,
+              color: isActive ? AppTheme.primaryRose : Colors.grey.shade700,
             ),
           ),
         ),

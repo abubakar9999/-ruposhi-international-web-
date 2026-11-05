@@ -15,7 +15,7 @@ class FooterSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       color: AppTheme.midnightPlum,
-      padding: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 64, vertical: 48),
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 18 : 64, vertical: 40),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1200),
@@ -27,8 +27,8 @@ class FooterSection extends StatelessWidget {
                 alignment: WrapAlignment.spaceBetween,
                 children: [
                   // Brand Column
-                  SizedBox(
-                    width: 340,
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 340),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -78,8 +78,8 @@ class FooterSection extends StatelessWidget {
                   ),
 
                   // Quick Links
-                  SizedBox(
-                    width: 200,
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 200),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -100,8 +100,8 @@ class FooterSection extends StatelessWidget {
                   ),
 
                   // Cosmetics Categories
-                  SizedBox(
-                    width: 200,
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 200),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -120,8 +120,8 @@ class FooterSection extends StatelessWidget {
                   ),
 
                   // Customer Concierge
-                  SizedBox(
-                    width: 240,
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 260),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

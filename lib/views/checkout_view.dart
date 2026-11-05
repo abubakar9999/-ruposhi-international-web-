@@ -214,6 +214,7 @@ class _CheckoutViewState extends State<CheckoutView> {
   Widget build(BuildContext context) {
     final cubit = context.read<StoreCubit>();
     final isMobile = MediaQuery.of(context).size.width < 900;
+    final isSmallMobile = MediaQuery.of(context).size.width < 460;
 
     if (widget.state.cart.isEmpty) {
       return Center(
@@ -258,15 +259,22 @@ class _CheckoutViewState extends State<CheckoutView> {
           constraints: const BoxConstraints(maxWidth: 1200),
           child: Form(
             key: _formKey,
-            child: Wrap(
-              spacing: 36,
-              runSpacing: 32,
-              children: [
-                // ==========================================
-                // LEFT: Delivery Information & Payment
-                // ==========================================
-                SizedBox(
-                  width: isMobile ? double.infinity : 680,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final available = constraints.maxWidth;
+                final isStacked = available < 1000;
+                final double leftWidth = isStacked ? double.infinity : (available - 36) * 0.60;
+                final double rightWidth = isStacked ? double.infinity : (available - 36) * 0.40;
+
+                return Wrap(
+                  spacing: 36,
+                  runSpacing: 32,
+                  children: [
+                    // ==========================================
+                    // LEFT: Delivery Information & Payment
+                    // ==========================================
+                    SizedBox(
+                      width: leftWidth,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -353,29 +361,49 @@ class _CheckoutViewState extends State<CheckoutView> {
                               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
                             ),
                             const SizedBox(height: 10),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _DeliveryZoneCard(
-                                    title: 'Inside Dhaka',
-                                    time: '24-48 Hours',
-                                    cost: widget.state.isFreeDeliveryEligible ? 'FREE' : '৳70',
-                                    isSelected: widget.state.insideDhaka,
-                                    onTap: () => cubit.toggleDeliveryZone(true),
+                            isSmallMobile
+                                ? Column(
+                                    children: [
+                                      _DeliveryZoneCard(
+                                        title: 'Inside Dhaka',
+                                        time: '24-48 Hours',
+                                        cost: widget.state.isFreeDeliveryEligible ? 'FREE' : '৳70',
+                                        isSelected: widget.state.insideDhaka,
+                                        onTap: () => cubit.toggleDeliveryZone(true),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      _DeliveryZoneCard(
+                                        title: 'Outside Dhaka',
+                                        time: '48-72 Hours',
+                                        cost: widget.state.isFreeDeliveryEligible ? 'FREE' : '৳130',
+                                        isSelected: !widget.state.insideDhaka,
+                                        onTap: () => cubit.toggleDeliveryZone(false),
+                                      ),
+                                    ],
+                                  )
+                                : Row(
+                                    children: [
+                                      Expanded(
+                                        child: _DeliveryZoneCard(
+                                          title: 'Inside Dhaka',
+                                          time: '24-48 Hours',
+                                          cost: widget.state.isFreeDeliveryEligible ? 'FREE' : '৳70',
+                                          isSelected: widget.state.insideDhaka,
+                                          onTap: () => cubit.toggleDeliveryZone(true),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 14),
+                                      Expanded(
+                                        child: _DeliveryZoneCard(
+                                          title: 'Outside Dhaka',
+                                          time: '48-72 Hours',
+                                          cost: widget.state.isFreeDeliveryEligible ? 'FREE' : '৳130',
+                                          isSelected: !widget.state.insideDhaka,
+                                          onTap: () => cubit.toggleDeliveryZone(false),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                                const SizedBox(width: 14),
-                                Expanded(
-                                  child: _DeliveryZoneCard(
-                                    title: 'Outside Dhaka',
-                                    time: '48-72 Hours',
-                                    cost: widget.state.isFreeDeliveryEligible ? 'FREE' : '৳130',
-                                    isSelected: !widget.state.insideDhaka,
-                                    onTap: () => cubit.toggleDeliveryZone(false),
-                                  ),
-                                ),
-                              ],
-                            ),
                           ],
                         ),
                       ),
@@ -448,7 +476,7 @@ class _CheckoutViewState extends State<CheckoutView> {
                 // RIGHT: Order Summary Card
                 // ==========================================
                 SizedBox(
-                  width: isMobile ? double.infinity : 440,
+                  width: rightWidth,
                   child: Container(
                     padding: const EdgeInsets.all(26),
                     decoration: BoxDecoration(
@@ -469,10 +497,14 @@ class _CheckoutViewState extends State<CheckoutView> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              'Order Summary',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                            const Flexible(
+                              child: Text(
+                                'Order Summary',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
+                            const SizedBox(width: 8),
                             Text(
                               '${widget.state.totalCartUnits} Items',
                               style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
@@ -589,16 +621,23 @@ class _CheckoutViewState extends State<CheckoutView> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              'Total Payable',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            const Flexible(
+                              child: Text(
+                                'Total Payable',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                            Text(
-                              '৳${widget.state.grandTotal.toStringAsFixed(0)} BDT',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 22,
-                                color: AppTheme.primaryRose,
+                            const SizedBox(width: 8),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                '৳${widget.state.grandTotal.toStringAsFixed(0)} BDT',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 18,
+                                  color: AppTheme.primaryRose,
+                                ),
                               ),
                             ),
                           ],
@@ -614,12 +653,16 @@ class _CheckoutViewState extends State<CheckoutView> {
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               const Icon(Icons.lock_outline, size: 18),
                               const SizedBox(width: 8),
-                              Text(
-                                widget.state.isBangla ? 'অর্ডার কনফার্ম করুন' : 'Confirm Order',
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              Flexible(
+                                child: Text(
+                                  widget.state.isBangla ? 'অর্ডার কনফার্ম করুন' : 'Confirm Order',
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             ],
                           ),
@@ -635,7 +678,9 @@ class _CheckoutViewState extends State<CheckoutView> {
                     ),
                   ),
                 ),
-              ],
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -649,12 +694,19 @@ class _CheckoutViewState extends State<CheckoutView> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(color: Colors.grey.shade700, fontSize: 13.5)),
+          Flexible(
+            child: Text(
+              label,
+              style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 8),
           Text(
             value,
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 14,
+              fontSize: 13.5,
               color: color ?? AppTheme.darkPlum,
             ),
           ),
@@ -700,14 +752,18 @@ class _DeliveryZoneCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13.5,
-                    color: isSelected ? AppTheme.primaryRose : AppTheme.darkPlum,
+                Flexible(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13.5,
+                      color: isSelected ? AppTheme.primaryRose : AppTheme.darkPlum,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                const SizedBox(width: 6),
                 Text(
                   cost,
                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
@@ -752,16 +808,20 @@ class _PaymentOptionTile extends StatelessWidget {
           width: isSelected ? 1.5 : 1,
         ),
       ),
-      child: ListTile(
-        onTap: onTap,
-        dense: true,
-        leading: Icon(icon, color: color),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
-        subtitle: Text(subtitle, style: TextStyle(fontSize: 11.5, color: Colors.grey.shade600)),
-        trailing: Icon(
-          isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
-          color: isSelected ? color : Colors.grey.shade400,
-          size: 20,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: ListTile(
+          onTap: onTap,
+          dense: true,
+          leading: Icon(icon, color: color),
+          title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
+          subtitle: Text(subtitle, style: TextStyle(fontSize: 11.5, color: Colors.grey.shade600)),
+          trailing: Icon(
+            isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+            color: isSelected ? color : Colors.grey.shade400,
+            size: 20,
+          ),
         ),
       ),
     );

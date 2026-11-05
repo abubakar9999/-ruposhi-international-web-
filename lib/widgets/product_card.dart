@@ -8,21 +8,26 @@ class ProductCard extends StatelessWidget {
   final Product product;
   final bool isBangla;
   final bool isB2BActive;
+  final double? width;
 
   const ProductCard({
     super.key,
     required this.product,
     required this.isBangla,
     this.isB2BActive = false,
+    this.width,
   });
 
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<StoreCubit>();
     final isWishlisted = context.select<StoreCubit, bool>((c) => c.state.isWishlisted(product.id));
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final targetWidth = width ?? (screenWidth < 360 ? screenWidth - 32 : 290.0);
+    final isCompact = targetWidth < 235;
 
     return Container(
-      width: 290,
+      width: targetWidth,
       decoration: BoxDecoration(
         color: AppTheme.surfaceWhite,
         borderRadius: BorderRadius.circular(20),
@@ -47,7 +52,7 @@ class ProductCard extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                   child: Container(
-                    height: 230,
+                    height: isCompact ? 175 : 230,
                     width: double.infinity,
                     color: const Color(0xFFF9F7F6),
                     child: Image.network(
@@ -348,45 +353,35 @@ class ProductCard extends StatelessWidget {
                 ],
 
                 // Price & Add to Bag
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Wrap(
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            spacing: 6,
-                            children: [
-                              Text(
-                                '৳${product.retailPrice.toStringAsFixed(0)}',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w800,
-                                  color: AppTheme.darkPlum,
-                                ),
-                              ),
-                              if (product.oldPrice != null)
-                                Text(
-                                  '৳${product.oldPrice!.toStringAsFixed(0)}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    decoration: TextDecoration.lineThrough,
-                                    color: Colors.grey.shade400,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                            ],
-                          ),
-                          Text(
-                            'BDT (Incl. VAT)',
-                            style: TextStyle(fontSize: 9.5, color: Colors.grey.shade500),
-                          ),
-                        ],
+                if (isCompact) ...[
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 5,
+                    children: [
+                      Text(
+                        '৳${product.retailPrice.toStringAsFixed(0)}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: AppTheme.darkPlum,
+                        ),
                       ),
-                    ),
-                    ElevatedButton(
+                      if (product.oldPrice != null)
+                        Text(
+                          '৳${product.oldPrice!.toStringAsFixed(0)}',
+                          style: TextStyle(
+                            fontSize: 11,
+                            decoration: TextDecoration.lineThrough,
+                            color: Colors.grey.shade400,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
                       onPressed: () {
                         cubit.addToCart(product);
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -415,24 +410,111 @@ class ProductCard extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primaryRose,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
                         elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.add_shopping_cart, size: 15),
-                          const SizedBox(width: 5),
+                          const Icon(Icons.add_shopping_cart, size: 14),
+                          const SizedBox(width: 4),
                           Text(
-                            isBangla ? 'কার্ট' : 'Add',
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                            isBangla ? 'কার্ট' : 'Add to Bag',
+                            style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ] else ...[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              spacing: 6,
+                              children: [
+                                Text(
+                                  '৳${product.retailPrice.toStringAsFixed(0)}',
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppTheme.darkPlum,
+                                  ),
+                                ),
+                                if (product.oldPrice != null)
+                                  Text(
+                                    '৳${product.oldPrice!.toStringAsFixed(0)}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      decoration: TextDecoration.lineThrough,
+                                      color: Colors.grey.shade400,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            Text(
+                              'BDT (Incl. VAT)',
+                              style: TextStyle(fontSize: 9.5, color: Colors.grey.shade500),
+                            ),
+                          ],
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          cubit.addToCart(product);
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              backgroundColor: AppTheme.midnightPlum,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              content: Row(
+                                children: [
+                                  const Icon(Icons.check_circle, color: AppTheme.goldAccent, size: 20),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text('${product.name} added to your Beauty Bag!'),
+                                  ),
+                                ],
+                              ),
+                              action: SnackBarAction(
+                                label: 'View Bag',
+                                textColor: AppTheme.goldLight,
+                                onPressed: () => Scaffold.of(context).openEndDrawer(),
+                              ),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primaryRose,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.add_shopping_cart, size: 15),
+                            const SizedBox(width: 5),
+                            Text(
+                              isBangla ? 'কার্ট' : 'Add',
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),

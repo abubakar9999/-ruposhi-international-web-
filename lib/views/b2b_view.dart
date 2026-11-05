@@ -31,13 +31,17 @@ class _B2BWholesaleViewState extends State<B2BWholesaleView> {
   Widget build(BuildContext context) {
     final cubit = context.read<StoreCubit>();
     final isMobile = MediaQuery.of(context).size.width < 800;
+    final isSmallMobile = MediaQuery.of(context).size.width < 480;
 
     if (!widget.state.isB2BAuthenticated) {
       return Center(
         child: Container(
           width: 480,
-          margin: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 24, vertical: 48),
-          padding: const EdgeInsets.all(36),
+          margin: EdgeInsets.symmetric(
+            horizontal: isSmallMobile ? 12 : (isMobile ? 16 : 24),
+            vertical: isMobile ? 24 : 48,
+          ),
+          padding: EdgeInsets.all(isSmallMobile ? 20 : (isMobile ? 24 : 36)),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
@@ -126,12 +130,16 @@ class _B2BWholesaleViewState extends State<B2BWholesaleView> {
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(Icons.lock_open, size: 18),
                     const SizedBox(width: 8),
-                    Text(
-                      widget.state.isBangla ? 'ডিলার হিসেবে আনলক করুন' : 'Unlock Wholesale Pricing',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14.5),
+                    Flexible(
+                      child: Text(
+                        widget.state.isBangla ? 'ডিলার হিসেবে আনলক করুন' : 'Unlock Wholesale Pricing',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14.5),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ),
@@ -143,14 +151,20 @@ class _B2BWholesaleViewState extends State<B2BWholesaleView> {
                   _passwordController.text = 'aaaa';
                   cubit.loginB2B('aaaa', 'aaaa');
                 },
-                child: const Text('1-Click Demo Login (aaaa / aaaa)'),
+                child: const FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text('1-Click Demo Login (aaaa / aaaa)'),
+                ),
               ),
               const SizedBox(height: 16),
               const Divider(),
               TextButton.icon(
                 onPressed: _launchB2BSupport,
                 icon: const Icon(Icons.chat, size: 16, color: Color(0xFF25D366)),
-                label: const Text('Apply for New Dealership on WhatsApp'),
+                label: const Text(
+                  'Apply for New Dealership on WhatsApp',
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),
@@ -169,7 +183,7 @@ class _B2BWholesaleViewState extends State<B2BWholesaleView> {
             children: [
               // B2B Status Header
               Container(
-                padding: const EdgeInsets.all(24),
+                padding: EdgeInsets.all(isMobile ? 18 : 24),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [Color(0xFF1B3B2B), Color(0xFF2E6347)],
@@ -185,23 +199,24 @@ class _B2BWholesaleViewState extends State<B2BWholesaleView> {
                     ),
                   ],
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
+                child: isMobile
+                    ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Row(
                             children: [
                               Icon(Icons.verified, color: Colors.greenAccent, size: 20),
                               SizedBox(width: 8),
-                              Text(
-                                'OFFICIAL WHOLESALE DEALER ACTIVE',
-                                style: TextStyle(
-                                  color: Colors.greenAccent,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.2,
+                              Flexible(
+                                child: Text(
+                                  'OFFICIAL WHOLESALE DEALER ACTIVE',
+                                  style: TextStyle(
+                                    color: Colors.greenAccent,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.2,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
@@ -214,6 +229,7 @@ class _B2BWholesaleViewState extends State<B2BWholesaleView> {
                             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 18,
                                 ),
                           ),
                           const SizedBox(height: 6),
@@ -221,22 +237,71 @@ class _B2BWholesaleViewState extends State<B2BWholesaleView> {
                             'All prices are shown excluding local courier freight. 100% genuine BSTI and Customs cleared batches with VAT Challan 6.3.',
                             style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 13),
                           ),
+                          const SizedBox(height: 14),
+                          OutlinedButton.icon(
+                            onPressed: cubit.logoutB2B,
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              side: const BorderSide(color: Colors.white60),
+                              backgroundColor: Colors.white.withValues(alpha: 0.1),
+                            ),
+                            icon: const Icon(Icons.lock_outline, size: 16),
+                            label: const Text('Lock Portal'),
+                          ),
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Row(
+                                  children: [
+                                    Icon(Icons.verified, color: Colors.greenAccent, size: 20),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'OFFICIAL WHOLESALE DEALER ACTIVE',
+                                      style: TextStyle(
+                                        color: Colors.greenAccent,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 1.2,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  widget.state.isBangla
+                                      ? 'অনুমোদিত ডিলার প্রাইস শিট ও বাল্ক অর্ডার পোর্টাল'
+                                      : 'Approved B2B Dealer Price Sheet & Consignment Portal',
+                                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  'All prices are shown excluding local courier freight. 100% genuine BSTI and Customs cleared batches with VAT Challan 6.3.',
+                                  style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 13),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          OutlinedButton.icon(
+                            onPressed: cubit.logoutB2B,
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              side: const BorderSide(color: Colors.white60),
+                              backgroundColor: Colors.white.withValues(alpha: 0.1),
+                            ),
+                            icon: const Icon(Icons.lock_outline, size: 16),
+                            label: const Text('Lock Portal'),
+                          ),
                         ],
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    OutlinedButton.icon(
-                      onPressed: cubit.logoutB2B,
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        side: const BorderSide(color: Colors.white60),
-                        backgroundColor: Colors.white.withValues(alpha: 0.1),
-                      ),
-                      icon: const Icon(Icons.lock_outline, size: 16),
-                      label: const Text('Lock Portal'),
-                    ),
-                  ],
-                ),
               ),
 
               const SizedBox(height: 32),
@@ -259,141 +324,269 @@ class _B2BWholesaleViewState extends State<B2BWholesaleView> {
                       ),
                     ],
                   ),
-                  child: Row(
-                    children: [
-                      // Thumbnail
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.network(
-                          p.imageUrl,
-                          width: 80,
-                          height: 85,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            width: 80,
-                            height: 85,
-                            color: Colors.grey.shade200,
-                            child: const Icon(Icons.spa_outlined),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                      // Details
-                      Expanded(
-                        child: Column(
+                  child: isMobile
+                      ? Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  p.brand.toUpperCase(),
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.primaryRose,
+                                // Thumbnail
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(
+                                    p.imageUrl,
+                                    width: 72,
+                                    height: 75,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Container(
+                                      width: 72,
+                                      height: 75,
+                                      color: Colors.grey.shade200,
+                                      child: const Icon(Icons.spa_outlined),
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 14),
+                                // Details
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Wrap(
+                                        crossAxisAlignment: WrapCrossAlignment.center,
+                                        children: [
+                                          Text(
+                                            p.brand.toUpperCase(),
+                                            style: const TextStyle(
+                                              fontSize: 10.5,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppTheme.primaryRose,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            '• ${p.originCountry}',
+                                            style: TextStyle(fontSize: 10.5, color: Colors.grey.shade600),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        p.name,
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'MRP: ৳${p.retailPrice.toStringAsFixed(0)} • Batch: ${p.batchNo}',
+                                        style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Divider(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.shade50,
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: Colors.green.shade200),
+                                  ),
+                                  child: Text(
+                                    '${marginPercent.toStringAsFixed(0)}% Margin',
+                                    style: TextStyle(
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green.shade800,
+                                    ),
+                                  ),
+                                ),
                                 Text(
-                                  '•  ${p.originCountry}',
-                                  style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                                  '৳${p.wholesalePrice.toStringAsFixed(0)}',
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.green,
+                                  ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              p.name,
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                              'MOQ: ${p.moq} units (Total: ৳${(p.wholesalePrice * p.moq).toStringAsFixed(0)})',
+                              style: TextStyle(fontSize: 11, color: Colors.grey.shade700),
                             ),
-                            const SizedBox(height: 6),
-                            Wrap(
-                              spacing: 12,
-                              runSpacing: 4,
+                            const SizedBox(height: 10),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: () {
+                                  cubit.addToCart(p, qty: p.moq, isWholesale: true);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      backgroundColor: AppTheme.midnightPlum,
+                                      content: Text('Added MOQ bundle (${p.moq} units) of ${p.name} at wholesale rate!'),
+                                      action: SnackBarAction(
+                                        label: 'View Bag',
+                                        textColor: AppTheme.goldLight,
+                                        onPressed: () => Scaffold.of(context).openEndDrawer(),
+                                      ),
+                                    ),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green.shade800,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                ),
+                                icon: const Icon(Icons.add_shopping_cart, size: 15),
+                                label: Text('Add MOQ (${p.moq} Units)'),
+                              ),
+                            ),
+                          ],
+                        )
+                      : Row(
+                          children: [
+                            // Thumbnail
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.network(
+                                p.imageUrl,
+                                width: 80,
+                                height: 85,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  width: 80,
+                                  height: 85,
+                                  color: Colors.grey.shade200,
+                                  child: const Icon(Icons.spa_outlined),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 20),
+                            // Details
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        p.brand.toUpperCase(),
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppTheme.primaryRose,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '•  ${p.originCountry}',
+                                        style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    p.name,
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Wrap(
+                                    spacing: 12,
+                                    runSpacing: 4,
+                                    children: [
+                                      Text(
+                                        'Retail MRP: ৳${p.retailPrice.toStringAsFixed(0)}',
+                                        style: TextStyle(fontSize: 12.5, color: Colors.grey.shade600),
+                                      ),
+                                      Text(
+                                        'Batch: ${p.batchNo}',
+                                        style: TextStyle(fontSize: 12.5, color: Colors.grey.shade600),
+                                      ),
+                                      Text(
+                                        'Expiry: ${p.expiryDate}',
+                                        style: TextStyle(fontSize: 12.5, color: Colors.grey.shade600),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            // Price & MOQ Action
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                Text(
-                                  'Retail MRP: ৳${p.retailPrice.toStringAsFixed(0)}',
-                                  style: TextStyle(fontSize: 12.5, color: Colors.grey.shade600),
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                      decoration: BoxDecoration(
+                                        color: Colors.green.shade50,
+                                        borderRadius: BorderRadius.circular(6),
+                                        border: Border.all(color: Colors.green.shade200),
+                                      ),
+                                      child: Text(
+                                        '${marginPercent.toStringAsFixed(0)}% Margin',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.green.shade800,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      '৳${p.wholesalePrice.toStringAsFixed(0)}',
+                                      style: const TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w800,
+                                        color: Colors.green,
+                                      ),
+                                    ),
+                                  ],
                                 ),
+                                const SizedBox(height: 6),
                                 Text(
-                                  'Batch: ${p.batchNo}',
-                                  style: TextStyle(fontSize: 12.5, color: Colors.grey.shade600),
+                                  'MOQ: ${p.moq} units (Total: ৳${(p.wholesalePrice * p.moq).toStringAsFixed(0)})',
+                                  style: TextStyle(fontSize: 11.5, color: Colors.grey.shade700),
                                 ),
-                                Text(
-                                  'Expiry: ${p.expiryDate}',
-                                  style: TextStyle(fontSize: 12.5, color: Colors.grey.shade600),
+                                const SizedBox(height: 10),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    cubit.addToCart(p, qty: p.moq, isWholesale: true);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        backgroundColor: AppTheme.midnightPlum,
+                                        content: Text('Added MOQ bundle (${p.moq} units) of ${p.name} at wholesale rate!'),
+                                        action: SnackBarAction(
+                                          label: 'View Bag',
+                                          textColor: AppTheme.goldLight,
+                                          onPressed: () => Scaffold.of(context).openEndDrawer(),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green.shade800,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                  ),
+                                  icon: const Icon(Icons.add_shopping_cart, size: 16),
+                                  label: Text('Add MOQ (${p.moq} Units)'),
                                 ),
                               ],
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(width: 16),
-                      // Price & MOQ Action
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: Colors.green.shade50,
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(color: Colors.green.shade200),
-                                ),
-                                child: Text(
-                                  '${marginPercent.toStringAsFixed(0)}% Margin',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.green.shade800,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Text(
-                                '৳${p.wholesalePrice.toStringAsFixed(0)}',
-                                style: const TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.green,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'MOQ: ${p.moq} units (Total: ৳${(p.wholesalePrice * p.moq).toStringAsFixed(0)})',
-                            style: TextStyle(fontSize: 11.5, color: Colors.grey.shade700),
-                          ),
-                          const SizedBox(height: 10),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              cubit.addToCart(p, qty: p.moq, isWholesale: true);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  backgroundColor: AppTheme.midnightPlum,
-                                  content: Text('Added MOQ bundle (${p.moq} units) of ${p.name} at wholesale rate!'),
-                                  action: SnackBarAction(
-                                    label: 'View Bag',
-                                    textColor: AppTheme.goldLight,
-                                    onPressed: () => Scaffold.of(context).openEndDrawer(),
-                                  ),
-                                ),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green.shade800,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            ),
-                            icon: const Icon(Icons.add_shopping_cart, size: 16),
-                            label: Text('Add MOQ (${p.moq} Units)'),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
                 );
               }),
             ],

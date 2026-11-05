@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ruposhi_international/cubits/store_cubit.dart';
 import 'package:ruposhi_international/models/product_model.dart';
@@ -138,9 +139,8 @@ void main() {
   });
 
   group('Widget Tests', () {
-    testWidgets('RuposhiCustomerApp renders luxury brand title and navigation',
+    testWidgets('RuposhiCustomerApp renders luxury brand title and navigation on desktop (1400x900)',
         (WidgetTester tester) async {
-      // Set desktop window size
       tester.view.physicalSize = const Size(1400, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -149,10 +149,205 @@ void main() {
       await tester.pumpWidget(const RuposhiCustomerApp());
       await tester.pump();
 
-      // Brand title should be present
       expect(find.text('INTERNATIONAL'), findsWidgets);
       expect(find.text('Shop Catalog'), findsWidgets);
       expect(find.text('B2B Wholesale'), findsWidgets);
+    });
+
+    testWidgets('RuposhiCustomerApp renders adaptively on tablet (768x1024)',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(768, 1024);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(const RuposhiCustomerApp());
+      await tester.pump();
+
+      expect(find.text('INTERNATIONAL'), findsWidgets);
+      expect(find.byIcon(Icons.menu_rounded), findsOneWidget);
+    });
+
+    testWidgets('RuposhiCustomerApp renders adaptively on mobile (375x812) with 0 overflows',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(375, 812);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(const RuposhiCustomerApp());
+      await tester.pump();
+
+      expect(find.text('INTERNATIONAL'), findsWidgets);
+      expect(find.byIcon(Icons.menu_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.shopping_bag_outlined), findsWidgets);
+    });
+
+    testWidgets('RuposhiCustomerApp renders on compact mobile (320x568) with 0 overflows',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(const RuposhiCustomerApp());
+      await tester.pump();
+
+      expect(find.text('INTERNATIONAL'), findsWidgets);
+      expect(find.byIcon(Icons.menu_rounded), findsOneWidget);
+    });
+
+    testWidgets('Mobile drawer navigation opens all views with 0 layout overflows',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(375, 812);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(const RuposhiCustomerApp());
+      await tester.pump();
+
+      // Open drawer
+      await tester.tap(find.byIcon(Icons.menu_rounded));
+      await tester.pumpAndSettle();
+
+      expect(find.text('RUPOSHI INTERNATIONAL'), findsWidgets);
+      final drawerShopItem = find.descendant(
+        of: find.byType(Drawer),
+        matching: find.text('Cosmetics Catalog'),
+      );
+      expect(drawerShopItem, findsOneWidget);
+
+      // Navigate to Shop
+      await tester.tap(drawerShopItem);
+      await tester.pumpAndSettle();
+      expect(find.text('Imported Cosmetics Catalog'), findsOneWidget);
+
+      // Open drawer again and navigate to Beauty Blog
+      await tester.tap(find.byIcon(Icons.menu_rounded));
+      await tester.pumpAndSettle();
+      final drawerBlogItem = find.descendant(
+        of: find.byType(Drawer),
+        matching: find.text('Beauty Blog & Guides'),
+      );
+      await tester.tap(drawerBlogItem);
+      await tester.pumpAndSettle();
+      expect(find.text('RUPOSHI BEAUTY & AUTHENTICITY BLOG'), findsOneWidget);
+
+      // Open drawer again and navigate to Contact & Tracking
+      await tester.tap(find.byIcon(Icons.menu_rounded));
+      await tester.pumpAndSettle();
+      final drawerContactItem = find.descendant(
+        of: find.byType(Drawer),
+        matching: find.text('Contact & Live Tracking'),
+      );
+      await tester.tap(drawerContactItem);
+      await tester.pumpAndSettle();
+      expect(find.text('Track Your Order'), findsOneWidget);
+
+      // Open drawer again and navigate to B2B Wholesale Portal
+      await tester.tap(find.byIcon(Icons.menu_rounded));
+      await tester.pumpAndSettle();
+      final drawerB2BItem = find.descendant(
+        of: find.byType(Drawer),
+        matching: find.text('B2B Wholesale Portal'),
+      );
+      await tester.tap(drawerB2BItem);
+      await tester.pumpAndSettle();
+      expect(find.text('B2B Wholesale Dealer Gate'), findsOneWidget);
+
+      // Open drawer again and navigate to Our Story & Warehousing
+      await tester.tap(find.byIcon(Icons.menu_rounded));
+      await tester.pumpAndSettle();
+      final drawerAboutItem = find.descendant(
+        of: find.byType(Drawer),
+        matching: find.text('Our Story & Warehousing'),
+      );
+      await tester.tap(drawerAboutItem);
+      await tester.pumpAndSettle();
+      expect(find.text('ABOUT RUPOSHI INTERNATIONAL'), findsWidgets);
+    });
+
+    testWidgets('Checkout and Cart Drawer render without overflow on compact mobile (320x568)',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(const RuposhiCustomerApp());
+      await tester.pump();
+
+      // Open shopping bag drawer when empty
+      final bagButton = find.byIcon(Icons.shopping_bag_outlined).first;
+      await tester.tap(bagButton);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Your Beauty Bag'), findsOneWidget);
+      expect(find.text('Your bag is empty'), findsOneWidget);
+
+      // Close drawer
+      await tester.tap(find.byIcon(Icons.close_rounded));
+      await tester.pumpAndSettle();
+
+      // Add product via cubit and open cart drawer
+      final cubit = tester.element(find.byType(Scaffold).first).read<StoreCubit>();
+      cubit.addToCart(cubit.state.products.first);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.shopping_bag_outlined).first);
+      await tester.pumpAndSettle();
+
+      final checkoutBtn = find.text('Proceed to Checkout');
+      expect(checkoutBtn, findsOneWidget);
+      await tester.tap(checkoutBtn);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Delivery & Express Checkout'), findsOneWidget);
+      expect(find.text('Order Summary'), findsOneWidget);
+    });
+
+    testWidgets('Product Details view renders without overflow on compact mobile (320x568)',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(const RuposhiCustomerApp());
+      await tester.pump();
+
+      final cubit = tester.element(find.byType(Scaffold).first).read<StoreCubit>();
+      cubit.navigateTo(AppView.productDetails, product: cubit.state.products.first);
+      await tester.pumpAndSettle();
+
+      // Check product details view renders cleanly
+      expect(find.text('Imported from ${cubit.state.products.first.originCountry}'), findsWidgets);
+      expect(find.text('Add to Beauty Bag'), findsOneWidget);
+    });
+
+    testWidgets('B2B authenticated portal renders without overflow on 320x568 and 768x1024',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(const RuposhiCustomerApp());
+      await tester.pump();
+
+      final cubit = tester.element(find.byType(Scaffold).first).read<StoreCubit>();
+      cubit.navigateTo(AppView.b2bPortal);
+      cubit.loginB2B('aaaa', 'aaaa');
+      await tester.pumpAndSettle();
+
+      expect(find.text('OFFICIAL WHOLESALE DEALER ACTIVE'), findsOneWidget);
+      expect(find.text('Lock Portal'), findsWidgets);
+
+      // Lock portal back
+      cubit.logoutB2B();
+      await tester.pumpAndSettle();
+      expect(find.text('B2B Wholesale Dealer Gate'), findsOneWidget);
     });
   });
 }

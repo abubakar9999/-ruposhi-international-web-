@@ -11,15 +11,18 @@ class CartDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final cubit = context.read<StoreCubit>();
 
+    final screenWidth = MediaQuery.of(context).size.width;
+    final drawerWidth = screenWidth < 460 ? (screenWidth * 0.94).clamp(280.0, 400.0) : 400.0;
+
     return Drawer(
-      width: 420,
+      width: drawerWidth,
       backgroundColor: AppTheme.surfaceWhite,
       child: SafeArea(
         child: Column(
           children: [
             // Header
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: const BoxDecoration(
                 border: Border(bottom: BorderSide(color: AppTheme.borderSubtle)),
               ),
@@ -33,24 +36,29 @@ class CartDrawer extends StatelessWidget {
                     ),
                     child: const Icon(Icons.shopping_bag_outlined, color: AppTheme.primaryRose, size: 20),
                   ),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        state.isBangla ? 'আপনার বিউটি ব্যাগ' : 'Your Beauty Bag',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                      ),
-                      Text(
-                        '${state.totalCartUnits} ${state.isBangla ? 'টি পণ্য যুক্ত আছে' : 'items selected'}',
-                        style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                      ),
-                    ],
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          state.isBangla ? 'আপনার বিউটি ব্যাগ' : 'Your Beauty Bag',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          '${state.totalCartUnits} ${state.isBangla ? 'টি পণ্য যুক্ত আছে' : 'items selected'}',
+                          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
                   ),
-                  const Spacer(),
                   IconButton(
                     icon: const Icon(Icons.close_rounded),
                     onPressed: () => Navigator.pop(context),
@@ -298,7 +306,7 @@ class CartDrawer extends StatelessWidget {
             // Bottom Checkout Summary
             if (state.cart.isNotEmpty)
               Container(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.all(screenWidth < 400 ? 14 : 20),
                 decoration: BoxDecoration(
                   color: AppTheme.surfaceWhite,
                   border: const Border(top: BorderSide(color: AppTheme.borderSubtle)),
@@ -315,13 +323,17 @@ class CartDrawer extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          state.isBangla ? 'সাবটোটাল' : 'Subtotal',
-                          style: TextStyle(color: Colors.grey.shade700, fontSize: 13.5),
+                        Flexible(
+                          child: Text(
+                            state.isBangla ? 'সাবটোটাল' : 'Subtotal',
+                            style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
+                        const SizedBox(width: 8),
                         Text(
                           '৳${state.subtotal.toStringAsFixed(0)}',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
                         ),
                       ],
                     ),
@@ -329,17 +341,21 @@ class CartDrawer extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          state.isBangla ? 'আনুমানিক ডেলিভারি' : 'Estimated Delivery',
-                          style: TextStyle(color: Colors.grey.shade700, fontSize: 13.5),
+                        Flexible(
+                          child: Text(
+                            state.isBangla ? 'আনুমানিক ডেলিভারি' : 'Estimated Delivery',
+                            style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
+                        const SizedBox(width: 8),
                         Text(
                           state.deliveryFee == 0
                               ? (state.isBangla ? 'ফ্রি' : 'FREE')
                               : '৳${state.deliveryFee.toStringAsFixed(0)}',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 14,
+                            fontSize: 13.5,
                             color: state.deliveryFee == 0 ? Colors.green : AppTheme.darkPlum,
                           ),
                         ),
@@ -349,16 +365,23 @@ class CartDrawer extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          state.isBangla ? 'সর্বমোট প্রদেয়' : 'Total Payable',
-                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                        Flexible(
+                          child: Text(
+                            state.isBangla ? 'সর্বমোট প্রদেয়' : 'Total Payable',
+                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                        Text(
-                          '৳${state.grandTotal.toStringAsFixed(0)} BDT',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 18,
-                            color: AppTheme.primaryRose,
+                        const SizedBox(width: 8),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            '৳${state.grandTotal.toStringAsFixed(0)} BDT',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
+                              color: AppTheme.primaryRose,
+                            ),
                           ),
                         ),
                       ],
@@ -376,10 +399,14 @@ class CartDrawer extends StatelessWidget {
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              state.isBangla ? 'চেকআউটে যান' : 'Proceed to Checkout',
-                              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                            Flexible(
+                              child: Text(
+                                state.isBangla ? 'চেকআউটে যান' : 'Proceed to Checkout',
+                                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                             const SizedBox(width: 8),
                             const Icon(Icons.arrow_forward_rounded, size: 18),

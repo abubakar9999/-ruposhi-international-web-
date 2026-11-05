@@ -53,7 +53,8 @@ class StorefrontShell extends StatelessWidget {
           // Mobile Drawer for responsive navigation
           drawer: Drawer(
             child: SafeArea(
-              child: Column(
+              child: ListView(
+                padding: EdgeInsets.zero,
                 children: [
                   Container(
                     width: double.infinity,

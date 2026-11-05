@@ -52,7 +52,9 @@ class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<StoreCubit>();
-    final isMobile = MediaQuery.of(context).size.width < 900;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 900;
+    final isSmallMobile = screenWidth < 480;
     final slide = _slides[_currentSlide];
 
     final displayedProducts = widget.state.products.where((p) {
@@ -68,7 +70,7 @@ class _HomeViewState extends State<HomeView> {
         // ==========================================
         Container(
           width: double.infinity,
-          height: isMobile ? 500 : 580,
+          height: isSmallMobile ? 530 : (isMobile ? 520 : 580),
           color: AppTheme.rose950,
           child: Stack(
             fit: StackFit.expand,
@@ -98,7 +100,7 @@ class _HomeViewState extends State<HomeView> {
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 1200),
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 48),
+                    padding: EdgeInsets.symmetric(horizontal: isSmallMobile ? 16 : (isMobile ? 24 : 48)),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,33 +118,36 @@ class _HomeViewState extends State<HomeView> {
                             children: [
                               const Icon(Icons.auto_awesome, size: 13, color: AppTheme.gold300),
                               const SizedBox(width: 6),
-                              Text(
-                                slide['badge']!,
-                                style: const TextStyle(
-                                  color: AppTheme.gold300,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.1,
+                              Flexible(
+                                child: Text(
+                                  slide['badge']!,
+                                  style: const TextStyle(
+                                    color: AppTheme.gold300,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.1,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
                           ),
                         ),
 
-                        const SizedBox(height: 20),
+                        SizedBox(height: isSmallMobile ? 12 : 20),
 
                         // Title
                         Text(
                           widget.state.isBangla ? slide['titleBn']! : slide['title']!,
                           style: Theme.of(context).textTheme.displayLarge?.copyWith(
                                 color: Colors.white,
-                                fontSize: isMobile ? 32 : 52,
+                                fontSize: isSmallMobile ? 25 : (isMobile ? 34 : 52),
                                 height: 1.18,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
 
-                        const SizedBox(height: 16),
+                        SizedBox(height: isSmallMobile ? 10 : 16),
 
                         // Description
                         ConstrainedBox(
@@ -151,13 +156,13 @@ class _HomeViewState extends State<HomeView> {
                             widget.state.isBangla ? slide['descBn']! : slide['desc']!,
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.9),
-                              fontSize: isMobile ? 14 : 16.5,
-                              height: 1.5,
+                              fontSize: isSmallMobile ? 12.5 : (isMobile ? 14 : 16.5),
+                              height: 1.45,
                             ),
                           ),
                         ),
 
-                        const SizedBox(height: 28),
+                        SizedBox(height: isSmallMobile ? 18 : 28),
 
                         // Buttons
                         Wrap(
@@ -339,54 +344,84 @@ class _HomeViewState extends State<HomeView> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
-                  Wrap(
-                    spacing: 18,
-                    runSpacing: 18,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      _CategoryCard(
-                        title: 'Skincare',
-                        titleBn: 'স্কিনকেয়ার',
-                        desc: 'Snail mucin, serums, cleansers',
-                        imgUrl: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80',
-                        onTap: () => cubit.setCategory('Skincare'),
-                      ),
-                      _CategoryCard(
-                        title: 'Makeup',
-                        titleBn: 'মেকআপ',
-                        desc: 'Matte lips, foundations, cheek tints',
-                        imgUrl: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=600&q=80',
-                        onTap: () => cubit.setCategory('Makeup'),
-                      ),
-                      _CategoryCard(
-                        title: 'Haircare',
-                        titleBn: 'হেয়ার কেয়ার',
-                        desc: 'Salon hair repair, keratin masks',
-                        imgUrl: 'https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=600&q=80',
-                        onTap: () => cubit.setCategory('Haircare'),
-                      ),
-                      _CategoryCard(
-                        title: 'Fragrance',
-                        titleBn: 'পারফিউম',
-                        desc: 'Luxury French perfumes',
-                        imgUrl: 'https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=600&q=80',
-                        onTap: () => cubit.setCategory('Fragrance'),
-                      ),
-                      _CategoryCard(
-                        title: 'Bath & Body',
-                        titleBn: 'বাথ অ্যান্ড বডি',
-                        desc: 'Body washes, ceramide lotions',
-                        imgUrl: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=600&q=80',
-                        onTap: () => cubit.setCategory('Bath & Body'),
-                      ),
-                      _CategoryCard(
-                        title: 'Mens Grooming',
-                        titleBn: 'মেন্স গ্রুমিং',
-                        desc: 'Beard care, face wash, styling',
-                        imgUrl: 'https://images.unsplash.com/photo-1621607512214-68297480165e?auto=format&fit=crop&w=600&q=80',
-                        onTap: () => cubit.setCategory('Mens Grooming'),
-                      ),
-                    ],
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final available = constraints.maxWidth;
+                      final double cardWidth;
+                      final double cardHeight;
+                      if (available < 480) {
+                        cardWidth = (available - 12) / 2;
+                        cardHeight = 175;
+                      } else if (available < 860) {
+                        cardWidth = (available - 2 * 14) / 3;
+                        cardHeight = 195;
+                      } else {
+                        cardWidth = (available - 5 * 16) / 6;
+                        cardHeight = 220;
+                      }
+
+                      return Wrap(
+                        spacing: available < 480 ? 12 : 16,
+                        runSpacing: available < 480 ? 12 : 16,
+                        alignment: WrapAlignment.center,
+                        children: [
+                          _CategoryCard(
+                            title: 'Skincare',
+                            titleBn: 'স্কিনকেয়ার',
+                            desc: 'Snail mucin, serums, cleansers',
+                            imgUrl: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80',
+                            width: cardWidth,
+                            height: cardHeight,
+                            onTap: () => cubit.setCategory('Skincare'),
+                          ),
+                          _CategoryCard(
+                            title: 'Makeup',
+                            titleBn: 'মেকআপ',
+                            desc: 'Matte lips, foundations, cheek tints',
+                            imgUrl: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=600&q=80',
+                            width: cardWidth,
+                            height: cardHeight,
+                            onTap: () => cubit.setCategory('Makeup'),
+                          ),
+                          _CategoryCard(
+                            title: 'Haircare',
+                            titleBn: 'হেয়ার কেয়ার',
+                            desc: 'Salon hair repair, keratin masks',
+                            imgUrl: 'https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=600&q=80',
+                            width: cardWidth,
+                            height: cardHeight,
+                            onTap: () => cubit.setCategory('Haircare'),
+                          ),
+                          _CategoryCard(
+                            title: 'Fragrance',
+                            titleBn: 'পারফিউম',
+                            desc: 'Luxury French perfumes',
+                            imgUrl: 'https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=600&q=80',
+                            width: cardWidth,
+                            height: cardHeight,
+                            onTap: () => cubit.setCategory('Fragrance'),
+                          ),
+                          _CategoryCard(
+                            title: 'Bath & Body',
+                            titleBn: 'বাথ অ্যান্ড বডি',
+                            desc: 'Body washes, ceramide lotions',
+                            imgUrl: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=600&q=80',
+                            width: cardWidth,
+                            height: cardHeight,
+                            onTap: () => cubit.setCategory('Bath & Body'),
+                          ),
+                          _CategoryCard(
+                            title: 'Mens Grooming',
+                            titleBn: 'মেন্স গ্রুমিং',
+                            desc: 'Beard care, face wash, styling',
+                            imgUrl: 'https://images.unsplash.com/photo-1621607512214-68297480165e?auto=format&fit=crop&w=600&q=80',
+                            width: cardWidth,
+                            height: cardHeight,
+                            onTap: () => cubit.setCategory('Mens Grooming'),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
@@ -443,45 +478,66 @@ class _HomeViewState extends State<HomeView> {
 
                   const SizedBox(height: 24),
 
-                  // Tabs
-                  Row(
-                    children: ['All', 'Best Sellers', 'New Arrivals'].map((tab) {
-                      final isSelected = _activeTab == tab;
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 10),
-                        child: ChoiceChip(
-                          label: Text(tab),
-                          selected: isSelected,
-                          selectedColor: AppTheme.rose600,
-                          labelStyle: TextStyle(
-                            color: isSelected ? Colors.white : AppTheme.textDark,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
+                  // Tabs (Horizontally scrollable for small screens)
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: ['All', 'Best Sellers', 'New Arrivals'].map((tab) {
+                        final isSelected = _activeTab == tab;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child: ChoiceChip(
+                            label: Text(tab),
+                            selected: isSelected,
+                            selectedColor: AppTheme.rose600,
+                            labelStyle: TextStyle(
+                              color: isSelected ? Colors.white : AppTheme.textDark,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                            backgroundColor: AppTheme.rose50,
+                            side: BorderSide(
+                              color: isSelected ? AppTheme.rose600 : AppTheme.borderSubtle,
+                            ),
+                            onSelected: (_) => setState(() => _activeTab = tab),
                           ),
-                          backgroundColor: AppTheme.rose50,
-                          side: BorderSide(
-                            color: isSelected ? AppTheme.rose600 : AppTheme.borderSubtle,
-                          ),
-                          onSelected: (_) => setState(() => _activeTab = tab),
-                        ),
-                      );
-                    }).toList(),
+                        );
+                      }).toList(),
+                    ),
                   ),
 
                   const SizedBox(height: 28),
 
-                  // Products Grid
-                  Wrap(
-                    spacing: 20,
-                    runSpacing: 24,
-                    alignment: WrapAlignment.center,
-                    children: displayedProducts.map((p) {
-                      return ProductCard(
-                        product: p,
-                        isBangla: widget.state.isBangla,
-                        isB2BActive: widget.state.isB2BAuthenticated,
+                  // Products Grid (Adaptive for Mobile, Tablet, Desktop)
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final available = constraints.maxWidth;
+                      final double cardWidth;
+                      if (available < 380) {
+                        cardWidth = available;
+                      } else if (available < 660) {
+                        cardWidth = (available - 14) / 2;
+                      } else if (available < 1000) {
+                        cardWidth = (available - 2 * 18) / 3;
+                      } else {
+                        cardWidth = (available - 3 * 20) / 4;
+                      }
+
+                      return Wrap(
+                        spacing: available < 660 ? 14 : 20,
+                        runSpacing: 22,
+                        alignment: WrapAlignment.center,
+                        children: displayedProducts.map((p) {
+                          return ProductCard(
+                            product: p,
+                            isBangla: widget.state.isBangla,
+                            isB2BActive: widget.state.isB2BAuthenticated,
+                            width: cardWidth,
+                          );
+                        }).toList(),
                       );
-                    }).toList(),
+                    },
                   ),
                 ],
               ),
@@ -506,28 +562,44 @@ class _TrustRibbonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: AppTheme.rose50,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppTheme.borderSubtle),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 140, maxWidth: 260),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: AppTheme.rose50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppTheme.borderSubtle),
+            ),
+            child: Icon(icon, color: AppTheme.rose600, size: 20),
           ),
-          child: Icon(icon, color: AppTheme.rose600, size: 22),
-        ),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
-            Text(subtitle, style: TextStyle(color: Colors.grey.shade500, fontSize: 11.5)),
-          ],
-        ),
-      ],
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  subtitle,
+                  style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -537,6 +609,8 @@ class _CategoryCard extends StatelessWidget {
   final String titleBn;
   final String desc;
   final String imgUrl;
+  final double width;
+  final double height;
   final VoidCallback onTap;
 
   const _CategoryCard({
@@ -544,6 +618,8 @@ class _CategoryCard extends StatelessWidget {
     required this.titleBn,
     required this.desc,
     required this.imgUrl,
+    required this.width,
+    required this.height,
     required this.onTap,
   });
 
@@ -553,8 +629,8 @@ class _CategoryCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
       child: Container(
-        width: 180,
-        height: 220,
+        width: width,
+        height: height,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
           image: DecorationImage(
@@ -574,7 +650,7 @@ class _CategoryCard extends StatelessWidget {
           ],
         ),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
             gradient: const LinearGradient(
@@ -592,7 +668,7 @@ class _CategoryCard extends StatelessWidget {
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                  fontSize: 15,
                 ),
               ),
               const SizedBox(height: 2),
@@ -602,7 +678,7 @@ class _CategoryCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: AppTheme.rose100,
-                  fontSize: 10.5,
+                  fontSize: 10,
                 ),
               ),
             ],

@@ -70,22 +70,24 @@ class _ContactViewState extends State<ContactView> {
                           child: const Icon(Icons.local_shipping_outlined, color: AppTheme.rose600, size: 24),
                         ),
                         const SizedBox(width: 14),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.state.isBangla ? 'লাইভ অর্ডার ট্র্যাকিং' : 'Track Your Order',
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                            Text(
-                              widget.state.isBangla
-                                  ? 'আপনার অর্ডারের রেফারেন্স আইডি দিন'
-                                  : 'Enter your Ruposhi order ID (e.g. RUP-2026-9812)',
-                              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-                            ),
-                          ],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.state.isBangla ? 'লাইভ অর্ডার ট্র্যাকিং' : 'Track Your Order',
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                              Text(
+                                widget.state.isBangla
+                                    ? 'আপনার অর্ডারের রেফারেন্স আইডি দিন'
+                                    : 'Enter your Ruposhi order ID (e.g. RUP-2026-9812)',
+                                style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -150,103 +152,112 @@ class _ContactViewState extends State<ContactView> {
 
               const SizedBox(height: 36),
 
-              // Contact & Corporate Info Wrap
-              Wrap(
-                spacing: 32,
-                runSpacing: 24,
-                children: [
-                  // Office Address & Channels
-                  SizedBox(
-                    width: isMobile ? double.infinity : 520,
-                    child: Container(
-                      padding: const EdgeInsets.all(32),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: AppTheme.borderSubtle),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Corporate Headquarters & Central Hub',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                          ),
-                          const SizedBox(height: 16),
-                          _infoRow(
-                            Icons.location_on_outlined,
-                            'Ruposhi International Ltd.\nLevel 7, Lotus Kamal Tower\nBanani Commercial Area, Dhaka-1213\nBangladesh',
-                          ),
-                          const SizedBox(height: 14),
-                          _infoRow(
-                            Icons.phone_outlined,
-                            'Concierge Hotline: +880 1700-000000\nCustomer Service: +880 1711-223344',
-                          ),
-                          const SizedBox(height: 14),
-                          _infoRow(
-                            Icons.email_outlined,
-                            'General: concierge@ruposhi.com.bd\nWholesale B2B: b2b@ruposhi.com.bd',
-                          ),
-                          const SizedBox(height: 14),
-                          _infoRow(
-                            Icons.schedule,
-                            'Support Hours: Saturday to Thursday (9:00 AM - 9:00 PM)',
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+              // Contact & Corporate Info Wrap (Adaptive for Mobile, Tablet, Desktop)
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final available = constraints.maxWidth;
+                  final isStacked = available < 1000;
+                  final double leftWidth = isStacked ? double.infinity : (available - 32) * 0.46;
+                  final double rightWidth = isStacked ? double.infinity : (available - 32) * 0.54;
 
-                  // Message Form
-                  SizedBox(
-                    width: isMobile ? double.infinity : 600,
-                    child: Container(
-                      padding: const EdgeInsets.all(32),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: AppTheme.borderSubtle),
+                  return Wrap(
+                    spacing: 32,
+                    runSpacing: 24,
+                    children: [
+                      // Office Address & Channels
+                      SizedBox(
+                        width: leftWidth,
+                        child: Container(
+                          padding: const EdgeInsets.all(32),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: AppTheme.borderSubtle),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Corporate Headquarters & Central Hub',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                              ),
+                              const SizedBox(height: 16),
+                              _infoRow(
+                                Icons.location_on_outlined,
+                                'Ruposhi International Ltd.\nLevel 7, Lotus Kamal Tower\nBanani Commercial Area, Dhaka-1213\nBangladesh',
+                              ),
+                              const SizedBox(height: 14),
+                              _infoRow(
+                                Icons.phone_outlined,
+                                'Concierge Hotline: +880 1700-000000\nCustomer Service: +880 1711-223344',
+                              ),
+                              const SizedBox(height: 14),
+                              _infoRow(
+                                Icons.email_outlined,
+                                'General: concierge@ruposhi.com.bd\nWholesale B2B: b2b@ruposhi.com.bd',
+                              ),
+                              const SizedBox(height: 14),
+                              _infoRow(
+                                Icons.schedule,
+                                'Support Hours: Saturday to Thursday (9:00 AM - 9:00 PM)',
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Send a Direct Inquiry to Concierge',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+
+                      // Message Form
+                      SizedBox(
+                        width: rightWidth,
+                        child: Container(
+                          padding: const EdgeInsets.all(32),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: AppTheme.borderSubtle),
                           ),
-                          const SizedBox(height: 16),
-                          TextField(
-                            controller: _nameCtrl,
-                            decoration: const InputDecoration(labelText: 'Your Full Name'),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Send a Direct Inquiry to Concierge',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                              ),
+                              const SizedBox(height: 16),
+                              TextField(
+                                controller: _nameCtrl,
+                                decoration: const InputDecoration(labelText: 'Your Full Name'),
+                              ),
+                              const SizedBox(height: 12),
+                              TextField(
+                                controller: _phoneCtrl,
+                                decoration: const InputDecoration(labelText: 'Mobile Number (+880)'),
+                              ),
+                              const SizedBox(height: 12),
+                              TextField(
+                                controller: _msgCtrl,
+                                maxLines: 3,
+                                decoration: const InputDecoration(labelText: 'Your Question or Product Request'),
+                              ),
+                              const SizedBox(height: 18),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  onPressed: () {
+                                    final text = 'Inquiry from ${_nameCtrl.text} (${_phoneCtrl.text}): ${_msgCtrl.text}';
+                                    _launchWhatsApp(text);
+                                  },
+                                  icon: const Icon(Icons.send_rounded, size: 16),
+                                  label: const Text('Send Message via WhatsApp'),
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 12),
-                          TextField(
-                            controller: _phoneCtrl,
-                            decoration: const InputDecoration(labelText: 'Mobile Number (+880)'),
-                          ),
-                          const SizedBox(height: 12),
-                          TextField(
-                            controller: _msgCtrl,
-                            maxLines: 3,
-                            decoration: const InputDecoration(labelText: 'Your Question or Product Request'),
-                          ),
-                          const SizedBox(height: 18),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: () {
-                                final text = 'Inquiry from ${_nameCtrl.text} (${_phoneCtrl.text}): ${_msgCtrl.text}';
-                                _launchWhatsApp(text);
-                              },
-                              icon: const Icon(Icons.send_rounded, size: 16),
-                              label: const Text('Send Message via WhatsApp'),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-                ],
+                    ],
+                  );
+                },
               ),
             ],
           ),
