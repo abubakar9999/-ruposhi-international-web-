@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ruposhi_international/cubits/store_cubit.dart';
 import 'package:ruposhi_international/models/product_model.dart';
 import 'package:ruposhi_international/admin/admin_models.dart';
+import 'package:ruposhi_international/services/invoice_service.dart';
 import 'package:ruposhi_international/main.dart';
 
 // 1x1 transparent PNG data for network image mocking in widget tests
@@ -631,6 +632,84 @@ void main() {
 
       expect(find.text('B2B Wholesale & Dealer Network'), findsOneWidget);
       expect(find.text('+ Onboard Partner'), findsOneWidget);
+    });
+
+    test('InvoiceService generates valid PDF invoice binary and triggers download', () async {
+      final sampleOrder = AdminOrder(
+        orderId: 'RUP-2026-TEST',
+        customerName: 'Samira Rahman',
+        customerPhone: '+8801711223344',
+        customerAddress: 'House 12, Road 4, Banani',
+        city: 'Dhaka',
+        paymentMethod: 'Cash on Delivery (COD)',
+        subtotal: 3500.0,
+        deliveryFee: 70.0,
+        grandTotal: 3570.0,
+        items: const [
+          {
+            'id': 'p_cosrx_01',
+            'name': 'COSRX Advanced Snail 96 Mucin Power Essence',
+            'price': 1750.0,
+            'quantity': 2,
+          }
+        ],
+        status: 'Confirmed',
+        createdAt: DateTime(2026, 11, 5, 21, 0),
+      );
+
+      final pdfBytes = await InvoiceService.generateInvoicePdf(sampleOrder);
+      expect(pdfBytes.isNotEmpty, isTrue);
+
+      // Verify PDF header magic bytes "%PDF-"
+      expect(pdfBytes.take(5).toList(), equals([0x25, 0x50, 0x44, 0x46, 0x2D]));
+
+      final downloadSuccess = await InvoiceService.downloadInvoice(sampleOrder);
+      expect(downloadSuccess, isTrue);
+    });
+
+    testWidgets('Checkout flow auto-downloads invoice and Return to Home Store button returns to home store', (tester) async {
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(const RuposhiCustomerApp());
+      await tester.pumpAndSettle();
+
+      final cubit = tester.element(find.byType(Scaffold).first).read<StoreCubit>();
+
+      // Add item to cart and navigate to checkout
+      cubit.addToCart(_testProduct, qty: 1);
+      cubit.navigateTo(AppView.checkout);
+      await tester.pumpAndSettle();
+
+      // Enter customer checkout details using form fields
+      final textFields = find.byType(TextFormField);
+      await tester.enterText(textFields.at(0), 'Tasnim Anika');
+      await tester.enterText(textFields.at(1), '01712345678');
+      await tester.enterText(textFields.at(2), 'Gulshan 2, Dhaka');
+      await tester.pumpAndSettle();
+
+      // Click Confirm Order
+      final confirmBtn = find.text('Confirm Order');
+      await tester.ensureVisible(confirmBtn);
+      await tester.tap(confirmBtn);
+      await tester.pumpAndSettle();
+
+      // Verify Order Placed Successfully and auto-download notice
+      expect(find.text('Order Placed Successfully!'), findsWidgets);
+      expect(find.text('Invoice auto-downloaded to your device'), findsWidgets);
+      expect(find.text('Download Official Invoice (PDF)'), findsWidgets);
+      expect(find.text('Return to Home Store'), findsWidgets);
+
+      // Tap Return to Home Store in the dialog
+      final returnHomeBtn = find.text('Return to Home Store').last;
+      await tester.tap(returnHomeBtn);
+      await tester.pumpAndSettle();
+
+      // Verify navigated back to Home Store
+      expect(cubit.state.currentView, equals(AppView.home));
+      expect(find.text('Unveil Your Purest\nLuminous Glow'), findsOneWidget);
     });
   });
 }

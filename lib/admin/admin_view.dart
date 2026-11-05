@@ -8,6 +8,7 @@ import '../models/product_model.dart';
 import 'admin_models.dart';
 import 'bulk_product_dialog.dart';
 import 'image_upload_service.dart';
+import '../services/invoice_service.dart';
 
 enum AdminSection {
   overview,
@@ -2456,10 +2457,11 @@ class _AdminViewState extends State<AdminView> {
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.rose900),
             onPressed: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invoice sent to thermal printer queue.')));
+              InvoiceService.downloadInvoice(order);
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Downloading official PDF invoice...')));
             },
-            icon: const Icon(Icons.print, size: 16, color: Colors.white),
-            label: const Text('Print Now', style: TextStyle(color: Colors.white)),
+            icon: const Icon(Icons.download, size: 16, color: Colors.white),
+            label: const Text('Download Invoice (PDF)', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

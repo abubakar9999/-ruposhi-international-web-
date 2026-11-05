@@ -16,8 +16,21 @@ import 'home_view.dart';
 import 'product_details_view.dart';
 import 'shop_view.dart';
 
-class StorefrontShell extends StatelessWidget {
+class StorefrontShell extends StatefulWidget {
   const StorefrontShell({super.key});
+
+  @override
+  State<StorefrontShell> createState() => _StorefrontShellState();
+}
+
+class _StorefrontShellState extends State<StorefrontShell> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   Future<void> _launchWhatsApp(BuildContext context, bool isBangla) async {
     final message = Uri.encodeComponent(
@@ -212,12 +225,21 @@ class StorefrontShell extends StatelessWidget {
               style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
             ),
           ),
-          body: SingleChildScrollView(
-            child: Column(
-              children: [
-                _buildActiveBody(context, state),
-                FooterSection(state: state),
-              ],
+          body: BlocListener<StoreCubit, StoreState>(
+            listenWhen: (prev, current) => prev.currentView != current.currentView,
+            listener: (context, state) {
+              if (_scrollController.hasClients) {
+                _scrollController.jumpTo(0);
+              }
+            },
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              child: Column(
+                children: [
+                  _buildActiveBody(context, state),
+                  FooterSection(state: state),
+                ],
+              ),
             ),
           ),
         );

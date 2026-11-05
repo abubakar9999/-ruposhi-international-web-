@@ -6,6 +6,7 @@ import '../core/app_theme.dart';
 import '../cubits/store_cubit.dart';
 import '../admin/admin_models.dart';
 import '../services/supabase_service.dart';
+import '../services/invoice_service.dart';
 
 class CheckoutView extends StatefulWidget {
   final StoreState state;
@@ -26,6 +27,8 @@ class _CheckoutViewState extends State<CheckoutView> {
   String _paymentMethod = 'Cash on Delivery (COD)';
   String? _couponMessage;
   bool _couponSuccess = false;
+  bool _orderConfirmed = false;
+  AdminOrder? _confirmedOrder;
 
   @override
   void initState() {
@@ -80,6 +83,9 @@ class _CheckoutViewState extends State<CheckoutView> {
     final savedSubtotal = widget.state.subtotal;
     final savedDeliveryFee = widget.state.deliveryFee;
     final savedItemsCount = widget.state.totalCartUnits;
+    final savedCoupon = widget.state.couponCode;
+    final savedDiscount = widget.state.discountAmount;
+
     final cartItemsPayload = widget.state.cart
         .map((item) => {
               'id': item.product.id,
@@ -89,28 +95,9 @@ class _CheckoutViewState extends State<CheckoutView> {
             })
         .toList();
 
-    // Record in local admin order stream
-    cubit.recordCustomerOrder(
-      AdminOrder(
-        orderId: randId,
-        customerName: _nameCtrl.text.trim(),
-        customerPhone: _phoneCtrl.text.trim(),
-        customerAddress: _addrCtrl.text.trim(),
-        city: _cityCtrl.text.trim(),
-        paymentMethod: _paymentMethod,
-        subtotal: savedSubtotal,
-        deliveryFee: savedDeliveryFee,
-        grandTotal: savedGrandTotal,
-        items: cartItemsPayload,
-        status: 'Pending',
-        createdAt: DateTime.now(),
-      ),
-    );
-
-    // Persist to Supabase in background
-    SupabaseService.createOrder(
+    final confirmedOrder = AdminOrder(
       orderId: randId,
-      customerName: _nameCtrl.text.trim(),
+      customerName: _nameCtrl.text.trim().isEmpty ? 'Valued Customer' : _nameCtrl.text.trim(),
       customerPhone: _phoneCtrl.text.trim(),
       customerAddress: _addrCtrl.text.trim(),
       city: _cityCtrl.text.trim(),
@@ -119,87 +106,188 @@ class _CheckoutViewState extends State<CheckoutView> {
       deliveryFee: savedDeliveryFee,
       grandTotal: savedGrandTotal,
       items: cartItemsPayload,
+      status: 'Pending',
+      createdAt: DateTime.now(),
     );
+
+    // 1. Record in local admin order stream
+    cubit.recordCustomerOrder(confirmedOrder);
+
+    // 2. Persist to Supabase in background
+    SupabaseService.createOrder(
+      orderId: randId,
+      customerName: confirmedOrder.customerName,
+      customerPhone: confirmedOrder.customerPhone,
+      customerAddress: confirmedOrder.customerAddress,
+      city: confirmedOrder.city,
+      paymentMethod: confirmedOrder.paymentMethod,
+      subtotal: savedSubtotal,
+      deliveryFee: savedDeliveryFee,
+      grandTotal: savedGrandTotal,
+      items: cartItemsPayload,
+    );
+
+    // 3. Automatically download official PDF invoice
+    InvoiceService.downloadInvoice(
+      confirmedOrder,
+      couponCode: savedCoupon.isNotEmpty ? savedCoupon : null,
+      discountAmount: savedDiscount,
+    );
+
+    setState(() {
+      _orderConfirmed = true;
+      _confirmedOrder = confirmedOrder;
+    });
 
     cubit.clearCart();
 
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         contentPadding: const EdgeInsets.all(28),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.green.shade50,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.check_circle, color: Colors.green, size: 52),
-            ),
-            const SizedBox(height: 18),
-            Text(
-              widget.state.isBangla ? 'অর্ডার সফলভাবে সম্পন্ন হয়েছে!' : 'Order Placed Successfully!',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Order Reference ID: $randId',
-              style: const TextStyle(fontWeight: FontWeight.w700, color: AppTheme.primaryRose, fontSize: 13.5),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppTheme.softBlush,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppTheme.borderSubtle),
-              ),
-              child: Column(
-                children: [
-                  _receiptRow('Customer', _nameCtrl.text.isEmpty ? 'Valued Customer' : _nameCtrl.text),
-                  _receiptRow('Contact', _phoneCtrl.text),
-                  _receiptRow('Destination', '${_addrCtrl.text}, ${_cityCtrl.text}'),
-                  _receiptRow('Payment Mode', _paymentMethod),
-                  _receiptRow('Total Units', '$savedItemsCount items'),
-                  const Divider(height: 14),
-                  _receiptRow('Total Payable', '৳${savedGrandTotal.toStringAsFixed(0)} BDT', isBold: true),
-                ],
-              ),
-            ),
-            const SizedBox(height: 14),
-            Text(
-              widget.state.isBangla ? 'আপনার ফোনে ট্র্যাকিং এসএমএস পাঠানো হবে। যেকোনো প্রশ্নে আমাদের কনসিয়ার্জে যোগাযোগ করুন।' : 'An SMS confirmation has been queued for your mobile. Our logistics team will dispatch in cold-chain packaging.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-            ),
-            const SizedBox(height: 22),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () => _sendWhatsAppReceipt(randId, savedGrandTotal),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF25D366),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 440),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  shape: BoxShape.circle,
                 ),
-                icon: const Icon(Icons.chat_bubble_outline, size: 18),
-                label: const Text('Send Order to WhatsApp Concierge'),
+                child: const Icon(Icons.check_circle_rounded, color: Colors.green, size: 52),
               ),
-            ),
-            const SizedBox(height: 10),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                cubit.navigateTo(AppView.home);
-              },
-              child: const Text('Return to Home Store'),
-            ),
-          ],
+              const SizedBox(height: 18),
+              Text(
+                widget.state.isBangla ? 'অর্ডার সফলভাবে সম্পন্ন হয়েছে!' : 'Order Placed Successfully!',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Order Reference ID: $randId',
+                style: const TextStyle(fontWeight: FontWeight.w700, color: AppTheme.primaryRose, fontSize: 13.5),
+              ),
+              const SizedBox(height: 12),
+              // Auto-download notification badge
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0FDF4),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFF86EFAC)),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.download_done_rounded, color: Color(0xFF16A34A), size: 16),
+                    SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        'Invoice auto-downloaded to your device',
+                        style: TextStyle(
+                          color: Color(0xFF15803D),
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppTheme.softBlush,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppTheme.borderSubtle),
+                ),
+                child: Column(
+                  children: [
+                    _receiptRow('Customer', confirmedOrder.customerName),
+                    _receiptRow('Contact', confirmedOrder.customerPhone),
+                    _receiptRow('Destination', '${confirmedOrder.customerAddress}, ${confirmedOrder.city}'),
+                    _receiptRow('Payment Mode', confirmedOrder.paymentMethod),
+                    _receiptRow('Total Units', '$savedItemsCount items'),
+                    const Divider(height: 14),
+                    _receiptRow('Total Payable', '৳${savedGrandTotal.toStringAsFixed(0)} BDT', isBold: true),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Action 1: Return to Home Store
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    if (Navigator.of(dialogContext, rootNavigator: true).canPop()) {
+                      Navigator.of(dialogContext, rootNavigator: true).pop();
+                    }
+                    setState(() {
+                      _orderConfirmed = false;
+                      _confirmedOrder = null;
+                    });
+                    cubit.navigateTo(AppView.home);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.rose900,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  icon: const Icon(Icons.storefront_outlined, size: 18),
+                  label: const Text(
+                    'Return to Home Store',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.5),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              // Action 2: Download Invoice Again (PDF)
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    InvoiceService.downloadInvoice(
+                      confirmedOrder,
+                      couponCode: savedCoupon.isNotEmpty ? savedCoupon : null,
+                      discountAmount: savedDiscount,
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Downloading official order invoice (PDF)...')),
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  icon: const Icon(Icons.download_rounded, size: 17),
+                  label: const Text('Download Official Invoice (PDF)'),
+                ),
+              ),
+              const SizedBox(height: 10),
+              // Action 3: WhatsApp Concierge
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => _sendWhatsAppReceipt(randId, savedGrandTotal),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF25D366),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  icon: const Icon(Icons.chat_bubble_outline, size: 17),
+                  label: const Text('Send Order to WhatsApp Concierge'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -235,40 +323,14 @@ class _CheckoutViewState extends State<CheckoutView> {
     final isMobile = MediaQuery.of(context).size.width < 900;
     final isSmallMobile = MediaQuery.of(context).size.width < 460;
 
+    // 1. If order was just placed, display the comprehensive Order Confirmed view
+    if (_orderConfirmed && _confirmedOrder != null) {
+      return _buildOrderConfirmedView(context, cubit, _confirmedOrder!);
+    }
+
+    // 2. If bag is empty and no recent order
     if (widget.state.cart.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(64),
-          child: Column(
-            children: [
-              Container(
-                width: 90,
-                height: 90,
-                decoration: const BoxDecoration(
-                  color: AppTheme.softBlush,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.shopping_bag_outlined, size: 40, color: AppTheme.primaryRose),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                widget.state.isBangla ? 'আপনার শপিং ব্যাগটি খালি' : 'Your Beauty Bag is Empty',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Please select luxury skincare or cosmetics to proceed with checkout.',
-                style: TextStyle(color: Colors.black54),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () => cubit.navigateTo(AppView.shop),
-                child: const Text('Return to Catalog'),
-              ),
-            ],
-          ),
-        ),
-      );
+      return _buildEmptyBagView(context, cubit);
     }
 
     return Padding(
@@ -726,6 +788,234 @@ class _CheckoutViewState extends State<CheckoutView> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyBagView(BuildContext context, StoreCubit cubit) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 64),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 90,
+              height: 90,
+              decoration: const BoxDecoration(
+                color: AppTheme.softBlush,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.shopping_bag_outlined, size: 40, color: AppTheme.primaryRose),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              widget.state.isBangla ? 'আপনার শপিং ব্যাগটি খালি' : 'Your Beauty Bag is Empty',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              widget.state.isBangla
+                  ? 'চেকআউট সম্পন্ন করার জন্য অনুগ্রহ করে ক্যাটালগ থেকে পণ্য নির্বাচন করুন।'
+                  : 'Please select luxury skincare or cosmetics to proceed with checkout.',
+              style: const TextStyle(color: Colors.black54),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () => cubit.navigateTo(AppView.shop),
+                  icon: const Icon(Icons.storefront_outlined, size: 18),
+                  label: Text(widget.state.isBangla ? 'ক্যাটালগ দেখুন' : 'Explore Catalog'),
+                ),
+                const SizedBox(width: 12),
+                OutlinedButton(
+                  onPressed: () => cubit.navigateTo(AppView.home),
+                  child: Text(widget.state.isBangla ? 'হোম পেজে ফিরুন' : 'Return to Home Store'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOrderConfirmedView(BuildContext context, StoreCubit cubit, AdminOrder order) {
+    final isMobile = MediaQuery.of(context).size.width < 768;
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 720),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 32, vertical: 40),
+          child: Container(
+            padding: EdgeInsets.all(isMobile ? 20 : 36),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: AppTheme.borderSubtle),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 18,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.check_circle_rounded, color: Colors.green, size: 54),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  widget.state.isBangla ? 'অর্ডার সফলভাবে সম্পন্ন হয়েছে!' : 'Order Placed Successfully!',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppTheme.softBlush,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: AppTheme.rose200),
+                  ),
+                  child: Text(
+                    'Order ID: ${order.orderId}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.rose900,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                // Auto-download notification badge
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF0FDF4),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFF86EFAC)),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.download_done_rounded, color: Color(0xFF16A34A), size: 18),
+                      SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          'Official PDF Invoice auto-downloaded to your device',
+                          style: TextStyle(
+                            color: Color(0xFF15803D),
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // Order Details Container
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surfaceWhite,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppTheme.borderSubtle),
+                  ),
+                  child: Column(
+                    children: [
+                      _receiptRow('Customer', order.customerName),
+                      _receiptRow('Contact', order.customerPhone),
+                      _receiptRow('Destination', '${order.customerAddress}, ${order.city}'),
+                      _receiptRow('Payment Mode', order.paymentMethod),
+                      _receiptRow('Total Items', '${order.items.length} product(s)'),
+                      const Divider(height: 18),
+                      _receiptRow('Total Payable', '৳${order.grandTotal.toStringAsFixed(0)} BDT', isBold: true),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                // Return to Home Store button (Primary)
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _orderConfirmed = false;
+                        _confirmedOrder = null;
+                      });
+                      cubit.navigateTo(AppView.home);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.rose900,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    icon: const Icon(Icons.storefront_outlined, size: 20),
+                    label: const Text(
+                      'Return to Home Store',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Re-download Invoice PDF
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      InvoiceService.downloadInvoice(order);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Downloading official order invoice (PDF)...')),
+                      );
+                    },
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: const BorderSide(color: AppTheme.rose900),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    icon: const Icon(Icons.download_rounded, color: AppTheme.rose900, size: 18),
+                    label: const Text(
+                      'Download Invoice Again (PDF)',
+                      style: TextStyle(color: AppTheme.rose900, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // WhatsApp Concierge
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () => _sendWhatsAppReceipt(order.orderId, order.grandTotal),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF25D366),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    icon: const Icon(Icons.chat_bubble_outline, size: 18),
+                    label: const Text('Send Order to WhatsApp Concierge'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
