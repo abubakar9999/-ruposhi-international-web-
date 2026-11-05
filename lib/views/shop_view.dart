@@ -253,7 +253,14 @@ class ShopCatalogView extends StatelessWidget {
               const SizedBox(height: 32),
 
               // Product Grid
-              if (products.isEmpty)
+              if (state.isLoadingProducts)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(48),
+                    child: CircularProgressIndicator(color: AppTheme.primaryRose),
+                  ),
+                )
+              else if (products.isEmpty)
                 Center(
                   child: Padding(
                     padding: const EdgeInsets.all(48),

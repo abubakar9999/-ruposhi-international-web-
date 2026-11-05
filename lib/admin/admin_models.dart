@@ -180,17 +180,40 @@ class B2BPartner extends Equatable {
   }
 
   factory B2BPartner.fromMap(Map<String, dynamic> map) {
+    final rawStatus = map['status'] ?? 'Pending Review';
+    final normalizedStatus = (rawStatus == 'Active' || rawStatus == 'Approved') ? 'Approved' : rawStatus;
+
+    var tierStr = map['tier']?.toString() ?? 'Wholesaler (20% off)';
+    if (tierStr == 'Platinum') tierStr = 'Platinum Partner (30% off)';
+    if (tierStr == 'Gold') tierStr = 'Gold Salon (25% off)';
+    if (tierStr == 'Silver' || tierStr == 'Bronze') tierStr = 'Wholesaler (20% off)';
+
+    final rawName = map['business_name'] ?? map['businessName'] ?? 'Wholesale Partner';
+    var bType = map['business_type'] ?? map['businessType'];
+    if (bType == null || bType.toString().isEmpty) {
+      final lowerName = rawName.toString().toLowerCase();
+      if (lowerName.contains('salon') || lowerName.contains('spa') || lowerName.contains('studio')) {
+        bType = 'Salon & Spa';
+      } else if (lowerName.contains('pharma') || lowerName.contains('drug') || lowerName.contains('chemist')) {
+        bType = 'Pharmacy';
+      } else if (lowerName.contains('distributor') || lowerName.contains('agency')) {
+        bType = 'Distributor';
+      } else {
+        bType = 'Wholesaler';
+      }
+    }
+
     return B2BPartner(
       id: map['id']?.toString() ?? 'b2b_${DateTime.now().millisecondsSinceEpoch}',
-      businessName: map['business_name'] ?? map['businessName'] ?? 'Wholesale Partner',
+      businessName: rawName,
       contactPerson: map['contact_person'] ?? map['contactPerson'] ?? 'Proprietor',
       phone: map['phone'] ?? '',
       email: map['email'] ?? '',
       tradeLicense: map['trade_license'] ?? map['tradeLicense'] ?? '',
       district: map['district'] ?? 'Dhaka',
-      tier: map['tier'] ?? 'Wholesaler (20% off)',
-      status: map['status'] ?? 'Pending Review',
-      businessType: map['business_type'] ?? map['businessType'] ?? 'Wholesaler',
+      tier: tierStr,
+      status: normalizedStatus,
+      businessType: bType.toString(),
       totalOrders: (map['total_orders'] as num?)?.toInt() ?? 0,
       totalSpend: (map['total_spend'] as num?)?.toDouble() ?? 0.0,
     );
@@ -254,6 +277,28 @@ class Coupon extends Equatable {
 
   @override
   List<Object?> get props => [code, discountPercent, isActive];
+
+  factory Coupon.fromMap(Map<String, dynamic> map) {
+    return Coupon(
+      code: map['code']?.toString() ?? '',
+      discountPercent: (map['discount_percent'] as num?)?.toDouble() ?? 10.0,
+      minSpend: (map['min_spend'] as num?)?.toDouble() ?? 0.0,
+      isActive: map['is_active'] ?? true,
+      usageCount: (map['usage_count'] as num?)?.toInt() ?? 0,
+      expiryDate: map['expiry_date']?.toString() ?? '2026-12-31',
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'code': code,
+      'discount_percent': discountPercent,
+      'min_spend': minSpend,
+      'is_active': isActive,
+      'usage_count': usageCount,
+      'expiry_date': expiryDate,
+    };
+  }
 }
 
 class CustomerRecord extends Equatable {
@@ -326,265 +371,44 @@ class WarehouseBatch extends Equatable {
 
   @override
   List<Object?> get props => [batchNo, productName, bstiCertNo];
+
+  factory WarehouseBatch.fromMap(Map<String, dynamic> map) {
+    final tempVal = map['current_temp'];
+    double temp = 21.0;
+    if (tempVal is num) {
+      temp = tempVal.toDouble();
+    } else if (tempVal is String) {
+      temp = double.tryParse(tempVal.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 21.0;
+    }
+    return WarehouseBatch(
+      batchNo: map['batch_no'] ?? map['batchNo'] ?? '',
+      productName: map['product_name'] ?? map['productName'] ?? '',
+      originCountry: map['origin_country'] ?? map['originCountry'] ?? '',
+      bstiCertNo: map['bsti_cert_no'] ?? map['bstiCertNo'] ?? '',
+      customsEntryNo: map['customs_entry_no'] ?? map['customsEntryNo'] ?? '',
+      airAwb: map['air_awb'] ?? map['airAwb'] ?? '',
+      currentTemp: temp,
+      status: map['status'] ?? 'Verified & Sealed',
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'batch_no': batchNo,
+      'product_name': productName,
+      'origin_country': originCountry,
+      'bsti_cert_no': bstiCertNo,
+      'customs_entry_no': customsEntryNo,
+      'air_awb': airAwb,
+      'current_temp': '${currentTemp.toStringAsFixed(1)}°C',
+      'status': status,
+    };
+  }
 }
 
-// Initial Sample Data for Business Operations
-final List<AdminOrder> initialSampleOrders = [
-  AdminOrder(
-    orderId: 'RUP-88129',
-    customerName: 'Tasnim Rahman',
-    customerPhone: '+880 1712-458921',
-    customerAddress: 'House 42, Road 11, Block D, Banani',
-    city: 'Dhaka (Inside City)',
-    paymentMethod: 'Cash on Delivery',
-    subtotal: 5850.0,
-    deliveryFee: 0.0,
-    grandTotal: 5850.0,
-    status: 'Pending',
-    createdAt: DateTime.now().subtract(const Duration(minutes: 42)),
-    courier: 'Steadfast Courier',
-    trackingCode: 'ST-998241',
-    items: const [
-      {'name': 'COSRX Advanced Snail 96 Mucin Power Essence', 'quantity': 2, 'price': 1850.0},
-      {'name': 'CeraVe Foaming Facial Cleanser (USA)', 'quantity': 1, 'price': 2150.0},
-    ],
-  ),
-  AdminOrder(
-    orderId: 'RUP-88120',
-    customerName: 'Farhana Chowdhury',
-    customerPhone: '+880 1819-332211',
-    customerAddress: 'Apartment 5B, South Breeze, Dhanmondi 27',
-    city: 'Dhaka (Inside City)',
-    paymentMethod: 'bKash Instant',
-    subtotal: 7800.0,
-    deliveryFee: 0.0,
-    grandTotal: 7020.0, // 10% coupon
-    status: 'Shipped',
-    createdAt: DateTime.now().subtract(const Duration(hours: 4)),
-    courier: 'Pathao Express',
-    trackingCode: 'PTH-7712093',
-    items: const [
-      {'name': 'La Roche-Posay Anthelios UVmune 400 SPF50+', 'quantity': 2, 'price': 2850.0},
-      {'name': 'MAC Retro Matte Lipstick - Ruby Woo', 'quantity': 1, 'price': 2100.0},
-    ],
-  ),
-  AdminOrder(
-    orderId: 'RUP-88114',
-    customerName: 'Samira Akter (Radiance Salon)',
-    customerPhone: '+880 1911-884422',
-    customerAddress: 'GEC Circle, Nasirabad',
-    city: 'Chittagong (Outside Dhaka)',
-    paymentMethod: 'Cash on Delivery',
-    subtotal: 19500.0,
-    deliveryFee: 0.0,
-    grandTotal: 19500.0,
-    status: 'Processing',
-    createdAt: DateTime.now().subtract(const Duration(hours: 9)),
-    courier: 'RedX Logistics',
-    trackingCode: 'REDX-331094',
-    items: const [
-      {'name': 'Beauty of Joseon Relief Sun: Rice + Probiotics', 'quantity': 10, 'price': 1150.0},
-      {'name': 'COSRX Advanced Snail 96 Mucin Power Essence', 'quantity': 5, 'price': 1600.0},
-    ],
-  ),
-  AdminOrder(
-    orderId: 'RUP-88098',
-    customerName: 'Dr. Mehzabin Sultana',
-    customerPhone: '+880 1733-112233',
-    customerAddress: 'Khadimpara, Shahjalal Upashahar',
-    city: 'Sylhet (Outside Dhaka)',
-    paymentMethod: 'Nagad Pay',
-    subtotal: 4700.0,
-    deliveryFee: 0.0,
-    grandTotal: 4700.0,
-    status: 'Delivered',
-    createdAt: DateTime.now().subtract(const Duration(days: 2)),
-    courier: 'Steadfast Courier',
-    trackingCode: 'ST-991204',
-    items: const [
-      {'name': 'The Ordinary Niacinamide 10% + Zinc 1%', 'quantity': 3, 'price': 1450.0},
-    ],
-  ),
-];
-
-final List<B2BPartner> initialSampleB2BPartners = [
-  const B2BPartner(
-    id: 'b2b_1',
-    businessName: 'Radiance Beauty Studio & Spa',
-    contactPerson: 'Farida Yasmin',
-    phone: '+880 1711-234567',
-    email: 'info@radiancebd.com',
-    tradeLicense: 'TRAD/DNCC/082194/2023',
-    district: 'Gulshan 2, Dhaka',
-    tier: 'Platinum Partner (30% off)',
-    status: 'Approved',
-    businessType: 'Salon & Spa',
-    totalOrders: 18,
-    totalSpend: 384000.0,
-  ),
-  const B2BPartner(
-    id: 'b2b_2',
-    businessName: 'Apex Derma Care Pharmacy',
-    contactPerson: 'Dr. M. A. Karim',
-    phone: '+880 1819-876543',
-    email: 'contact@apexderma.com',
-    tradeLicense: 'TRAD/DSCC/034981/2024',
-    district: 'Dhanmondi, Dhaka',
-    tier: 'Gold Salon (25% off)',
-    status: 'Approved',
-    businessType: 'Pharmacy',
-    totalOrders: 12,
-    totalSpend: 245000.0,
-  ),
-  const B2BPartner(
-    id: 'b2b_3',
-    businessName: 'Glamour Queen Beauty Parlour',
-    contactPerson: 'Nusrat Jahan',
-    phone: '+880 1912-334455',
-    email: 'glamourqueen.ctg@gmail.com',
-    tradeLicense: 'TRAD/CCC/119284/2024',
-    district: 'Panchlaish, Chittagong',
-    tier: 'Gold Salon (25% off)',
-    status: 'Pending Review',
-    businessType: 'Salon & Spa',
-    totalOrders: 0,
-    totalSpend: 0.0,
-  ),
-  const B2BPartner(
-    id: 'b2b_4',
-    businessName: 'Bengal Cosmetics Wholesalers Ltd',
-    contactPerson: 'Haji Mohammad Rafiq',
-    phone: '+880 1911-884422',
-    email: 'bengalwholesale.dhaka@gmail.com',
-    tradeLicense: 'TRAD/DSCC/008812/2022',
-    district: 'Chawkbazar, Dhaka',
-    tier: 'Wholesaler (20% off)',
-    status: 'Approved',
-    businessType: 'Wholesaler',
-    totalOrders: 34,
-    totalSpend: 840000.0,
-  ),
-  const B2BPartner(
-    id: 'b2b_5',
-    businessName: 'Sylhet Aesthetics & Laser Clinic',
-    contactPerson: 'Dr. Sabrina Ahmed',
-    phone: '+880 1722-998877',
-    email: 'info@sylhetaesthetics.com',
-    tradeLicense: 'TRAD/SCC/045812/2023',
-    district: 'Zindabazar, Sylhet',
-    tier: 'Master Distributor (35% off)',
-    status: 'Approved',
-    businessType: 'Distributor',
-    totalOrders: 26,
-    totalSpend: 620000.0,
-  ),
-];
-
-final List<Coupon> initialSampleCoupons = [
-  const Coupon(
-    code: 'RUPOSHI10',
-    discountPercent: 10,
-    minSpend: 2000,
-    isActive: true,
-    usageCount: 142,
-    expiryDate: '2026-12-31',
-  ),
-  const Coupon(
-    code: 'LUXE15',
-    discountPercent: 15,
-    minSpend: 5000,
-    isActive: true,
-    usageCount: 68,
-    expiryDate: '2026-12-31',
-  ),
-  const Coupon(
-    code: 'EIDGLOW20',
-    discountPercent: 20,
-    minSpend: 8000,
-    isActive: true,
-    usageCount: 29,
-    expiryDate: '2026-06-30',
-  ),
-];
-
-final List<CustomerRecord> initialSampleCustomers = [
-  const CustomerRecord(
-    phone: '+880 1712-458921',
-    name: 'Tasnim Rahman',
-    district: 'Dhaka',
-    totalOrders: 6,
-    totalSpent: 28400.0,
-    lastOrderDate: 'Today',
-    isVip: true,
-  ),
-  const CustomerRecord(
-    phone: '+880 1819-332211',
-    name: 'Farhana Chowdhury',
-    district: 'Dhaka',
-    totalOrders: 4,
-    totalSpent: 21900.0,
-    lastOrderDate: 'Today',
-    isVip: true,
-  ),
-  const CustomerRecord(
-    phone: '+880 1911-884422',
-    name: 'Samira Akter',
-    district: 'Chittagong',
-    totalOrders: 8,
-    totalSpent: 142000.0,
-    lastOrderDate: 'Yesterday',
-    isVip: true,
-  ),
-  const CustomerRecord(
-    phone: '+880 1733-112233',
-    name: 'Dr. Mehzabin Sultana',
-    district: 'Sylhet',
-    totalOrders: 3,
-    totalSpent: 16400.0,
-    lastOrderDate: '2 days ago',
-    isVip: false,
-  ),
-];
-
-final List<WarehouseBatch> initialSampleBatches = [
-  const WarehouseBatch(
-    batchNo: 'KOR-2026-COSRX-96',
-    productName: 'COSRX Advanced Snail 96 Mucin Power Essence',
-    originCountry: 'South Korea',
-    bstiCertNo: 'BSTI/COS/2026/0491',
-    customsEntryNo: 'DAC/AIR/C-77291',
-    airAwb: 'KE-0694-8812',
-    currentTemp: 19.4,
-    status: 'Verified & Sealed',
-  ),
-  const WarehouseBatch(
-    batchNo: 'USA-2026-CERAVE-FOAM',
-    productName: 'CeraVe Foaming Facial Cleanser (USA)',
-    originCountry: 'United States',
-    bstiCertNo: 'BSTI/COS/2026/0512',
-    customsEntryNo: 'DAC/AIR/C-77340',
-    airAwb: 'EK-0205-9921',
-    currentTemp: 19.8,
-    status: 'Verified & Sealed',
-  ),
-  const WarehouseBatch(
-    batchNo: 'FRA-2026-LRP-UVMUNE',
-    productName: 'La Roche-Posay Anthelios UVmune 400 SPF50+',
-    originCountry: 'France',
-    bstiCertNo: 'BSTI/COS/2026/0688',
-    customsEntryNo: 'DAC/AIR/C-78104',
-    airAwb: 'AF-0331-7742',
-    currentTemp: 19.2,
-    status: 'Verified & Sealed',
-  ),
-  const WarehouseBatch(
-    batchNo: 'CAN-2026-MAC-RUBY',
-    productName: 'MAC Retro Matte Lipstick - Ruby Woo',
-    originCountry: 'Canada / USA',
-    bstiCertNo: 'BSTI/COS/2026/0724',
-    customsEntryNo: 'DAC/AIR/C-78441',
-    airAwb: 'QR-0824-3310',
-    currentTemp: 20.1,
-    status: 'Verified & Sealed',
-  ),
-];
+// Production Initial Empty Lists (Populated dynamically via Supabase)
+const List<AdminOrder> initialSampleOrders = [];
+const List<B2BPartner> initialSampleB2BPartners = [];
+const List<Coupon> initialSampleCoupons = [];
+const List<CustomerRecord> initialSampleCustomers = [];
+const List<WarehouseBatch> initialSampleBatches = [];

@@ -176,7 +176,7 @@ class _AdminViewState extends State<AdminView> {
                     controller: _passwordCtrl,
                     obscureText: true,
                     decoration: const InputDecoration(
-                      labelText: 'Password or PIN (Demo: admin123 / 2026)',
+                      labelText: 'Admin Password',
                       prefixIcon: Icon(Icons.lock_outline, size: 20),
                     ),
                   ),
@@ -204,19 +204,6 @@ class _AdminViewState extends State<AdminView> {
                         ],
                       ),
                     ),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  // Quick Demo Autofill Button
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      _usernameCtrl.text = 'admin';
-                      _passwordCtrl.text = 'admin123';
-                      cubit.loginAdmin('admin', 'admin123');
-                    },
-                    icon: const Icon(Icons.flash_on, size: 16, color: AppTheme.gold600),
-                    label: const Text('One-Click Demo Admin Sign In', style: TextStyle(fontSize: 12.5)),
                   ),
 
                   const SizedBox(height: 18),
@@ -2597,7 +2584,7 @@ class _AdminViewState extends State<AdminView> {
               ),
               const SizedBox(height: 10),
               const Text(
-                '• Dealers log in directly via the website top navigation under "B2B Wholesale" using their registered Mobile Number and security PIN (or demo "aaaa / aaaa").\n'
+                '• Dealers log in directly via the website top navigation under "B2B Wholesale" using their registered Mobile Phone Number or Trade License.\n'
                 '• Approved dealers see exclusive wholesale rates with 15% to 35% margin discounts and bulk MOQ packaging with VAT 6.3 invoices.\n'
                 '• Applications submitted via the website form appear below under "Pending Review" for 1-click executive approval.',
                 style: TextStyle(color: Color(0xFFCBD5E1), fontSize: 12, height: 1.45),
@@ -3667,40 +3654,62 @@ class _AdminViewState extends State<AdminView> {
         const Text('BSTI Certified Batch Records & Air Cargo AWBs', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
         const SizedBox(height: 12),
 
-        ...initialSampleBatches.map((b) => Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.verified_user, color: Colors.green, size: 28),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('${b.productName} (${b.originCountry})', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                        Text('Batch No: ${b.batchNo} • BSTI Certificate: ${b.bstiCertNo}', style: const TextStyle(fontSize: 12, color: Colors.blueGrey)),
-                        Text('Customs Entry: ${b.customsEntryNo} • Air AWB: ${b.airAwb}', style: const TextStyle(fontSize: 11.5, color: Colors.grey)),
-                      ],
-                    ),
+        if (widget.state.warehouseBatches.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.inventory_2_outlined, color: Colors.blueGrey, size: 24),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'No customs batches recorded yet. BSTI batches sync directly from Supabase warehouse_batches table.',
+                    style: TextStyle(color: Colors.blueGrey, fontSize: 13),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.green.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.green.shade300),
+                ),
+              ],
+            ),
+          )
+        else
+          ...widget.state.warehouseBatches.map((b) => Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.verified_user, color: Colors.green, size: 28),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('${b.productName} (${b.originCountry})', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                          Text('Batch No: ${b.batchNo} • BSTI Certificate: ${b.bstiCertNo}', style: const TextStyle(fontSize: 12, color: Colors.blueGrey)),
+                          Text('Customs Entry: ${b.customsEntryNo} • Air AWB: ${b.airAwb}', style: const TextStyle(fontSize: 11.5, color: Colors.grey)),
+                        ],
+                      ),
                     ),
-                    child: Text(b.status, style: TextStyle(color: Colors.green.shade900, fontSize: 11, fontWeight: FontWeight.bold)),
-                  ),
-                ],
-              ),
-            )),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.green.shade300),
+                      ),
+                      child: Text(b.status, style: TextStyle(color: Colors.green.shade900, fontSize: 11, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+              )),
       ],
     );
   }

@@ -12,12 +12,13 @@ void main() async {
 }
 
 class RuposhiCustomerApp extends StatelessWidget {
-  const RuposhiCustomerApp({super.key});
+  final StoreCubit? cubit;
+  const RuposhiCustomerApp({super.key, this.cubit});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => StoreCubit()..loadProducts(),
+      create: (_) => cubit ?? StoreCubit(),
       child: MaterialApp(
         title: 'Ruposhi International | Premier Luxury Cosmetics Importer in Bangladesh',
         debugShowCheckedModeBanner: false,

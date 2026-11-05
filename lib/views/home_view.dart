@@ -57,11 +57,14 @@ class _HomeViewState extends State<HomeView> {
     final isSmallMobile = screenWidth < 480;
     final slide = _slides[_currentSlide];
 
-    final displayedProducts = widget.state.products.where((p) {
+    var displayedProducts = widget.state.products.where((p) {
       if (_activeTab == 'Best Sellers') return p.isBestSeller;
       if (_activeTab == 'New Arrivals') return p.isNewArrival;
       return true;
     }).toList();
+    if (displayedProducts.isEmpty && widget.state.products.isNotEmpty) {
+      displayedProducts = widget.state.products;
+    }
 
     return Column(
       children: [
@@ -529,35 +532,70 @@ class _HomeViewState extends State<HomeView> {
                   const SizedBox(height: 28),
 
                   // Products Grid (Adaptive for Mobile, Tablet, Desktop)
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final available = constraints.maxWidth;
-                      final double cardWidth;
-                      if (available < 380) {
-                        cardWidth = available;
-                      } else if (available < 660) {
-                        cardWidth = (available - 14) / 2;
-                      } else if (available < 1000) {
-                        cardWidth = (available - 2 * 18) / 3;
-                      } else {
-                        cardWidth = (available - 3 * 20) / 4;
-                      }
+                  if (widget.state.isLoadingProducts)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 40),
+                        child: CircularProgressIndicator(color: AppTheme.rose800),
+                      ),
+                    )
+                  else if (displayedProducts.isEmpty)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(40),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                      ),
+                      child: Column(
+                        children: [
+                          const Icon(Icons.inventory_2_outlined, size: 48, color: Colors.blueGrey),
+                          const SizedBox(height: 14),
+                          Text(
+                            widget.state.isBangla ? 'কোন পণ্য পাওয়া যায়নি' : 'No cosmetics found in catalog',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            widget.state.isBangla
+                                ? 'লাইভ ডাটাবেজ থেকে পণ্য লোড হচ্ছে অথবা অ্যাডমিন প্যানেল থেকে নতুন পণ্য যুক্ত করুন।'
+                                : 'Live products will appear here dynamically once added in the Admin Panel.',
+                            style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final available = constraints.maxWidth;
+                        final double cardWidth;
+                        if (available < 380) {
+                          cardWidth = available;
+                        } else if (available < 660) {
+                          cardWidth = (available - 14) / 2;
+                        } else if (available < 1000) {
+                          cardWidth = (available - 2 * 18) / 3;
+                        } else {
+                          cardWidth = (available - 3 * 20) / 4;
+                        }
 
-                      return Wrap(
-                        spacing: available < 660 ? 14 : 20,
-                        runSpacing: 22,
-                        alignment: WrapAlignment.center,
-                        children: displayedProducts.map((p) {
-                          return ProductCard(
-                            product: p,
-                            isBangla: widget.state.isBangla,
-                            isB2BActive: widget.state.isB2BAuthenticated,
-                            width: cardWidth,
-                          );
-                        }).toList(),
-                      );
-                    },
-                  ),
+                        return Wrap(
+                          spacing: available < 660 ? 14 : 20,
+                          runSpacing: 22,
+                          alignment: WrapAlignment.center,
+                          children: displayedProducts.map((p) {
+                            return ProductCard(
+                              product: p,
+                              isBangla: widget.state.isBangla,
+                              isB2BActive: widget.state.isB2BAuthenticated,
+                              width: cardWidth,
+                            );
+                          }).toList(),
+                        );
+                      },
+                    ),
                 ],
               ),
             ),

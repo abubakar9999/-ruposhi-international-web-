@@ -315,8 +315,8 @@ class _B2BWholesaleViewState extends State<B2BWholesaleView> {
                 TextField(
                   controller: _usernameController,
                   decoration: InputDecoration(
-                    labelText: 'Dealer Mobile Phone / Dealer ID',
-                    hintText: 'e.g. +880 1711-234567 or aaaa',
+                    labelText: 'Dealer Mobile Phone / Trade License / ID',
+                    hintText: 'e.g. 01711223344 or Trade License',
                     prefixIcon: const Icon(Icons.phone_iphone_outlined),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
@@ -326,8 +326,8 @@ class _B2BWholesaleViewState extends State<B2BWholesaleView> {
                   controller: _passwordController,
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
-                    labelText: 'Wholesale Password / PIN',
-                    hintText: 'e.g. aaaa or your registered PIN',
+                    labelText: 'Wholesale Password / Security PIN',
+                    hintText: 'Enter your dealer password or PIN',
                     prefixIcon: const Icon(Icons.key_outlined),
                     suffixIcon: IconButton(
                       icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, size: 18),
@@ -388,67 +388,25 @@ class _B2BWholesaleViewState extends State<B2BWholesaleView> {
                   ),
                 ),
 
-                const SizedBox(height: 12),
-                OutlinedButton(
-                  onPressed: () {
-                    _usernameController.text = 'aaaa';
-                    _passwordController.text = 'aaaa';
-                    cubit.loginB2B('aaaa', 'aaaa');
-                  },
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 13),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: const FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.flash_on, size: 16, color: AppTheme.gold600),
-                        SizedBox(width: 6),
-                        Text('1-Click Demo Login (aaaa / aaaa)', style: TextStyle(fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 18),
-
-                // Quick selector for existing approved dealers
+                const SizedBox(height: 16),
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF8FAFC),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: const Color(0xFFE2E8F0)),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      const Text(
-                        '1-Click Test with Registered Approved Dealers:',
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.blueGrey),
-                      ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
-                        children: widget.state.b2bPartners.where((p) => p.status == 'Approved').take(3).map((p) {
-                          return ActionChip(
-                            avatar: const Icon(Icons.store, size: 14, color: AppTheme.rose800),
-                            label: Text(
-                              '${p.businessName.split(' ').first} (${p.phone})',
-                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-                            ),
-                            backgroundColor: Colors.white,
-                            onPressed: () {
-                              _usernameController.text = p.phone;
-                              _passwordController.text = '1234';
-                              cubit.loginB2B(p.phone, '1234');
-                            },
-                          );
-                        }).toList(),
+                      const Icon(Icons.verified_user_outlined, size: 20, color: AppTheme.rose800),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          widget.state.isBangla
+                              ? 'অনুমোদিত ডিলার ও পাইকারি ক্রেতারা তাদের নিবন্ধিত ফোন নম্বর দিয়ে সরাসরি লগইন করতে পারেন।'
+                              : 'Authorized dealers can sign in directly using their registered mobile phone number. New salons, spas, and wholesalers can apply above.',
+                          style: const TextStyle(fontSize: 12, color: Colors.blueGrey, height: 1.35),
+                        ),
                       ),
                     ],
                   ),

@@ -591,7 +591,10 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
             const SizedBox(height: 12),
             TextField(
               controller: otpCtrl,
-              decoration: const InputDecoration(labelText: '4-Digit SMS Code (Demo: 1234)'),
+              decoration: const InputDecoration(
+                labelText: '4-Digit Verification Code',
+                hintText: 'Enter 4-digit code',
+              ),
             ),
           ],
         ),

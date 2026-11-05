@@ -125,6 +125,16 @@ CREATE TABLE public.customers (
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
+-- 3.7 Admin Users & Executive Security Table
+CREATE TABLE IF NOT EXISTS public.admin_users (
+    id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+    username TEXT UNIQUE NOT NULL,
+    email TEXT,
+    password_hash TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'SuperAdmin',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+);
+
 -- ==============================================================================
 -- 4. PERFORMANCE INDEXES
 -- ==============================================================================
@@ -203,6 +213,11 @@ ALTER TABLE public.b2b_partners ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.coupons ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.warehouse_batches ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.customers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
+
+-- Admin Users
+DROP POLICY IF EXISTS "Allow All Access Admin Users" ON public.admin_users;
+CREATE POLICY "Allow All Access Admin Users" ON public.admin_users FOR ALL USING (true) WITH CHECK (true);
 
 -- Products
 DROP POLICY IF EXISTS "Public Read Products" ON public.products;
@@ -553,6 +568,13 @@ VALUES
 ('+8801819556677', 'Dr. Sabrina Haque', 'Dhaka', 18, 312000.00, NOW() - INTERVAL '5 days', TRUE),
 ('+8801912345678', 'Sadia Islam', 'Dhaka', 3, 7250.00, NOW() - INTERVAL '1 day', FALSE),
 ('+8801812345679', 'Tahmina Rahman', 'Chittagong', 2, 4900.00, NOW() - INTERVAL '4 days', FALSE);
+
+-- 8.6 System Administrators
+INSERT INTO public.admin_users (username, email, password_hash, role)
+VALUES
+('admin', 'admin@ruposhi.com', 'admin123', 'SuperAdmin'),
+('ruposhi', 'ceo@ruposhi.com', 'admin2026', 'Executive')
+ON CONFLICT (username) DO NOTHING;
 
 -- ==============================================================================
 -- END OF COMPLETE SCHEMA SCRIPT
