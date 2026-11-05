@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../core/app_theme.dart';
@@ -32,10 +33,19 @@ class _AdminViewState extends State<AdminView> {
   final TextEditingController _passwordCtrl = TextEditingController(text: 'admin123');
   final TextEditingController _productSearchCtrl = TextEditingController();
   final TextEditingController _orderSearchCtrl = TextEditingController();
+  final TextEditingController _customerSearchCtrl = TextEditingController();
 
   String _productCategoryFilter = 'All';
   bool _onlyLowStock = false;
   String _orderStatusFilter = 'All';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<StoreCubit>().loadAdminData();
+    });
+  }
 
   @override
   void dispose() {
@@ -43,6 +53,7 @@ class _AdminViewState extends State<AdminView> {
     _passwordCtrl.dispose();
     _productSearchCtrl.dispose();
     _orderSearchCtrl.dispose();
+    _customerSearchCtrl.dispose();
     super.dispose();
   }
 
@@ -300,7 +311,7 @@ class _AdminViewState extends State<AdminView> {
                 const Spacer(),
 
                 // Live Warehouse Temperature Status Pill
-                if (screenWidth >= 800)
+                if (screenWidth >= 1200) ...[
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
@@ -317,11 +328,11 @@ class _AdminViewState extends State<AdminView> {
                       ],
                     ),
                   ),
-
-                const SizedBox(width: 12),
+                  const SizedBox(width: 10),
+                ],
 
                 // Live Supabase Status Pill
-                if (screenWidth >= 950)
+                if (screenWidth >= 1350) ...[
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
@@ -338,8 +349,24 @@ class _AdminViewState extends State<AdminView> {
                       ],
                     ),
                   ),
+                  const SizedBox(width: 10),
+                ],
 
-                const SizedBox(width: 12),
+                // Sync Live Supabase Data Button
+                IconButton(
+                  tooltip: 'Sync Live Orders & Customers',
+                  onPressed: widget.state.isLoadingAdminData ? null : () => cubit.loadAdminData(),
+                  style: IconButton.styleFrom(
+                    backgroundColor: const Color(0xFF0284C7),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.all(8),
+                  ),
+                  icon: widget.state.isLoadingAdminData
+                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      : const Icon(Icons.sync_rounded, size: 18),
+                ),
+
+                const SizedBox(width: 10),
 
                 // Return to Customer Storefront
                 ElevatedButton.icon(
@@ -1776,28 +1803,120 @@ class _AdminViewState extends State<AdminView> {
 
           const SizedBox(height: 12),
 
-          // Customer and Location
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          // Dedicated Verified Customer Details Box
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFBF8F9),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFF1E4E8)),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: AppTheme.rose100,
+                  child: Text(
+                    order.customerName.isNotEmpty ? order.customerName[0].toUpperCase() : 'C',
+                    style: const TextStyle(color: AppTheme.rose900, fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              order.customerName,
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14.5, color: Colors.black87),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                            decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(6), border: Border.all(color: Colors.green.shade200)),
+                            child: const Text('Verified Order', style: TextStyle(color: Colors.green, fontSize: 9.5, fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          const Icon(Icons.phone_outlined, size: 13, color: Colors.grey),
+                          const SizedBox(width: 4),
+                          SelectableText(order.customerPhone, style: const TextStyle(fontSize: 12, color: Colors.black87, fontWeight: FontWeight.w600)),
+                          const SizedBox(width: 6),
+                          InkWell(
+                            onTap: () {
+                              Clipboard.setData(ClipboardData(text: order.customerPhone));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Phone number ${order.customerPhone} copied!')),
+                              );
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.all(2),
+                              child: Icon(Icons.copy, size: 13, color: Colors.blueGrey),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.location_on_outlined, size: 13, color: Colors.grey),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: SelectableText(
+                              '${order.customerAddress}, ${order.city}',
+                              style: const TextStyle(fontSize: 12, color: Color(0xFF475569)),
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              final fullAddress = '${order.customerName}\n${order.customerPhone}\n${order.customerAddress}, ${order.city}';
+                              Clipboard.setData(ClipboardData(text: fullAddress));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Full delivery address copied for courier!')),
+                              );
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.only(left: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(4)),
+                              child: const Text('Copy Address', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.blueGrey)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(order.customerName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                    Text(order.customerPhone, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                    Text('${order.customerAddress}, ${order.city}', style: const TextStyle(fontSize: 12, color: Colors.blueGrey)),
+                    Text('৳${order.grandTotal.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppTheme.rose900)),
+                    Container(
+                      margin: const EdgeInsets.only(top: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: order.paymentMethod.toUpperCase().contains('BKASH') ? Colors.pink.shade50 : Colors.green.shade50,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        order.paymentMethod,
+                        style: TextStyle(fontSize: 11, color: order.paymentMethod.toUpperCase().contains('BKASH') ? Colors.pink.shade700 : Colors.green.shade800, fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ],
                 ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text('৳${order.grandTotal.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppTheme.rose900)),
-                  Text(order.paymentMethod, style: const TextStyle(fontSize: 11, color: Colors.green, fontWeight: FontWeight.bold)),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
 
           const SizedBox(height: 12),
@@ -1811,21 +1930,31 @@ class _AdminViewState extends State<AdminView> {
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: order.items.map((it) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Row(
-                    children: [
-                      Text('${it['quantity']}x', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(it['name']?.toString() ?? 'Cosmetic Item', style: const TextStyle(fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
-                      ),
-                      Text('৳${((it['price'] as num?)?.toDouble() ?? 0) * ((it['quantity'] as num?)?.toInt() ?? 1)}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                    ],
-                  ),
-                );
-              }).toList(),
+              children: [
+                ...order.items.map((it) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Row(
+                      children: [
+                        Text('${it['quantity']}x', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(it['name']?.toString() ?? 'Cosmetic Item', style: const TextStyle(fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        ),
+                        Text('৳${((it['price'] as num?)?.toDouble() ?? 0) * ((it['quantity'] as num?)?.toInt() ?? 1)}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                      ],
+                    ),
+                  );
+                }),
+                const Divider(height: 14),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Subtotal: ৳${order.subtotal.toStringAsFixed(0)} | Delivery: ৳${order.deliveryFee.toStringAsFixed(0)}', style: const TextStyle(fontSize: 11.5, color: Colors.blueGrey)),
+                    Text('Total: ৳${order.grandTotal.toStringAsFixed(0)}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.rose900)),
+                  ],
+                ),
+              ],
             ),
           ),
 
@@ -1852,37 +1981,65 @@ class _AdminViewState extends State<AdminView> {
             const SizedBox(height: 12),
           ],
 
-          // Action Toolbar: Status update, Courier assign, Print receipt, WhatsApp alert
+          // Quick Status Selector Chips Row
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled'].map((statusOption) {
+              final isCurrent = order.status.toLowerCase() == statusOption.toLowerCase();
+              return InkWell(
+                onTap: () => cubit.updateOrderStatus(order.orderId, statusOption),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isCurrent ? AppTheme.rose900 : Colors.white,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: isCurrent ? AppTheme.rose900 : Colors.grey.shade300),
+                  ),
+                  child: Text(
+                    statusOption,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+                      color: isCurrent ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+
+          const SizedBox(height: 14),
+
+          // Action Toolbar: Customer Details Modal, Courier assign, Print receipt, WhatsApp alert
           Wrap(
             spacing: 8,
             runSpacing: 8,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              // Change Status Dropdown
-              PopupMenuButton<String>(
-                tooltip: 'Update Order Status',
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.sync_alt, size: 14),
-                      SizedBox(width: 6),
-                      Text('Change Status', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                ),
-                onSelected: (newStatus) {
-                  cubit.updateOrderStatus(order.orderId, newStatus);
+              // View Full Customer Profile & History Modal
+              OutlinedButton.icon(
+                onPressed: () {
+                  final customer = widget.state.customers.firstWhere(
+                    (c) => c.phone.trim() == order.customerPhone.trim(),
+                    orElse: () => CustomerRecord(
+                      phone: order.customerPhone,
+                      name: order.customerName,
+                      district: order.city,
+                      totalOrders: 1,
+                      totalSpent: order.grandTotal,
+                      lastOrderDate: order.createdAt.toString().split(' ').first,
+                    ),
+                  );
+                  _openCustomerDetailsDialog(context, customer);
                 },
-                itemBuilder: (_) => ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled']
-                    .map((s) => PopupMenuItem(value: s, child: Text(s)))
-                    .toList(),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTheme.rose900,
+                  side: const BorderSide(color: AppTheme.rose900),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                ),
+                icon: const Icon(Icons.person_outline, size: 15),
+                label: const Text('Customer Profile', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
               ),
 
               // Assign Courier
@@ -1917,6 +2074,217 @@ class _AdminViewState extends State<AdminView> {
                 label: const Text('WhatsApp Customer', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openCustomerDetailsDialog(BuildContext context, CustomerRecord customer) {
+    final customerOrders = widget.state.orders
+        .where((o) => o.customerPhone.trim() == customer.phone.trim())
+        .toList();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: const EdgeInsets.all(24),
+        content: SizedBox(
+          width: 580,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header with Avatar and Badges
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 26,
+                      backgroundColor: AppTheme.rose900,
+                      child: Text(
+                        customer.name.isNotEmpty ? customer.name[0].toUpperCase() : 'C',
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  customer.name,
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (customer.isVip) ...[
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFEF3C7),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: const Color(0xFFF59E0B)),
+                                  ),
+                                  child: const Text('★ VIP CLIENT', style: TextStyle(color: Color(0xFFB45309), fontSize: 10, fontWeight: FontWeight.bold)),
+                                ),
+                              ],
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          Text('${customer.phone} • ${customer.district}', style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                const Divider(),
+                const SizedBox(height: 12),
+
+                // Stats Cards
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Total Orders', style: TextStyle(fontSize: 11, color: Colors.blueGrey)),
+                            const SizedBox(height: 4),
+                            Text('${customer.totalOrders}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.rose900)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Lifetime Spend', style: TextStyle(fontSize: 11, color: Colors.blueGrey)),
+                            const SizedBox(height: 4),
+                            Text('৳${customer.totalSpent.toStringAsFixed(0)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Last Active', style: TextStyle(fontSize: 11, color: Colors.blueGrey)),
+                            const SizedBox(height: 4),
+                            Text(customer.lastOrderDate, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                // Quick Contact Actions
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () async {
+                          final clean = customer.phone.replaceAll(RegExp(r'[^0-9]'), '');
+                          final msg = Uri.encodeComponent('Assalamu Alaikum ${customer.name}! Greetings from Ruposhi International Customer Concierge.');
+                          final url = Uri.parse('https://wa.me/$clean?text=$msg');
+                          if (await canLaunchUrl(url)) await launchUrl(url, mode: LaunchMode.externalApplication);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF25D366),
+                          foregroundColor: Colors.white,
+                        ),
+                        icon: const Icon(Icons.chat, size: 16),
+                        label: const Text('Open WhatsApp Chat', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: customer.phone));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Copied ${customer.phone} to clipboard')),
+                        );
+                      },
+                      icon: const Icon(Icons.copy, size: 15),
+                      label: const Text('Copy Phone', style: TextStyle(fontSize: 12)),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 22),
+                Text('Purchase History (${customerOrders.length} orders)', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                const SizedBox(height: 10),
+
+                if (customerOrders.isEmpty)
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(10)),
+                    child: const Center(child: Text('No orders found for this phone number in current session.', style: TextStyle(color: Colors.grey, fontSize: 12))),
+                  )
+                else
+                  ...customerOrders.map((o) => Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(color: AppTheme.rose50, borderRadius: BorderRadius.circular(6)),
+                              child: Text(o.orderId, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.rose900)),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text('${o.items.length} item(s) • ${o.paymentMethod}', style: const TextStyle(fontSize: 12, color: Colors.blueGrey)),
+                            ),
+                            _buildOrderStatusPill(o.status),
+                            const SizedBox(width: 10),
+                            Text('৳${o.grandTotal.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.rose900)),
+                          ],
+                        ),
+                      )),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Close'),
           ),
         ],
       ),
@@ -2487,75 +2855,261 @@ class _AdminViewState extends State<AdminView> {
   // SECTION 6: CUSTOMERS CRM DIRECTORY
   // ==========================================
   Widget _buildCustomersSection(BuildContext context, StoreCubit cubit) {
+    final query = _customerSearchCtrl.text.trim().toLowerCase();
+    final allCustomers = widget.state.customers;
+    final filteredCustomers = allCustomers.where((c) {
+      return query.isEmpty ||
+          c.name.toLowerCase().contains(query) ||
+          c.phone.contains(query) ||
+          c.district.toLowerCase().contains(query);
+    }).toList();
+
+    final totalSpentSum = allCustomers.fold<double>(0.0, (sum, c) => sum + c.totalSpent);
+    final vipCount = allCustomers.where((c) => c.isVip).length;
+    final repeatBuyersCount = allCustomers.where((c) => c.totalOrders > 1).length;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Customer Directory & CRM', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-        Text('Manage customer records, repeat purchases, and direct WhatsApp alerts.', style: TextStyle(color: Colors.grey.shade600, fontSize: 12.5)),
-        const SizedBox(height: 20),
-        ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: initialSampleCustomers.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 10),
-          itemBuilder: (context, index) {
-            final c = initialSampleCustomers[index];
-            return Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
-              ),
-              child: Row(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    backgroundColor: AppTheme.rose100,
-                    child: Text(c.name.isNotEmpty ? c.name[0] : 'C', style: const TextStyle(color: AppTheme.rose900, fontWeight: FontWeight.bold)),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(c.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                            if (c.isVip) ...[
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                                decoration: BoxDecoration(color: AppTheme.gold100, borderRadius: BorderRadius.circular(6)),
-                                child: const Text('VIP Client', style: TextStyle(color: AppTheme.gold600, fontSize: 9.5, fontWeight: FontWeight.bold)),
-                              ),
-                            ],
-                          ],
-                        ),
-                        Text('${c.phone} • Region: ${c.district}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                        Text('${c.totalOrders} Completed Orders • ৳${c.totalSpent.toStringAsFixed(0)} Total Lifetime Spend', style: const TextStyle(color: AppTheme.rose800, fontWeight: FontWeight.w600, fontSize: 11.5)),
-                      ],
-                    ),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: () async {
-                      final cleanPhone = c.phone.replaceAll(RegExp(r'[^0-9]'), '');
-                      final url = Uri.parse('https://wa.me/$cleanPhone');
-                      if (await canLaunchUrl(url)) await launchUrl(url, mode: LaunchMode.externalApplication);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF25D366),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    ),
-                    icon: const Icon(Icons.chat, size: 14),
-                    label: const Text('WhatsApp', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
-                  ),
+                  const Text('Customer Directory & Real-Time CRM', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                  Text('Direct phone contacts, delivery histories, and WhatsApp client relationship management.', style: TextStyle(color: Colors.grey.shade600, fontSize: 12.5)),
                 ],
               ),
-            );
-          },
+            ),
+          ],
         ),
+
+        const SizedBox(height: 18),
+
+        // CRM Top Metrics Row
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            _buildCustomerMetricCard('Total Customers', '${allCustomers.length}', Icons.people, const Color(0xFF0284C7)),
+            _buildCustomerMetricCard('VIP Clients', '$vipCount', Icons.stars, const Color(0xFFD97706)),
+            _buildCustomerMetricCard('Repeat Buyers', '$repeatBuyersCount', Icons.repeat, const Color(0xFF10B981)),
+            _buildCustomerMetricCard('Lifetime Value', '৳${totalSpentSum.toStringAsFixed(0)}', Icons.payments, AppTheme.rose900),
+          ],
+        ),
+
+        const SizedBox(height: 18),
+
+        // Search Bar
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.search, color: Colors.grey, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextField(
+                  controller: _customerSearchCtrl,
+                  onChanged: (_) => setState(() {}),
+                  decoration: const InputDecoration(
+                    hintText: 'Search customer by Name, Phone Number, or District...',
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(vertical: 8),
+                  ),
+                ),
+              ),
+              if (_customerSearchCtrl.text.isNotEmpty)
+                IconButton(
+                  icon: const Icon(Icons.clear, size: 18),
+                  onPressed: () {
+                    _customerSearchCtrl.clear();
+                    setState(() {});
+                  },
+                ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(8)),
+                child: Text('${filteredCustomers.length} shown', style: const TextStyle(fontSize: 12, color: Colors.blueGrey, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 18),
+
+        if (filteredCustomers.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
+            child: const Center(
+              child: Text('No customers matching your search query.', style: TextStyle(color: Colors.grey, fontSize: 13)),
+            ),
+          )
+        else
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: filteredCustomers.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final c = filteredCustomers[index];
+              return Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 6, offset: const Offset(0, 2)),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 22,
+                      backgroundColor: c.isVip ? const Color(0xFFFEF3C7) : AppTheme.rose100,
+                      child: Text(
+                        c.name.isNotEmpty ? c.name[0].toUpperCase() : 'C',
+                        style: TextStyle(color: c.isVip ? const Color(0xFFB45309) : AppTheme.rose900, fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(c.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14.5), overflow: TextOverflow.ellipsis),
+                              ),
+                              if (c.isVip) ...[
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                                  decoration: BoxDecoration(color: const Color(0xFFFEF3C7), borderRadius: BorderRadius.circular(6), border: Border.all(color: const Color(0xFFF59E0B))),
+                                  child: const Text('★ VIP CLIENT', style: TextStyle(color: Color(0xFFB45309), fontSize: 9.5, fontWeight: FontWeight.bold)),
+                                ),
+                              ],
+                            ],
+                          ),
+                          const SizedBox(height: 3),
+                          Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 6,
+                            runSpacing: 4,
+                            children: [
+                              const Icon(Icons.phone_outlined, size: 12, color: Colors.grey),
+                              SelectableText(c.phone, style: const TextStyle(color: Colors.black87, fontSize: 12, fontWeight: FontWeight.w600)),
+                              InkWell(
+                                onTap: () {
+                                  Clipboard.setData(ClipboardData(text: c.phone));
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Copied ${c.phone}!')));
+                                },
+                                child: const Icon(Icons.copy, size: 12, color: Colors.blueGrey),
+                              ),
+                              Text('• District: ${c.district}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Wrap(
+                            spacing: 8,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(color: const Color(0xFFEFF6FF), borderRadius: BorderRadius.circular(4)),
+                                child: Text('${c.totalOrders} Order(s)', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF1D4ED8))),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(color: const Color(0xFFECFDF5), borderRadius: BorderRadius.circular(4)),
+                                child: Text('৳${c.totalSpent.toStringAsFixed(0)} Total Spend', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF047857))),
+                              ),
+                              Text('Last purchase: ${c.lastOrderDate}', style: const TextStyle(color: Colors.blueGrey, fontSize: 11)),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    // Action Buttons
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: () => _openCustomerDetailsDialog(context, c),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            foregroundColor: AppTheme.rose900,
+                            side: const BorderSide(color: AppTheme.rose900),
+                          ),
+                          icon: const Icon(Icons.receipt_long, size: 14),
+                          label: const Text('Order History', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                        ),
+                        ElevatedButton.icon(
+                          onPressed: () async {
+                            final cleanPhone = c.phone.replaceAll(RegExp(r'[^0-9]'), '');
+                            final msg = Uri.encodeComponent('Assalamu Alaikum ${c.name}! Greetings from Ruposhi International Concierge.');
+                            final url = Uri.parse('https://wa.me/$cleanPhone?text=$msg');
+                            if (await canLaunchUrl(url)) await launchUrl(url, mode: LaunchMode.externalApplication);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF25D366),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          ),
+                          icon: const Icon(Icons.chat, size: 14),
+                          label: const Text('WhatsApp', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
       ],
+    );
+  }
+
+  Widget _buildCustomerMetricCard(String title, String value, IconData icon, Color color) {
+    return Container(
+      width: 170,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(fontSize: 10.5, color: Colors.blueGrey, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 2),
+                Text(value, style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: color)),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

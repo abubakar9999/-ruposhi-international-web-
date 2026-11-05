@@ -34,8 +34,10 @@ class StoreState extends Equatable {
   final bool isAdminLoggedIn;
   final String? adminLoginError;
   final List<AdminOrder> orders;
+  final List<CustomerRecord> customers;
   final List<B2BPartner> b2bPartners;
   final List<Coupon> coupons;
+  final bool isLoadingAdminData;
   final String announcementEn;
   final String announcementBn;
 
@@ -63,8 +65,10 @@ class StoreState extends Equatable {
     this.isAdminLoggedIn = false,
     this.adminLoginError,
     this.orders = const [],
+    this.customers = const [],
     this.b2bPartners = const [],
     this.coupons = const [],
+    this.isLoadingAdminData = false,
     this.announcementEn = '100% Original Imported Products Guaranteed | Fast Nationwide Delivery (Cash on Delivery Available)',
     this.announcementBn = '১০০% আসল আমদানিকৃত প্রসাধনীর নিশ্চয়তা | সারাদেশে দ্রুত হোম ডেলিভারি (ক্যাশ অন ডেলিভারি)',
   });
@@ -149,8 +153,10 @@ class StoreState extends Equatable {
     bool? isAdminLoggedIn,
     String? adminLoginError,
     List<AdminOrder>? orders,
+    List<CustomerRecord>? customers,
     List<B2BPartner>? b2bPartners,
     List<Coupon>? coupons,
+    bool? isLoadingAdminData,
     String? announcementEn,
     String? announcementBn,
   }) {
@@ -178,8 +184,10 @@ class StoreState extends Equatable {
       isAdminLoggedIn: isAdminLoggedIn ?? this.isAdminLoggedIn,
       adminLoginError: adminLoginError,
       orders: orders ?? this.orders,
+      customers: customers ?? this.customers,
       b2bPartners: b2bPartners ?? this.b2bPartners,
       coupons: coupons ?? this.coupons,
+      isLoadingAdminData: isLoadingAdminData ?? this.isLoadingAdminData,
       announcementEn: announcementEn ?? this.announcementEn,
       announcementBn: announcementBn ?? this.announcementBn,
     );
@@ -210,8 +218,10 @@ class StoreState extends Equatable {
         isAdminLoggedIn,
         adminLoginError,
         orders,
+        customers,
         b2bPartners,
         coupons,
+        isLoadingAdminData,
         announcementEn,
         announcementBn,
       ];
@@ -221,6 +231,7 @@ class StoreCubit extends Cubit<StoreState> {
   StoreCubit()
       : super(StoreState(
           orders: initialSampleOrders,
+          customers: initialSampleCustomers,
           b2bPartners: initialSampleB2BPartners,
           coupons: initialSampleCoupons,
         ));
@@ -232,6 +243,66 @@ class StoreCubit extends Cubit<StoreState> {
       emit(state.copyWith(products: fetched, isLoadingProducts: false));
     } catch (_) {
       emit(state.copyWith(products: sampleProducts, isLoadingProducts: false));
+    }
+  }
+
+  /// Refreshes live customer orders and customer CRM records from Supabase
+  Future<void> loadAdminData() async {
+    emit(state.copyWith(isLoadingAdminData: true));
+    try {
+      final fetchedOrders = await SupabaseService.fetchOrders();
+      final fetchedCustomers = await SupabaseService.fetchCustomers();
+
+      List<AdminOrder> combinedOrders = List<AdminOrder>.from(state.orders);
+      if (fetchedOrders.isNotEmpty) {
+        final fetchedIds = fetchedOrders.map((o) => o.orderId).toSet();
+        combinedOrders = [
+          ...fetchedOrders,
+          ...state.orders.where((o) => !fetchedIds.contains(o.orderId)),
+        ];
+      }
+
+      final Map<String, CustomerRecord> customerMap = {};
+      for (final c in state.customers) {
+        customerMap[c.phone] = c;
+      }
+      for (final c in fetchedCustomers) {
+        customerMap[c.phone] = c;
+      }
+      for (final order in combinedOrders) {
+        if (order.customerPhone.isNotEmpty) {
+          if (!customerMap.containsKey(order.customerPhone)) {
+            customerMap[order.customerPhone] = CustomerRecord(
+              phone: order.customerPhone,
+              name: order.customerName,
+              district: order.city,
+              totalOrders: 1,
+              totalSpent: order.grandTotal,
+              lastOrderDate: order.createdAt.toString().split(' ').first,
+              isVip: order.grandTotal >= 10000,
+            );
+          } else {
+            final old = customerMap[order.customerPhone]!;
+            customerMap[order.customerPhone] = CustomerRecord(
+              phone: old.phone,
+              name: order.customerName.isNotEmpty ? order.customerName : old.name,
+              district: order.city.isNotEmpty ? order.city : old.district,
+              totalOrders: old.totalOrders,
+              totalSpent: old.totalSpent,
+              lastOrderDate: old.lastOrderDate,
+              isVip: old.isVip || old.totalSpent >= 10000,
+            );
+          }
+        }
+      }
+
+      emit(state.copyWith(
+        orders: combinedOrders,
+        customers: customerMap.values.toList(),
+        isLoadingAdminData: false,
+      ));
+    } catch (_) {
+      emit(state.copyWith(isLoadingAdminData: false));
     }
   }
 
@@ -494,8 +565,41 @@ class StoreCubit extends Cubit<StoreState> {
   }
 
   void recordCustomerOrder(AdminOrder order) {
-    final updated = List<AdminOrder>.from(state.orders)..insert(0, order);
-    emit(state.copyWith(orders: updated));
+    final updatedOrders = List<AdminOrder>.from(state.orders)..insert(0, order);
+
+    // Immediately update Customer Directory with this customer's details
+    final updatedCustomers = List<CustomerRecord>.from(state.customers);
+    final idx = updatedCustomers.indexWhere((c) => c.phone == order.customerPhone);
+    if (idx >= 0) {
+      final old = updatedCustomers[idx];
+      updatedCustomers[idx] = CustomerRecord(
+        phone: old.phone,
+        name: order.customerName.isNotEmpty ? order.customerName : old.name,
+        district: order.city.isNotEmpty ? order.city : old.district,
+        totalOrders: old.totalOrders + 1,
+        totalSpent: old.totalSpent + order.grandTotal,
+        lastOrderDate: order.createdAt.toString().split(' ').first,
+        isVip: (old.totalSpent + order.grandTotal) >= 10000,
+      );
+    } else {
+      updatedCustomers.insert(
+        0,
+        CustomerRecord(
+          phone: order.customerPhone,
+          name: order.customerName,
+          district: order.city,
+          totalOrders: 1,
+          totalSpent: order.grandTotal,
+          lastOrderDate: order.createdAt.toString().split(' ').first,
+          isVip: order.grandTotal >= 10000,
+        ),
+      );
+    }
+
+    emit(state.copyWith(
+      orders: updatedOrders,
+      customers: updatedCustomers,
+    ));
   }
 
   void updateB2BPartnerStatus(String partnerId, String status) {

@@ -1,6 +1,7 @@
 import 'dart:developer' as dev;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/product_model.dart';
+import '../admin/admin_models.dart';
 
 class SupabaseService {
   static const String supabaseUrl = 'https://eisxuqlnznaixjgkjndc.supabase.co';
@@ -78,7 +79,47 @@ class SupabaseService {
     return sampleProducts;
   }
 
-  /// Inserts a new order into the Supabase 'orders' table
+  /// Fetches real-time customer orders from Supabase 'orders' table
+  static Future<List<AdminOrder>> fetchOrders() async {
+    if (client == null) return [];
+    try {
+      final response = await client!
+          .from('orders')
+          .select()
+          .order('created_at', ascending: false);
+      if (response.isNotEmpty) {
+        return (response as List<dynamic>).map((row) {
+          final map = row as Map<String, dynamic>;
+          return AdminOrder.fromMap(map);
+        }).toList();
+      }
+    } catch (e) {
+      dev.log('Supabase fetchOrders error: $e');
+    }
+    return [];
+  }
+
+  /// Fetches customer CRM records from Supabase 'customers' table
+  static Future<List<CustomerRecord>> fetchCustomers() async {
+    if (client == null) return [];
+    try {
+      final response = await client!
+          .from('customers')
+          .select()
+          .order('last_order_date', ascending: false);
+      if (response.isNotEmpty) {
+        return (response as List<dynamic>).map((row) {
+          final map = row as Map<String, dynamic>;
+          return CustomerRecord.fromMap(map);
+        }).toList();
+      }
+    } catch (e) {
+      dev.log('Supabase fetchCustomers error: $e');
+    }
+    return [];
+  }
+
+  /// Inserts a new order into the Supabase 'orders' table & syncs customer CRM
   static Future<bool> createOrder({
     required String orderId,
     required String customerName,
@@ -90,6 +131,7 @@ class SupabaseService {
     required double deliveryFee,
     required double grandTotal,
     required List<Map<String, dynamic>> items,
+    String status = 'Pending',
   }) async {
     if (client == null) return false;
     try {
@@ -104,9 +146,20 @@ class SupabaseService {
         'delivery_fee': deliveryFee,
         'grand_total': grandTotal,
         'items': items,
-        'status': 'Confirmed',
+        'status': status,
         'created_at': DateTime.now().toIso8601String(),
       });
+
+      // Synchronize with customer CRM directory
+      try {
+        await client!.from('customers').upsert({
+          'phone': customerPhone,
+          'name': customerName,
+          'district': city,
+          'last_order_date': DateTime.now().toIso8601String(),
+        }, onConflict: 'phone');
+      } catch (_) {}
+
       return true;
     } catch (e) {
       dev.log('Supabase createOrder notice: $e');

@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ruposhi_international/cubits/store_cubit.dart';
 import 'package:ruposhi_international/models/product_model.dart';
+import 'package:ruposhi_international/admin/admin_models.dart';
 import 'package:ruposhi_international/main.dart';
 
 // 1x1 transparent PNG data for network image mocking in widget tests
@@ -432,6 +433,75 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('INTERNATIONAL'), findsWidgets);
+    });
+
+    testWidgets('Customer placed order is accurately visible in Admin Panel with complete customer details and in Customer Directory',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1400, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(const RuposhiCustomerApp());
+      await tester.pump();
+
+      final cubit = tester.element(find.byType(Scaffold).first).read<StoreCubit>();
+
+      // Simulate a customer placing an order on the storefront
+      cubit.recordCustomerOrder(
+        AdminOrder(
+          orderId: 'RUP-2026-9999',
+          customerName: 'Samira Akhtar',
+          customerPhone: '+8801799887766',
+          customerAddress: 'House 42, Road 11, Banani',
+          city: 'Dhaka',
+          paymentMethod: 'Cash on Delivery',
+          subtotal: 4500.0,
+          deliveryFee: 70.0,
+          grandTotal: 4570.0,
+          items: const [
+            {
+              'id': 'p1',
+              'name': 'Anua Heartleaf 77% Soothing Toner',
+              'price': 2150.0,
+              'quantity': 2,
+            }
+          ],
+          status: 'Pending',
+          createdAt: DateTime.now(),
+        ),
+      );
+
+      // Admin logs in
+      cubit.navigateTo(AppView.admin);
+      await tester.pumpAndSettle();
+      cubit.loginAdmin('admin', 'admin123');
+      await tester.pumpAndSettle();
+
+      // Go to Orders & Shipping section
+      final ordersTile = find.text('Orders & Shipping').first;
+      await tester.tap(ordersTile);
+      await tester.pumpAndSettle();
+
+      // Verify the new customer's details appear clearly on their order card
+      expect(find.text('RUP-2026-9999'), findsOneWidget);
+      expect(find.text('Samira Akhtar'), findsWidgets);
+      expect(find.text('+8801799887766'), findsWidgets);
+      expect(find.text('House 42, Road 11, Banani, Dhaka'), findsOneWidget);
+      expect(find.text('Verified Order'), findsWidgets);
+      expect(find.text('Customer Profile'), findsWidgets);
+      expect(find.text('Copy Address'), findsWidgets);
+
+      // Switch to Customer Directory & CRM section
+      final customersTile = find.text('Customer Directory').first;
+      await tester.tap(customersTile);
+      await tester.pumpAndSettle();
+
+      // Verify Customer Directory has updated with the customer
+      expect(find.text('Customer Directory & Real-Time CRM'), findsOneWidget);
+      expect(find.text('Samira Akhtar'), findsWidgets);
+      expect(find.text('+8801799887766'), findsWidgets);
+      expect(find.text('Order History'), findsWidgets);
     });
   });
 }

@@ -73,6 +73,53 @@ class AdminOrder extends Equatable {
 
   @override
   List<Object?> get props => [orderId, customerPhone, status, grandTotal, trackingCode];
+
+  factory AdminOrder.fromMap(Map<String, dynamic> map) {
+    List<Map<String, dynamic>> itemsList = [];
+    final rawItems = map['items'];
+    if (rawItems is List) {
+      itemsList = rawItems.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+    }
+    return AdminOrder(
+      orderId: map['order_id'] ?? map['orderId'] ?? 'RUP-000',
+      customerName: map['customer_name'] ?? map['customerName'] ?? 'Valued Customer',
+      customerPhone: map['customer_phone'] ?? map['customerPhone'] ?? '',
+      customerAddress: map['delivery_address'] ?? map['customerAddress'] ?? '',
+      city: map['city'] ?? 'Dhaka',
+      paymentMethod: map['payment_method'] ?? map['paymentMethod'] ?? 'COD',
+      subtotal: (map['subtotal'] as num?)?.toDouble() ?? 0.0,
+      deliveryFee: (map['delivery_fee'] as num?)?.toDouble() ?? (map['deliveryFee'] as num?)?.toDouble() ?? 0.0,
+      grandTotal: (map['grand_total'] as num?)?.toDouble() ?? (map['grandTotal'] as num?)?.toDouble() ?? 0.0,
+      items: itemsList,
+      status: map['status'] ?? 'Pending',
+      createdAt: map['created_at'] != null
+          ? (DateTime.tryParse(map['created_at'].toString()) ?? DateTime.now())
+          : (map['createdAt'] is DateTime ? map['createdAt'] : DateTime.now()),
+      courier: map['courier'],
+      trackingCode: map['tracking_code'] ?? map['trackingCode'],
+      notes: map['notes'],
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'order_id': orderId,
+      'customer_name': customerName,
+      'customer_phone': customerPhone,
+      'delivery_address': customerAddress,
+      'city': city,
+      'payment_method': paymentMethod,
+      'subtotal': subtotal,
+      'delivery_fee': deliveryFee,
+      'grand_total': grandTotal,
+      'items': items,
+      'status': status,
+      'created_at': createdAt.toIso8601String(),
+      if (courier != null) 'courier': courier,
+      if (trackingCode != null) 'tracking_code': trackingCode,
+      if (notes != null) 'notes': notes,
+    };
+  }
 }
 
 class B2BPartner extends Equatable {
@@ -194,6 +241,32 @@ class CustomerRecord extends Equatable {
 
   @override
   List<Object?> get props => [phone, name, totalOrders, totalSpent];
+
+  factory CustomerRecord.fromMap(Map<String, dynamic> map) {
+    return CustomerRecord(
+      phone: map['phone'] ?? '',
+      name: map['name'] ?? 'Valued Customer',
+      district: map['district'] ?? 'Dhaka',
+      totalOrders: (map['total_orders'] as num?)?.toInt() ?? 1,
+      totalSpent: (map['total_spent'] as num?)?.toDouble() ?? 0.0,
+      lastOrderDate: map['last_order_date'] != null
+          ? map['last_order_date'].toString().split('T').first
+          : 'Recent',
+      isVip: map['is_vip'] ?? false,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'phone': phone,
+      'name': name,
+      'district': district,
+      'total_orders': totalOrders,
+      'total_spent': totalSpent,
+      'last_order_date': lastOrderDate,
+      'is_vip': isVip,
+    };
+  }
 }
 
 class WarehouseBatch extends Equatable {
