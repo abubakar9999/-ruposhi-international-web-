@@ -1,0 +1,2552 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruposhi International | Premier Luxury Cosmetics Importer in Bangladesh</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: [&#39;Inter&#39;, &#39;Hind Siliguri&#39;, &#39;sans-serif&#39;],
+                        serif: [&#39;Playfair Display&#39;, &#39;Hind Siliguri&#39;, &#39;serif&#39;],
+                        bangla: [&#39;Hind Siliguri&#39;, &#39;sans-serif&#39;]
+                    },
+                    colors: {
+                        rose: {
+                            50: &#39;#fff1f2&#39;,
+                            100: &#39;#ffe4e6&#39;,
+                            200: &#39;#fecdd3&#39;,
+                            300: &#39;#fda4af&#39;,
+                            400: &#39;#fb7185&#39;,
+                            500: &#39;#f43f5e&#39;,
+                            600: &#39;#e11d48&#39;,
+                            700: &#39;#be123c&#39;,
+                            800: &#39;#9f1239&#39;,
+                            900: &#39;#881337&#39;,
+                            950: &#39;#4c0519&#39;,
+                        },
+                        gold: {
+                            100: &#39;#FBF5E6&#39;,
+                            300: &#39;#E6C675&#39;,
+                            400: &#39;#D4AF37&#39;,
+                            500: &#39;#B59024&#39;,
+                            600: &#39;#8F6F14&#39;
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .hero-slide {
+            transition: opacity 0.8s ease-in-out, transform 6s ease-out;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+    <!-- Supabase JS Client Integration -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://eisxuqlnznaixjgkjndc.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_W5jx58z6zjiT-KFZKIDOVw_tPHzLkC4';
+        let supabaseClient = null;
+        try {
+            if (window.supabase) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log('Supabase JS initialized successfully.');
+            }
+        } catch(e) {
+            console.warn('Supabase JS init fallback:', e);
+        }
+    </script>
+
+</head>
+<body class="bg-[#FDFBF9] text-gray-800 antialiased min-h-screen flex flex-col font-sans overflow-x-hidden selection:bg-rose-600 selection:text-white">
+
+    <!-- ========================================== -->
+    <!-- TOP ANNOUNCEMENT & TRUST BAR               -->
+    <!-- ========================================== -->
+    <div class="bg-rose-950 text-rose-100 text-xs py-2 px-4 border-b border-rose-900">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
+            <div class="flex items-center space-x-4">
+                <span class="flex items-center gap-1.5 font-medium">
+                    <i class="fa-solid fa-certificate text-gold-400"></i>
+                    <span data-i18n="top_auth">100% Original Imported Products Guaranteed</span>
+                </span>
+                <span class="hidden md:inline text-rose-700">|</span>
+                <span class="hidden md:flex items-center gap-1.5">
+                    <i class="fa-solid fa-truck-fast text-rose-400"></i>
+                    <span data-i18n="top_delivery">Fast Nationwide Delivery (Cash on Delivery Available)</span>
+                </span>
+            </div>
+            <div class="flex items-center space-x-4 ml-auto">
+                <button onclick="switchView(&#39;contact-view&#39;)" class="hover:text-gold-300 transition flex items-center gap-1">
+                    <i class="fa-solid fa-location-dot text-rose-400"></i>
+                    <span data-i18n="track_order">Track Order</span>
+                </button>
+                <span class="text-rose-800">|</span>
+                <!-- Language Switcher -->
+                <div class="flex items-center bg-rose-900/80 rounded-full p-0.5 border border-rose-800">
+                    <button id="lang-en" onclick="setLanguage(&#39;en&#39;)" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-gold-400 text-rose-950 transition">EN</button>
+                    <button id="lang-bn" onclick="setLanguage(&#39;bn&#39;)" class="px-2.5 py-0.5 rounded-full text-[11px] font-bangla text-rose-200 hover:text-white transition">বাংলা</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MAIN STICKY HEADER                         -->
+    <!-- ========================================== -->
+    <header class="bg-white/95 backdrop-blur-md border-b border-rose-100 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20 gap-4">
+                
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileMenu()" class="lg:hidden text-gray-700 hover:text-rose-600 p-2">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+
+                <!-- Brand Logo -->
+                <a href="#" onclick="switchView(&#39;home-view&#39;); return false;" class="flex items-center gap-2.5 group flex-shrink-0">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-rose-600 to-rose-900 flex items-center justify-center text-white font-serif font-bold text-xl shadow-md group-hover:scale-105 transition">
+                        R
+                    </div>
+                    <div>
+                        <span class="font-serif text-2xl font-bold text-gray-900 tracking-wider block leading-none">
+                            RUPOSHI<span class="text-rose-600">.</span>
+                        </span>
+                        <span class="text-[10px] uppercase tracking-[0.22em] text-gold-600 font-semibold block mt-0.5">International</span>
+                    </div>
+                </a>
+
+                <!-- Search Bar with Live Auto-Suggestions -->
+                <div class="hidden md:block flex-1 max-w-md mx-4 relative">
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="header-search-input"
+                            oninput="handleSearchSuggestions(this.value)"
+                            onfocus="handleSearchSuggestions(this.value)"
+                            placeholder="Search CeraVe, MAC, Korean Skincare, Serums..." 
+                            data-i18n-placeholder="search_placeholder"
+                            class="w-full pl-10 pr-10 py-2.5 bg-rose-50/60 border border-rose-200 rounded-full text-sm focus:outline-none focus:border-rose-500 focus:bg-white focus:ring-2 focus:ring-rose-200 transition"
+                        >
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-gray-400"></i>
+                        <button id="clear-search-btn" onclick="clearSearch()" class="hidden absolute right-3.5 top-2.5 text-gray-400 hover:text-gray-600">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </button>
+                    </div>
+                    <!-- Auto-Suggestion Dropdown -->
+                    <div id="search-suggestions" class="hidden absolute left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-rose-100 overflow-hidden z-50 max-h-96 overflow-y-auto">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden lg:flex items-center space-x-6 text-sm font-medium">
+                    <button onclick="switchView(&#39;home-view&#39;)" class="nav-tab text-rose-600 font-semibold hover:text-rose-600 transition py-2" data-view="home-view" data-i18n="nav_home">Home</button>
+                    <button onclick="switchView(&#39;shop-view&#39;)" class="nav-tab text-gray-700 hover:text-rose-600 transition py-2" data-view="shop-view" data-i18n="nav_shop">Shop Catalog</button>
+                    <button onclick="switchView(&#39;about-view&#39;)" class="nav-tab text-gray-700 hover:text-rose-600 transition py-2" data-view="about-view" data-i18n="nav_about">About Us</button>
+                    <button onclick="switchView(&#39;blog-view&#39;)" class="nav-tab text-gray-700 hover:text-rose-600 transition py-2" data-view="blog-view" data-i18n="nav_blog">Beauty Blog</button>
+                    <button onclick="switchView(&#39;b2b-view&#39;)" class="nav-tab px-3 py-1.5 rounded-full bg-gold-100 text-gold-600 border border-gold-300 hover:bg-gold-300/40 font-semibold transition flex items-center gap-1.5" data-view="b2b-view">
+                        <i class="fa-solid fa-briefcase text-xs"></i>
+                        <span data-i18n="nav_b2b">B2B Wholesale</span>
+                    </button>
+                    <button onclick="switchView(&#39;contact-view&#39;)" class="nav-tab text-gray-700 hover:text-rose-600 transition py-2" data-view="contact-view" data-i18n="nav_contact">Contact</button>
+                </nav>
+
+                <!-- Action Icons -->
+                <div class="flex items-center space-x-3 sm:space-x-4">
+                    <!-- Account / OTP Login -->
+                    <button onclick="toggleLoginModal()" class="flex items-center gap-2 text-gray-700 hover:text-rose-600 transition p-1.5 rounded-full hover:bg-rose-50" title="Customer Account">
+                        <i class="fa-regular fa-user text-lg"></i>
+                        <span id="header-user-status" class="hidden xl:inline text-xs font-medium" data-i18n="login_btn">Sign In</span>
+                    </button>
+
+                    <!-- Wishlist -->
+                    <button onclick="toggleWishlistModal()" class="relative text-gray-700 hover:text-rose-600 transition p-1.5 rounded-full hover:bg-rose-50" title="Wishlist">
+                        <i class="fa-regular fa-heart text-lg"></i>
+                        <span id="wishlist-badge" class="absolute -top-0.5 -right-0.5 bg-rose-500 text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center">2</span>
+                    </button>
+
+                    <!-- Shopping Cart -->
+                    <button onclick="toggleCartDrawer()" class="relative flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white px-3.5 py-2 rounded-full transition shadow-sm">
+                        <i class="fa-solid fa-bag-shopping text-sm"></i>
+                        <span id="cart-badge" class="text-xs font-bold">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Search Bar -->
+            <div class="md:hidden pb-3">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        oninput="handleSearchSuggestions(this.value, true)"
+                        placeholder="Search authentic imported cosmetics..." 
+                        class="w-full pl-9 pr-4 py-2 bg-rose-50/70 border border-rose-200 rounded-full text-xs focus:outline-none focus:border-rose-500"
+                    >
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-2.5 text-gray-400 text-xs"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Dropdown Navigation -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-rose-100 px-4 pt-2 pb-4 space-y-2 shadow-lg">
+            <button onclick="switchView(&#39;home-view&#39;); toggleMobileMenu()" class="block w-full text-left px-3 py-2 rounded-lg text-sm font-medium hover:bg-rose-50 hover:text-rose-600">Home</button>
+            <button onclick="switchView(&#39;shop-view&#39;); toggleMobileMenu()" class="block w-full text-left px-3 py-2 rounded-lg text-sm font-medium hover:bg-rose-50 hover:text-rose-600">Shop Catalog</button>
+            <button onclick="switchView(&#39;about-view&#39;); toggleMobileMenu()" class="block w-full text-left px-3 py-2 rounded-lg text-sm font-medium hover:bg-rose-50 hover:text-rose-600">About Us (Company Overview)</button>
+            <button onclick="switchView(&#39;blog-view&#39;); toggleMobileMenu()" class="block w-full text-left px-3 py-2 rounded-lg text-sm font-medium hover:bg-rose-50 hover:text-rose-600">Beauty Blog & Guides</button>
+            <button onclick="switchView(&#39;b2b-view&#39;); toggleMobileMenu()" class="block w-full text-left px-3 py-2 rounded-lg text-sm font-semibold bg-gold-100 text-gold-600">B2B Wholesale Portal (Login: aaaa)</button>
+            <button onclick="switchView(&#39;contact-view&#39;); toggleMobileMenu()" class="block w-full text-left px-3 py-2 rounded-lg text-sm font-medium hover:bg-rose-50 hover:text-rose-600">Contact & Track Order</button>
+        </div>
+    </header>
+
+    <!-- ========================================== -->
+    <!-- MAIN SPA VIEW CONTAINER                    -->
+    <!-- ========================================== -->
+    <main class="flex-grow w-full">
+
+        <!-- ========================================== -->
+        <!-- 1. HOME VIEW                               -->
+        <!-- ========================================== -->
+        <section id="home-view" class="view-section block animate-fade-in">
+            
+            <!-- HERO SLIDER WITH FEMALE BEAUTY MODELS -->
+            <div class="relative w-full h-[540px] md:h-[640px] bg-rose-950 overflow-hidden">
+                <!-- Slide 1 -->
+                <div class="hero-slide absolute inset-0 opacity-100 z-10" data-slide="0">
+                    <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1920&q=85" alt="Luxury Beauty Model" class="w-full h-full object-cover object-center scale-105 transform transition-transform duration-1000" onerror="this.src=&#39;https://placehold.co/1920x800/4c0519/ffffff?text=Luxury+Beauty&#39;">
+                    <div class="absolute inset-0 bg-gradient-to-r from-rose-950/90 via-rose-950/60 to-transparent"></div>
+                    <div class="relative z-20 max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex items-center">
+                        <div class="max-w-xl text-white space-y-5">
+                            <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-gold-400/20 border border-gold-400 text-gold-300 text-xs font-semibold uppercase tracking-widest">
+                                <i class="fa-solid fa-sparkles"></i> <span data-i18n="hero1_badge">Festive Radiance Campaign 2026</span>
+                            </span>
+                            <h1 class="font-serif text-4xl sm:text-5xl md:text-6xl font-bold leading-tight" data-i18n="hero1_title">
+                                Unveil Your Purest Luminous Glow
+                            </h1>
+                            <p class="text-rose-100/90 text-base sm:text-lg leading-relaxed" data-i18n="hero1_desc">
+                                Experience 100% authentic global skincare and luxury makeup imported directly from France, South Korea, USA, and the UK to Bangladesh.
+                            </p>
+                            <div class="pt-2 flex flex-wrap gap-4">
+                                <button onclick="switchView(&#39;shop-view&#39;)" class="bg-rose-600 hover:bg-rose-500 text-white px-8 py-3.5 rounded-full font-semibold transition shadow-xl flex items-center gap-2">
+                                    <span data-i18n="shop_now_btn">Explore Collection</span> <i class="fa-solid fa-arrow-right text-xs"></i>
+                                </button>
+                                <button onclick="switchView(&#39;about-view&#39;)" class="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white px-7 py-3.5 rounded-full font-semibold transition">
+                                    <span data-i18n="our_authenticity_btn">Authenticity Guarantee</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 2 -->
+                <div class="hero-slide absolute inset-0 opacity-0 z-0" data-slide="1">
+                    <img src="https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=1920&q=85" alt="Korean Glass Skin Model" class="w-full h-full object-cover object-center" onerror="this.src=&#39;https://placehold.co/1920x800/881337/ffffff?text=Korean+Skincare&#39;">
+                    <div class="absolute inset-0 bg-gradient-to-r from-gray-950/90 via-gray-900/60 to-transparent"></div>
+                    <div class="relative z-20 max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex items-center">
+                        <div class="max-w-xl text-white space-y-5">
+                            <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-rose-500/30 border border-rose-400 text-rose-200 text-xs font-semibold uppercase tracking-widest">
+                                <i class="fa-solid fa-crown"></i> New Arrivals • K-Beauty & Luxury Makeup
+                            </span>
+                            <h2 class="font-serif text-4xl sm:text-5xl md:text-6xl font-bold leading-tight">
+                                Runway-Ready Velvet & Glass Skin
+                            </h2>
+                            <p class="text-gray-200 text-base sm:text-lg leading-relaxed">
+                                Discover dermatologist-approved serums from The Ordinary, COSRX, and iconic lip colors from MAC & Maybelline New York.
+                            </p>
+                            <div class="pt-2 flex flex-wrap gap-4">
+                                <button onclick="filterByCategoryAndGo(&#39;Makeup&#39;)" class="bg-gold-400 hover:bg-gold-500 text-gray-950 px-8 py-3.5 rounded-full font-bold transition shadow-xl">
+                                    Shop Luxury Makeup
+                                </button>
+                                <button onclick="switchView(&#39;b2b-view&#39;)" class="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white px-7 py-3.5 rounded-full font-semibold transition">
+                                    Partner With Us (B2B)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 3 -->
+                <div class="hero-slide absolute inset-0 opacity-0 z-0" data-slide="2">
+                    <img src="https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?auto=format&fit=crop&w=1920&q=85" alt="Skincare Routine Female Model" class="w-full h-full object-cover object-center" onerror="this.src=&#39;https://placehold.co/1920x800/4c0519/ffffff?text=Skincare+Routine&#39;">
+                    <div class="absolute inset-0 bg-gradient-to-r from-rose-950/90 via-rose-900/55 to-transparent"></div>
+                    <div class="relative z-20 max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex items-center">
+                        <div class="max-w-xl text-white space-y-5">
+                            <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-green-500/20 border border-green-400 text-green-300 text-xs font-semibold uppercase tracking-widest">
+                                <i class="fa-solid fa-shield-check"></i> Direct Importer • Batch Verified
+                            </span>
+                            <h2 class="font-serif text-4xl sm:text-5xl md:text-6xl font-bold leading-tight">
+                                Pure Science Meets Timeless Beauty
+                            </h2>
+                            <p class="text-rose-100 text-base sm:text-lg leading-relaxed">
+                                Every bottle comes with verified import batch codes, BSTI compliance, and temperature-controlled warehousing in Dhaka.
+                            </p>
+                            <div class="pt-2 flex flex-wrap gap-4">
+                                <button onclick="filterByCategoryAndGo(&#39;Skincare&#39;)" class="bg-rose-600 hover:bg-rose-500 text-white px-8 py-3.5 rounded-full font-semibold transition shadow-xl">
+                                    Shop Clinical Skincare
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slider Controls -->
+                <div class="absolute bottom-6 left-0 right-0 z-30 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+                    <div class="flex space-x-2.5">
+                        <button onclick="goToSlide(0)" class="slide-dot w-8 h-2 rounded-full bg-gold-400 transition-all"></button>
+                        <button onclick="goToSlide(1)" class="slide-dot w-2.5 h-2 rounded-full bg-white/50 hover:bg-white transition-all"></button>
+                        <button onclick="goToSlide(2)" class="slide-dot w-2.5 h-2 rounded-full bg-white/50 hover:bg-white transition-all"></button>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="prevSlide()" class="w-10 h-10 rounded-full bg-black/30 hover:bg-rose-600 text-white border border-white/20 flex items-center justify-center transition"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+                        <button onclick="nextSlide()" class="w-10 h-10 rounded-full bg-black/30 hover:bg-rose-600 text-white border border-white/20 flex items-center justify-center transition"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AUTHENTICITY & TRUST GUARANTEE RIBBON -->
+            <div class="bg-white border-b border-rose-100 shadow-sm relative z-20">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 text-xl flex-shrink-0">
+                            <i class="fa-solid fa-award"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-gray-900" data-i18n="trust1_title">100% Authentic Import</h4>
+                            <p class="text-xs text-gray-500">Directly sourced from USA, Korea & EU</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 text-xl flex-shrink-0">
+                            <i class="fa-solid fa-barcode"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-gray-900" data-i18n="trust2_title">Batch & Expiry Verified</h4>
+                            <p class="text-xs text-gray-500">Check batch code on every product</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 text-xl flex-shrink-0">
+                            <i class="fa-solid fa-hand-holding-dollar"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-gray-900" data-i18n="trust3_title">Cash on Delivery</h4>
+                            <p class="text-xs text-gray-500">Pay at doorstep + bKash / Nagad</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 text-xl flex-shrink-0">
+                            <i class="fa-solid fa-boxes-packing"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-gray-900" data-i18n="trust4_title">Retail & B2B Wholesale</h4>
+                            <p class="text-xs text-gray-500">Authorized distributor across BD</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SHOP BY CATEGORY (WITH MODEL IMAGERY) -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-10">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-widest text-rose-600 block mb-1">Curated Departments</span>
+                        <h2 class="font-serif text-3xl md:text-4xl font-bold text-gray-900" data-i18n="cat_heading">Shop By Beauty Category</h2>
+                    </div>
+                    <button onclick="switchView(&#39;shop-view&#39;)" class="text-sm font-semibold text-rose-600 hover:text-rose-800 mt-2 md:mt-0 flex items-center gap-1.5">
+                        <span>View Full Catalog</span> <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-5">
+                    <!-- Category 1: Skincare -->
+                    <div onclick="filterByCategoryAndGo(&#39;Skincare&#39;)" class="group cursor-pointer text-center">
+                        <div class="relative aspect-[4/5] rounded-2xl overflow-hidden mb-3 shadow-sm border border-rose-100">
+                            <img src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80" alt="Skincare Model" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
+                            <span class="absolute bottom-3 left-0 right-0 text-white font-serif font-bold text-lg tracking-wide">Skincare</span>
+                        </div>
+                        <p class="text-xs text-gray-500">Serums, Cleansers & SPF</p>
+                    </div>
+
+                    <!-- Category 2: Makeup -->
+                    <div onclick="filterByCategoryAndGo(&#39;Makeup&#39;)" class="group cursor-pointer text-center">
+                        <div class="relative aspect-[4/5] rounded-2xl overflow-hidden mb-3 shadow-sm border border-rose-100">
+                            <img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=600&q=80" alt="Makeup Model" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
+                            <span class="absolute bottom-3 left-0 right-0 text-white font-serif font-bold text-lg tracking-wide">Makeup</span>
+                        </div>
+                        <p class="text-xs text-gray-500">Lips, Face & Eyes</p>
+                    </div>
+
+                    <!-- Category 3: Haircare -->
+                    <div onclick="filterByCategoryAndGo(&#39;Haircare&#39;)" class="group cursor-pointer text-center">
+                        <div class="relative aspect-[4/5] rounded-2xl overflow-hidden mb-3 shadow-sm border border-rose-100">
+                            <img src="https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=600&q=80" alt="Haircare Model" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
+                            <span class="absolute bottom-3 left-0 right-0 text-white font-serif font-bold text-lg tracking-wide">Haircare</span>
+                        </div>
+                        <p class="text-xs text-gray-500">Oils, Masks & Keratin</p>
+                    </div>
+
+                    <!-- Category 4: Fragrance -->
+                    <div onclick="filterByCategoryAndGo(&#39;Fragrance&#39;)" class="group cursor-pointer text-center">
+                        <div class="relative aspect-[4/5] rounded-2xl overflow-hidden mb-3 shadow-sm border border-rose-100">
+                            <img src="https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=600&q=80" alt="Luxury Perfume" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
+                            <span class="absolute bottom-3 left-0 right-0 text-white font-serif font-bold text-lg tracking-wide">Fragrance</span>
+                        </div>
+                        <p class="text-xs text-gray-500">French Eau De Parfum</p>
+                    </div>
+
+                    <!-- Category 5: Bath & Body -->
+                    <div onclick="filterByCategoryAndGo(&#39;Bath & Body&#39;)" class="group cursor-pointer text-center">
+                        <div class="relative aspect-[4/5] rounded-2xl overflow-hidden mb-3 shadow-sm border border-rose-100">
+                            <img src="https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=600&q=80" alt="Bath and Body Model" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
+                            <span class="absolute bottom-3 left-0 right-0 text-white font-serif font-bold text-lg tracking-wide">Bath & Body</span>
+                        </div>
+                        <p class="text-xs text-gray-500">Lotions & Scrubs</p>
+                    </div>
+
+                    <!-- Category 6: Men&#39;s Grooming -->
+                    <div onclick="filterByCategoryAndGo(&#39;Men\&#39;s Grooming&#39;)" class="group cursor-pointer text-center">
+                        <div class="relative aspect-[4/5] rounded-2xl overflow-hidden mb-3 shadow-sm border border-rose-100">
+                            <img src="https://images.unsplash.com/photo-1621607512214-68297480165e?auto=format&fit=crop&w=600&q=80" alt="Mens Grooming" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
+                            <span class="absolute bottom-3 left-0 right-0 text-white font-serif font-bold text-lg tracking-wide">Men&#39;s Care</span>
+                        </div>
+                        <p class="text-xs text-gray-500">Grooming & Cologne</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABBED PRODUCT SHOWCASE (NEW ARRIVALS / BEST SELLERS / OFFERS) -->
+            <div class="bg-rose-50/60 py-16 border-y border-rose-100">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-widest text-rose-600 block mb-1">100% Authentic & Batch Verified</span>
+                            <h2 class="font-serif text-3xl md:text-4xl font-bold text-gray-900" data-i18n="featured_heading">Trending Cosmetics in Bangladesh</h2>
+                        </div>
+                        <div class="flex bg-white p-1 rounded-full border border-rose-200 shadow-sm self-start">
+                            <button onclick="filterHomeTab(&#39;all&#39;, this)" class="home-tab-btn px-5 py-2 rounded-full text-xs font-bold bg-rose-600 text-white transition">All Featured</button>
+                            <button onclick="filterHomeTab(&#39;Best Seller&#39;, this)" class="home-tab-btn px-5 py-2 rounded-full text-xs font-bold text-gray-600 hover:text-rose-600 transition">Best Sellers</button>
+                            <button onclick="filterHomeTab(&#39;New Arrival&#39;, this)" class="home-tab-btn px-5 py-2 rounded-full text-xs font-bold text-gray-600 hover:text-rose-600 transition">New Arrivals</button>
+                            <button onclick="filterHomeTab(&#39;Festive Offer&#39;, this)" class="home-tab-btn px-5 py-2 rounded-full text-xs font-bold text-gray-600 hover:text-rose-600 transition">Special Offers</button>
+                        </div>
+                    </div>
+
+                    <div id="home-products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <!-- Dynamically Populated via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- EDITORIAL MODEL CAMPAIGN BANNER -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+                <div class="grid grid-cols-1 lg:grid-cols-12 rounded-3xl overflow-hidden shadow-xl border border-rose-100 bg-rose-950">
+                    <div class="lg:col-span-6 relative min-h-[360px]">
+                        <img src="https://images.unsplash.com/photo-1596755389378-c31d21fd1273?auto=format&fit=crop&w=1000&q=85" alt="Female Beauty Editorial Model" class="w-full h-full object-cover">
+                        <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold text-rose-900 shadow">
+                            <i class="fa-solid fa-check-circle text-green-600 mr-1"></i> Imported Directly From Seoul & Paris
+                        </div>
+                    </div>
+                    <div class="lg:col-span-6 p-8 sm:p-12 lg:p-14 flex flex-col justify-center text-white space-y-6">
+                        <span class="text-gold-400 text-xs font-bold uppercase tracking-[0.2em]">Ruposhi International Exclusive</span>
+                        <h3 class="font-serif text-3xl sm:text-4xl font-bold leading-tight">
+                            Why 50,000+ Bangladeshi Women & Salons Trust Ruposhi
+                        </h3>
+                        <p class="text-rose-100/85 text-sm sm:text-base leading-relaxed">
+                            Counterfeit cosmetics can permanently damage your skin. At Ruposhi International, every single product is imported through official channels, stored in climate-controlled facilities in Dhaka, and verified with original manufacturer batch numbers.
+                        </p>
+                        <div class="grid grid-cols-3 gap-4 pt-2 border-t border-rose-800/80">
+                            <div>
+                                <span class="font-serif text-2xl sm:text-3xl font-bold text-gold-400">100%</span>
+                                <p class="text-xs text-rose-200 mt-0.5">Original Guarantee</p>
+                            </div>
+                            <div>
+                                <span class="font-serif text-2xl sm:text-3xl font-bold text-gold-400">35+</span>
+                                <p class="text-xs text-rose-200 mt-0.5">Global Brands</p>
+                            </div>
+                            <div>
+                                <span class="font-serif text-2xl sm:text-3xl font-bold text-gold-400">450+</span>
+                                <p class="text-xs text-rose-200 mt-0.5">B2B Salon Partners</p>
+                            </div>
+                        </div>
+                        <div class="pt-2 flex flex-wrap gap-4">
+                            <button onclick="switchView(&#39;about-view&#39;)" class="bg-gold-400 hover:bg-gold-500 text-rose-950 font-bold px-7 py-3 rounded-full text-sm transition shadow-lg">
+                                Read Our Import Story
+                            </button>
+                            <button onclick="switchView(&#39;b2b-view&#39;)" class="border border-rose-400 hover:bg-rose-900 text-white font-semibold px-6 py-3 rounded-full text-sm transition">
+                                Wholesale Inquiry
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VERIFIED CUSTOMER REVIEWS (FEMALE BUYER PORTRAITS) -->
+            <div class="bg-white py-16 border-t border-rose-100">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center max-w-2xl mx-auto mb-12">
+                        <span class="text-xs font-bold uppercase tracking-widest text-rose-600">Real Stories, Real Glow</span>
+                        <h2 class="font-serif text-3xl md:text-4xl font-bold text-gray-900 mt-1">Loved by Beauty Enthusiasts</h2>
+                        <p class="text-sm text-gray-500 mt-2">Verified reviews from retail customers and beauty parlor owners across Bangladesh.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <!-- Review 1 -->
+                        <div class="bg-rose-50/50 p-7 rounded-2xl border border-rose-100 shadow-sm flex flex-col justify-between">
+                            <div>
+                                <div class="flex text-gold-400 text-xs mb-4 space-x-1">
+                                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                                </div>
+                                <p class="text-gray-700 text-sm italic leading-relaxed mb-6">
+                                    "Finally a trustworthy cosmetics importer in Dhaka! I ordered the COSRX Snail Mucin and CeraVe Cleanser. Checked the batch code online and it is 100% authentic Korean & US import. Delivery to Gulshan took less than 24 hours!"
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-3.5 pt-4 border-t border-rose-200/60">
+                                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" alt="Nusrat Jahan" class="w-12 h-12 rounded-full object-cover border-2 border-rose-400">
+                                <div>
+                                    <h5 class="font-bold text-sm text-gray-900">Nusrat Jahan</h5>
+                                    <span class="text-xs text-green-600 font-medium"><i class="fa-solid fa-circle-check"></i> Verified Buyer • Gulshan, Dhaka</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Review 2 -->
+                        <div class="bg-rose-50/50 p-7 rounded-2xl border border-rose-100 shadow-sm flex flex-col justify-between">
+                            <div>
+                                <div class="flex text-gold-400 text-xs mb-4 space-x-1">
+                                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                                </div>
+                                <p class="text-gray-700 text-sm italic leading-relaxed mb-6">
+                                    "As a bridal makeup artist in Chattogram, I only use original MAC, Estée Lauder, and Maybelline on my brides. Ruposhi International&#39;s B2B wholesale portal gives my studio amazing dealer rates and guaranteed original stock."
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-3.5 pt-4 border-t border-rose-200/60">
+                                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80" alt="Farhana Karim" class="w-12 h-12 rounded-full object-cover border-2 border-rose-400">
+                                <div>
+                                    <h5 class="font-bold text-sm text-gray-900">Farhana Karim</h5>
+                                    <span class="text-xs text-rose-600 font-medium"><i class="fa-solid fa-crown"></i> Bridal MUA & B2B Partner • Chattogram</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Review 3 -->
+                        <div class="bg-rose-50/50 p-7 rounded-2xl border border-rose-100 shadow-sm flex flex-col justify-between">
+                            <div>
+                                <div class="flex text-gold-400 text-xs mb-4 space-x-1">
+                                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                                </div>
+                                <p class="text-gray-700 text-sm italic leading-relaxed mb-6">
+                                    "Loved the packaging and the expiry date is clearly printed on the import sticker. Paid easily via bKash during checkout and got an instant SMS tracking link. My skin has never looked better!"
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-3.5 pt-4 border-t border-rose-200/60">
+                                <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80" alt="Tasnim Zara" class="w-12 h-12 rounded-full object-cover border-2 border-rose-400">
+                                <div>
+                                    <h5 class="font-bold text-sm text-gray-900">Tasnim Rahman</h5>
+                                    <span class="text-xs text-green-600 font-medium"><i class="fa-solid fa-circle-check"></i> Verified Buyer • Dhanmondi, Dhaka</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 2. SHOP CATALOG VIEW                       -->
+        <!-- ========================================== -->
+        <section id="shop-view" class="view-section hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <!-- Shop Header Banner -->
+            <div class="relative rounded-3xl overflow-hidden mb-8 bg-rose-900 h-48 flex items-center px-8">
+                <img src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1400&q=80" alt="Cosmetics Catalog Banner" class="absolute inset-0 w-full h-full object-cover opacity-40">
+                <div class="relative z-10 text-white">
+                    <span class="text-xs uppercase tracking-widest text-gold-300 font-bold">Direct Import Catalog</span>
+                    <h1 class="font-serif text-3xl md:text-4xl font-bold mt-1">Authentic Global Beauty Collection</h1>
+                    <p class="text-sm text-rose-100 mt-1">Filter by category, international brand, skin type, or country of origin.</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Sidebar Filters -->
+                <aside class="w-full lg:w-64 flex-shrink-0">
+                    <div class="bg-white p-6 rounded-2xl border border-rose-100 shadow-sm sticky top-24 space-y-6">
+                        <div class="flex items-center justify-between border-b border-rose-100 pb-3">
+                            <h3 class="font-bold text-gray-900 flex items-center gap-2"><i class="fa-solid fa-sliders text-rose-600"></i> Filters</h3>
+                            <button onclick="resetShopFilters()" class="text-xs text-rose-600 hover:underline font-medium">Reset All</button>
+                        </div>
+
+                        <!-- Category Filter -->
+                        <div>
+                            <h4 class="font-semibold text-xs uppercase tracking-wider text-gray-500 mb-2.5">Category</h4>
+                            <select id="filter-category" onchange="applyShopFilters()" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-rose-500">
+                                <option value="all">All Categories</option>
+                                <option value="Skincare">Skincare</option>
+                                <option value="Makeup">Makeup</option>
+                                <option value="Haircare">Haircare</option>
+                                <option value="Fragrance">Fragrance</option>
+                                <option value="Bath & Body">Bath & Body</option>
+                                <option value="Men&#39;s Grooming">Men&#39;s Grooming</option>
+                            </select>
+                        </div>
+
+                        <!-- Brand Filter -->
+                        <div>
+                            <h4 class="font-semibold text-xs uppercase tracking-wider text-gray-500 mb-2.5">International Brand</h4>
+                            <select id="filter-brand" onchange="applyShopFilters()" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-rose-500">
+                                <option value="all">All Brands</option>
+                                <option value="The Ordinary">The Ordinary (Canada)</option>
+                                <option value="CeraVe">CeraVe (USA)</option>
+                                <option value="COSRX">COSRX (Korea)</option>
+                                <option value="MAC Cosmetics">MAC Cosmetics (USA)</option>
+                                <option value="L&#39;Oréal Paris">L&#39;Oréal Paris (France)</option>
+                                <option value="Maybelline">Maybelline NY (USA)</option>
+                                <option value="Laneige">Laneige (Korea)</option>
+                                <option value="Dior Beauty">Dior (France)</option>
+                            </select>
+                        </div>
+
+                        <!-- Country of Origin -->
+                        <div>
+                            <h4 class="font-semibold text-xs uppercase tracking-wider text-gray-500 mb-2.5">Imported From</h4>
+                            <select id="filter-origin" onchange="applyShopFilters()" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-rose-500">
+                                <option value="all">All Countries</option>
+                                <option value="South Korea">🇰🇷 South Korea</option>
+                                <option value="USA">🇺🇸 United States</option>
+                                <option value="France">🇫🇷 France</option>
+                                <option value="Canada">🇨🇦 Canada</option>
+                                <option value="UK">🇬🇧 United Kingdom</option>
+                            </select>
+                        </div>
+
+                        <!-- Skin Type -->
+                        <div>
+                            <h4 class="font-semibold text-xs uppercase tracking-wider text-gray-500 mb-2.5">Skin Type</h4>
+                            <select id="filter-skin" onchange="applyShopFilters()" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-rose-500">
+                                <option value="all">All Skin Types</option>
+                                <option value="All Skin Types">Universal / All Skin</option>
+                                <option value="Oily & Acne-Prone">Oily & Acne-Prone</option>
+                                <option value="Dry & Sensitive">Dry & Sensitive</option>
+                                <option value="Combination">Combination Skin</option>
+                            </select>
+                        </div>
+
+                        <!-- Max Price Range -->
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-2">
+                                <span class="text-gray-500 uppercase">Max Price</span>
+                                <span id="price-range-label" class="text-rose-600 font-bold">৳ 15,000</span>
+                            </div>
+                            <input type="range" id="filter-price" min="500" max="15000" step="250" value="15000" oninput="document.getElementById(&#39;price-range-label&#39;).innerText = &#39;৳ &#39; + Number(this.value).toLocaleString(); applyShopFilters()" class="w-full accent-rose-600 cursor-pointer">
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Catalog Product Grid Area -->
+                <div class="flex-grow">
+                    <div class="bg-white p-4 rounded-2xl border border-rose-100 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-4">
+                        <p class="text-sm text-gray-600"><Showing <span id="shop-count" class="font-bold text-gray-900">12</span> authentic imported products</p>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs text-gray-500 font-medium">Sort By:</label>
+                            <select id="sort-select" onchange="applyShopFilters()" class="border border-gray-200 rounded-xl px-3 py-1.5 text-sm outline-none focus:border-rose-500">
+                                <option value="popular">Popularity & Featured</option>
+                                <option value="price-asc">Price: Low to High</option>
+                                <option value="price-desc">Price: High to Low</option>
+                                <option value="name">Product Name (A-Z)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="shop-products-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                        <!-- Dynamically Populated via JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 3. PRODUCT DETAIL VIEW                     -->
+        <!-- ========================================== -->
+        <section id="product-detail-view" class="view-section hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <button onclick="switchView(&#39;shop-view&#39;)" class="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-rose-600 mb-6 transition">
+                <i class="fa-solid fa-arrow-left"></i> Back to Product Catalog
+            </button>
+
+            <div class="bg-white rounded-3xl border border-rose-100 shadow-sm p-6 md:p-10">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                    <!-- Product Gallery -->
+                    <div class="lg:col-span-6 space-y-4">
+                        <div class="aspect-square rounded-2xl overflow-hidden bg-rose-50/40 border border-rose-100 relative">
+                            <img id="detail-main-img" src="" alt="Product Main" class="w-full h-full object-cover">
+                            <span id="detail-badge" class="absolute top-4 left-4 bg-rose-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow">Best Seller</span>
+                            <span id="detail-origin-pill" class="absolute top-4 right-4 bg-white/90 backdrop-blur text-gray-800 text-xs font-semibold px-3 py-1 rounded-full shadow border border-gray-200">🇰🇷 South Korea</span>
+                        </div>
+                        <div id="detail-thumbnails" class="grid grid-cols-4 gap-3">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Product Details & Import Info -->
+                    <div class="lg:col-span-6 flex flex-col">
+                        <div class="flex items-center justify-between mb-2">
+                            <span id="detail-brand" class="text-xs font-bold uppercase tracking-widest text-rose-600">BRAND</span>
+                            <span class="inline-flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-50 px-2.5 py-1 rounded-full border border-green-200">
+                                <i class="fa-solid fa-circle-check"></i> In Stock (Ready to Ship)
+                            </span>
+                        </div>
+
+                        <h1 id="detail-title" class="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3">Product Name</h1>
+
+                        <div class="flex items-center gap-4 mb-5">
+                            <div class="flex text-gold-400 text-sm">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                            </div>
+                            <span class="text-xs text-gray-500 font-medium">(128 Verified Customer Reviews)</span>
+                        </div>
+
+                        <div class="flex items-baseline gap-3 mb-6">
+                            <span id="detail-price" class="text-3xl font-bold text-rose-600">৳ 1,850</span>
+                            <span id="detail-old-price" class="text-lg text-gray-400 line-through">৳ 2,200</span>
+                            <span class="text-xs font-bold bg-rose-100 text-rose-700 px-2.5 py-1 rounded-md">Save 15%</span>
+                        </div>
+
+                        <p id="detail-short-desc" class="text-gray-600 text-sm leading-relaxed mb-6"></p>
+
+                        <!-- Batch, Expiry & Import Verification Box (Crucial Trust Builder) -->
+                        <div class="bg-rose-50/70 rounded-2xl p-4 border border-rose-200/80 mb-6 grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
+                            <div>
+                                <span class="text-gray-500 block">Import Batch No.</span>
+                                <span id="detail-batch" class="font-bold text-gray-900 font-mono">RP-2026-884A</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500 block">Expiry Date</span>
+                                <span id="detail-expiry" class="font-bold text-green-700">Nov 2028</span>
+                            </div>
+                            <div class="col-span-2 sm:col-span-1">
+                                <span class="text-gray-500 block">Importer Verification</span>
+                                <span class="font-bold text-rose-900"><i class="fa-solid fa-shield-halved text-rose-600"></i> BSTI & Customs Cleared</span>
+                            </div>
+                        </div>
+
+                        <!-- Size / Shade Selector -->
+                        <div class="mb-6">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">Select Size / Variant</label>
+                            <div id="detail-variants" class="flex flex-wrap gap-2.5">
+                                <button onclick="selectVariant(this)" class="variant-btn border-2 border-rose-600 bg-rose-50 text-rose-900 font-semibold px-4 py-2 rounded-xl text-xs">Standard Full Size</button>
+                                <button onclick="selectVariant(this)" class="variant-btn border border-gray-200 bg-white text-gray-600 hover:border-rose-400 px-4 py-2 rounded-xl text-xs">Deluxe Value Pack</button>
+                                <button onclick="selectVariant(this)" class="variant-btn border border-gray-200 bg-white text-gray-600 hover:border-rose-400 px-4 py-2 rounded-xl text-xs">Travel Mini</button>
+                            </div>
+                        </div>
+
+                        <!-- Quantity & CTA Buttons -->
+                        <div class="flex flex-wrap items-center gap-4 mb-8">
+                            <div class="flex items-center border border-gray-300 rounded-xl bg-white">
+                                <button onclick="adjustDetailQty(-1)" class="px-3.5 py-3 text-gray-600 hover:text-rose-600 font-bold">-</button>
+                                <input id="detail-qty" type="number" value="1" min="1" class="w-12 text-center text-sm font-bold outline-none" readonly>
+                                <button onclick="adjustDetailQty(1)" class="px-3.5 py-3 text-gray-600 hover:text-rose-600 font-bold">+</button>
+                            </div>
+                            <button onclick="addCurrentProductToCart()" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-bag-shopping"></i> Add to Shopping Bag
+                            </button>
+                            <button onclick="buyNowCurrentProduct()" class="bg-gray-900 hover:bg-gray-800 text-white font-bold py-3.5 px-6 rounded-xl shadow transition">
+                                Buy Now
+                            </button>
+                        </div>
+
+                        <!-- Detailed Info Tabs (Description, Ingredients, How to Use) -->
+                        <div class="border border-rose-100 rounded-2xl overflow-hidden bg-white mt-auto">
+                            <div class="flex border-b border-rose-100 bg-rose-50/50 text-xs font-bold">
+                                <button onclick="switchDetailTab(&#39;desc&#39;, this)" class="detail-tab-btn flex-1 py-3 px-4 text-rose-600 border-b-2 border-rose-600">Description</button>
+                                <button onclick="switchDetailTab(&#39;ingr&#39;, this)" class="detail-tab-btn flex-1 py-3 px-4 text-gray-500 hover:text-gray-800">Active Ingredients</button>
+                                <button onclick="switchDetailTab(&#39;usage&#39;, this)" class="detail-tab-btn flex-1 py-3 px-4 text-gray-500 hover:text-gray-800">How to Use</button>
+                            </div>
+                            <div class="p-4 text-xs sm:text-sm text-gray-600 leading-relaxed">
+                                <div id="detail-tab-desc" class="detail-tab-pane"></div>
+                                <div id="detail-tab-ingr" class="detail-tab-pane hidden"></div>
+                                <div id="detail-tab-usage" class="detail-tab-pane hidden"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 4. ABOUT US (COMPANY OVERVIEW) VIEW        -->
+        <!-- ========================================== -->
+        <section id="about-view" class="view-section hidden w-full">
+            <!-- Luxury Editorial Hero -->
+            <div class="relative w-full h-[420px] md:h-[500px] flex items-center justify-center overflow-hidden bg-rose-950">
+                <img src="https://images.unsplash.com/photo-1512207846876-bb54ef5056fe?auto=format&fit=crop&w=1920&q=85" alt="Ruposhi Heritage Editorial Model" class="absolute inset-0 w-full h-full object-cover opacity-45">
+                <div class="absolute inset-0 bg-gradient-to-t from-rose-950 via-rose-950/40 to-transparent"></div>
+                <div class="relative z-10 text-center px-4 max-w-3xl mx-auto">
+                    <span class="inline-block px-4 py-1 rounded-full bg-gold-400/20 border border-gold-400 text-gold-300 text-xs font-bold uppercase tracking-widest mb-4">
+                        Established Importer & Distributor • Dhaka, Bangladesh
+                    </span>
+                    <h1 class="font-serif text-4xl md:text-6xl font-bold text-white mb-4 tracking-wide">
+                        The Ruposhi Story
+                    </h1>
+                    <p class="text-base md:text-lg text-rose-100 leading-relaxed">
+                        Bridging the world&#39;s most iconic beauty houses with discerning consumers, luxury salons, and retailers across Bangladesh.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Editorial Story Split Section with Female Model -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-20">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                    <div class="lg:col-span-6 relative">
+                        <div class="aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=85" alt="Ruposhi Luxury Face Model" class="w-full h-full object-cover">
+                        </div>
+                        <div class="hidden sm:block absolute -bottom-6 -right-6 bg-white p-6 rounded-2xl shadow-xl border border-rose-100 max-w-xs">
+                            <div class="flex items-center gap-3 mb-2">
+                                <i class="fa-solid fa-certificate text-2xl text-gold-500"></i>
+                                <span class="font-serif font-bold text-gray-900">100% Genuine Import</span>
+                            </div>
+                            <p class="text-xs text-gray-500">Every shipment undergoes strict customs & BSTI compliance checks in Bangladesh.</p>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-6 space-y-6">
+                        <span class="text-xs font-bold uppercase tracking-widest text-rose-600">Company Overview & Import Heritage</span>
+                        <h2 class="font-serif text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+                            Setting the Gold Standard for Authentic Cosmetics in Bangladesh
+                        </h2>
+                        <p class="text-gray-600 leading-relaxed">
+                            Founded in Dhaka, <strong>Ruposhi International</strong> emerged from a singular realization: beauty consumers in Bangladesh deserved uncompromising access to 100% genuine international skincare, makeup, and personal care products—free from the risks of grey-market counterfeits.
+                        </p>
+                        <p class="text-gray-600 leading-relaxed">
+                            As a licensed direct importer, we partner with authorized brand distributors in <strong>South Korea, France, the United States, Canada, and the UK</strong>. All products are air-freighted and stored in our temperature-regulated fulfillment center in Banani, Dhaka, preserving active ingredients like Vitamin C, Retinol, and Peptides.
+                        </p>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4">
+                            <div class="bg-rose-50 p-4 rounded-2xl border border-rose-100">
+                                <span class="font-serif text-2xl font-bold text-rose-700">18°C–22°C</span>
+                                <p class="text-xs text-gray-600 mt-1">Climate-Controlled Dhaka Warehouse</p>
+                            </div>
+                            <div class="bg-rose-50 p-4 rounded-2xl border border-rose-100">
+                                <span class="font-serif text-2xl font-bold text-rose-700">64 Districts</span>
+                                <p class="text-xs text-gray-600 mt-1">Fast Doorstep & B2B Delivery</p>
+                            </div>
+                            <div class="bg-rose-50 p-4 rounded-2xl border border-rose-100 col-span-2 sm:col-span-1">
+                                <span class="font-serif text-2xl font-bold text-rose-700">100%</span>
+                                <p class="text-xs text-gray-600 mt-1">Batch & Expiry Transparency</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mission, Vision & Quality Pillar Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-rose-100 hover:shadow-md transition">
+                        <div class="w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 text-2xl mb-6">
+                            <i class="fa-solid fa-bullseye"></i>
+                        </div>
+                        <h3 class="font-serif text-2xl font-bold text-gray-900 mb-3">Our Mission</h3>
+                        <p class="text-gray-600 text-sm leading-relaxed">
+                            To empower Bangladeshi consumers and beauty professionals with authentic, dermatologist-tested global cosmetics backed by transparent pricing and batch traceability.
+                        </p>
+                    </div>
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-rose-100 hover:shadow-md transition">
+                        <div class="w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 text-2xl mb-6">
+                            <i class="fa-solid fa-eye"></i>
+                        </div>
+                        <h3 class="font-serif text-2xl font-bold text-gray-900 mb-3">Our Vision</h3>
+                        <p class="text-gray-600 text-sm leading-relaxed">
+                            To become South Asia&#39;s most trusted omnichannel cosmetics import house, seamlessly connecting global beauty innovation with retail and wholesale markets.
+                        </p>
+                    </div>
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-rose-100 hover:shadow-md transition">
+                        <div class="w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 text-2xl mb-6">
+                            <i class="fa-solid fa-shield-heart"></i>
+                        </div>
+                        <h3 class="font-serif text-2xl font-bold text-gray-900 mb-3">Authenticity Pledge</h3>
+                        <p class="text-gray-600 text-sm leading-relaxed">
+                            We offer a 200% Money-Back Authenticity Guarantee. Every item carries our official importer hologram and verifiable manufacturer lot code.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- International Brand Partners Showcase -->
+                <div class="bg-white rounded-3xl p-8 md:p-12 border border-rose-100 shadow-sm text-center">
+                    <span class="text-xs font-bold uppercase tracking-widest text-rose-600">Global Portfolio</span>
+                    <h3 class="font-serif text-2xl md:text-3xl font-bold text-gray-900 mt-1 mb-8">International Brands We Import & Distribute</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4 items-center">
+                        <div onclick="filterByBrandAndGo(&#39;The Ordinary&#39;)" class="cursor-pointer p-4 rounded-xl border border-gray-100 hover:border-rose-300 hover:bg-rose-50/40 transition font-serif font-bold text-sm text-gray-800">THE ORDINARY</div>
+                        <div onclick="filterByBrandAndGo(&#39;CeraVe&#39;)" class="cursor-pointer p-4 rounded-xl border border-gray-100 hover:border-rose-300 hover:bg-rose-50/40 transition font-sans font-extrabold text-sm text-blue-900">CeraVe</div>
+                        <div onclick="filterByBrandAndGo(&#39;COSRX&#39;)" class="cursor-pointer p-4 rounded-xl border border-gray-100 hover:border-rose-300 hover:bg-rose-50/40 transition font-mono font-bold text-sm text-gray-900">COSRX</div>
+                        <div onclick="filterByBrandAndGo(&#39;MAC Cosmetics&#39;)" class="cursor-pointer p-4 rounded-xl border border-gray-100 hover:border-rose-300 hover:bg-rose-50/40 transition font-sans font-black tracking-widest text-sm text-gray-900">M·A·C</div>
+                        <div onclick="filterByBrandAndGo(&#39;L\&#39;Oréal Paris&#39;)" class="cursor-pointer p-4 rounded-xl border border-gray-100 hover:border-rose-300 hover:bg-rose-50/40 transition font-serif font-bold text-sm text-gray-800">L&#39;ORÉAL</div>
+                        <div onclick="filterByBrandAndGo(&#39;Maybelline&#39;)" class="cursor-pointer p-4 rounded-xl border border-gray-100 hover:border-rose-300 hover:bg-rose-50/40 transition font-sans font-bold text-sm text-pink-700">MAYBELLINE</div>
+                        <div onclick="filterByBrandAndGo(&#39;Laneige&#39;)" class="cursor-pointer p-4 rounded-xl border border-gray-100 hover:border-rose-300 hover:bg-rose-50/40 transition font-serif tracking-wider font-semibold text-sm text-sky-800">LANEIGE</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 5. BEAUTY BLOG & GUIDES VIEW               -->
+        <!-- ========================================== -->
+        <section id="blog-view" class="view-section hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <span class="text-xs font-bold uppercase tracking-widest text-rose-600">Ruposhi Editorial Journal</span>
+                <h1 class="font-serif text-3xl md:text-5xl font-bold text-gray-900 mt-1">Beauty Tips & Skincare Guides</h1>
+                <p class="text-gray-500 text-sm mt-2">Expert advice tailored for Bangladeshi climate, humidity, and skin tones.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Blog Article 1 -->
+                <article class="bg-white rounded-3xl overflow-hidden border border-rose-100 shadow-sm hover:shadow-lg transition flex flex-col">
+                    <div class="aspect-[16/10] overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1552693673-1bf958298935?auto=format&fit=crop&w=800&q=80" alt="Korean Skincare Routine" class="w-full h-full object-cover hover:scale-105 transition duration-500">
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between">
+                        <div>
+                            <span class="text-[11px] font-bold uppercase tracking-widest text-rose-600">Skincare Guide • 5 Min Read</span>
+                            <h3 class="font-serif text-xl font-bold text-gray-900 mt-2 mb-3">How to Build a 5-Step Korean Skincare Routine for Dhaka&#39;s Humid Weather</h3>
+                            <p class="text-gray-600 text-xs leading-relaxed mb-4">
+                                Heavy creams can clog pores in tropical humidity. Learn how lightweight gel cleansers, snail mucin, and Niacinamide balance sebum while giving glass skin.
+                            </p>
+                        </div>
+                        <button onclick="openBlogModal(0)" class="text-xs font-bold text-rose-600 hover:text-rose-800 flex items-center gap-1.5 self-start">
+                            Read Full Article <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </article>
+
+                <!-- Blog Article 2 -->
+                <article class="bg-white rounded-3xl overflow-hidden border border-rose-100 shadow-sm hover:shadow-lg transition flex flex-col">
+                    <div class="aspect-[16/10] overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1526045612212-70caf35c14df?auto=format&fit=crop&w=800&q=80" alt="Spotting Fake Cosmetics" class="w-full h-full object-cover hover:scale-105 transition duration-500">
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between">
+                        <div>
+                            <span class="text-[11px] font-bold uppercase tracking-widest text-gold-600">Authenticity Check • 4 Min Read</span>
+                            <h3 class="font-serif text-xl font-bold text-gray-900 mt-2 mb-3">5 Ways to Spot Counterfeit The Ordinary & CeraVe Products in Bangladesh</h3>
+                            <p class="text-gray-600 text-xs leading-relaxed mb-4">
+                                From checking laser-etched batch codes to texture and packaging typography, our import quality team shares how to verify original bottles.
+                            </p>
+                        </div>
+                        <button onclick="openBlogModal(1)" class="text-xs font-bold text-rose-600 hover:text-rose-800 flex items-center gap-1.5 self-start">
+                            Read Full Article <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </article>
+
+                <!-- Blog Article 3 -->
+                <article class="bg-white rounded-3xl overflow-hidden border border-rose-100 shadow-sm hover:shadow-lg transition flex flex-col">
+                    <div class="aspect-[16/10] overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=800&q=80" alt="South Asian Bridal Lipsticks" class="w-full h-full object-cover hover:scale-105 transition duration-500">
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between">
+                        <div>
+                            <span class="text-[11px] font-bold uppercase tracking-widest text-rose-600">Makeup Editorial • 6 Min Read</span>
+                            <h3 class="font-serif text-xl font-bold text-gray-900 mt-2 mb-3">Top 7 Long-Wear Lip Shades That Flatter Warm South Asian Undertones</h3>
+                            <p class="text-gray-600 text-xs leading-relaxed mb-4">
+                                From MAC Ruby Woo to Maybelline SuperStay Ink, discover the most universally flattering reds,rosewoods, and warm nudes for festive events.
+                            </p>
+                        </div>
+                        <button onclick="openBlogModal(2)" class="text-xs font-bold text-rose-600 hover:text-rose-800 flex items-center gap-1.5 self-start">
+                            Read Full Article <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 6. B2B WHOLESALE PORTAL (LOGIN: aaaa/aaaa) -->
+        <!-- ========================================== -->
+        <section id="b2b-view" class="view-section hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            
+            <!-- B2B LOGIN GATE (Shown by default until logged in with aaaa / aaaa) -->
+            <div id="b2b-login-gate" class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                <!-- Left Info & Dealer Registration Prompt -->
+                <div class="lg:col-span-7 space-y-6">
+                    <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-gold-100 border border-gold-300 text-gold-600 text-xs font-bold uppercase tracking-widest">
+                        <i class="fa-solid fa-handshake"></i> Ruposhi B2B Importer Division
+                    </span>
+                    <h1 class="font-serif text-3xl sm:text-5xl font-bold text-gray-900 leading-tight">
+                        Authorized Wholesale & Salon Supply Portal
+                    </h1>
+                    <p class="text-gray-600 leading-relaxed">
+                        Since Ruposhi International is a direct cosmetics importer, we supply over 450+ retail cosmetics stores, pharmacies, e-commerce sellers, and luxury beauty parlors across Bangladesh with exclusive wholesale margins.
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <div class="bg-white p-4 rounded-2xl border border-rose-100 shadow-sm flex items-start gap-3">
+                            <i class="fa-solid fa-percent text-rose-600 text-xl mt-1"></i>
+                            <div>
+                                <h4 class="font-bold text-sm text-gray-900">Up to 40% Dealer Margin</h4>
+                                <p class="text-xs text-gray-500">Tiered wholesale pricing unlocked exclusively for approved partners.</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border border-rose-100 shadow-sm flex items-start gap-3">
+                            <i class="fa-solid fa-file-invoice text-rose-600 text-xl mt-1"></i>
+                            <div>
+                                <h4 class="font-bold text-sm text-gray-900">BSTI & Chalan Documents</h4>
+                                <p class="text-xs text-gray-500">Official VAT invoice and import authenticity certificates provided.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Demo Credential Hint Box -->
+                    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-key text-amber-600 text-lg"></i>
+                            <div class="text-xs">
+                                <span class="font-bold text-amber-900 block">Demo Wholesale Login Credentials:</span>
+                                <span class="text-amber-800">Username: <code class="bg-white px-1.5 py-0.5 rounded border font-bold">aaaa</code> | Password: <code class="bg-white px-1.5 py-0.5 rounded border font-bold">aaaa</code></span>
+                            </div>
+                        </div>
+                        <button onclick="fillDemoB2B()" class="text-xs bg-amber-600 hover:bg-amber-700 text-white font-bold px-3 py-1.5 rounded-lg transition">
+                            Auto-Fill
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Login Card -->
+                <div class="lg:col-span-5">
+                    <div class="bg-white p-8 rounded-3xl shadow-xl border border-rose-100">
+                        <div class="text-center mb-6">
+                            <div class="w-14 h-14 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl">
+                                <i class="fa-solid fa-lock"></i>
+                            </div>
+                            <h2 class="font-serif text-2xl font-bold text-gray-900">Approved Dealer Login</h2>
+                            <p class="text-xs text-gray-500 mt-1">Sign in to view hidden wholesale rates & bulk order form</p>
+                        </div>
+
+                        <form onsubmit="handleB2BLogin(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Dealer Username / ID</label>
+                                <input type="text" id="b2b-user" placeholder="Enter &#39;aaaa&#39;" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Password</label>
+                                <input type="password" id="b2b-pass" placeholder="Enter &#39;aaaa&#39;" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none" required>
+                            </div>
+                            <p id="b2b-error" class="text-rose-600 text-xs font-semibold hidden bg-rose-50 p-2.5 rounded-lg border border-rose-200">
+                                <i class="fa-solid fa-circle-exclamation mr-1"></i> Invalid credentials! Please use username <b>aaaa</b> and password <b>aaaa</b>.
+                            </p>
+                            <button type="submit" class="w-full bg-gray-900 hover:bg-rose-600 text-white font-bold py-3.5 rounded-xl transition shadow-lg">
+                                Unlock Wholesale Dashboard
+                            </button>
+                        </form>
+
+                        <div class="mt-6 pt-6 border-t border-gray-100 text-center">
+                            <p class="text-xs text-gray-500 mb-2">New retailer, pharmacy, or beauty salon?</p>
+                            <button onclick="toggleDealerRegModal()" class="text-xs font-bold text-rose-600 hover:underline">
+                                Apply for a Wholesale Dealer Account &rarr;
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- B2B UNLOCKED DASHBOARD (Visible after logging in with aaaa / aaaa) -->
+            <div id="b2b-dashboard" class="hidden space-y-8 animate-fade-in">
+                <div class="bg-gradient-to-r from-gray-900 via-rose-950 to-gray-900 text-white p-8 rounded-3xl shadow-xl flex flex-wrap items-center justify-between gap-6">
+                    <div>
+                        <div class="flex items-center gap-2 text-gold-400 text-xs font-bold uppercase tracking-widest mb-1">
+                            <i class="fa-solid fa-circle-check"></i> Verified Tier-1 Wholesale Partner (Account: #DL-AAAA)
+                        </div>
+                        <h2 class="font-serif text-3xl font-bold">Welcome to Ruposhi B2B Wholesale Hub</h2>
+                        <p class="text-xs text-rose-200 mt-1">Minimum Order Quantity (MOQ): 10 units per SKU. Direct importer dispatch within 24 hours.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <button onclick="downloadPriceListPDF()" class="bg-gold-400 hover:bg-gold-500 text-gray-950 font-bold text-xs px-5 py-3 rounded-xl transition flex items-center gap-2 shadow">
+                            <i class="fa-solid fa-file-pdf"></i> Download 2026 Price List (PDF)
+                        </button>
+                        <button onclick="logoutB2B()" class="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-4 py-3 rounded-xl transition">
+                            <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Interactive Bulk Order Sheet -->
+                <div class="bg-white rounded-3xl border border-rose-100 shadow-sm overflow-hidden">
+                    <div class="p-6 border-b border-rose-100 flex flex-wrap justify-between items-center gap-4">
+                        <div>
+                            <h3 class="font-serif text-xl font-bold text-gray-900">Quick B2B Bulk Order Form</h3>
+                            <p class="text-xs text-gray-500">Adjust quantities below (MOQ 10 units per item) to calculate your dealer invoice.</p>
+                        </div>
+                        <span class="text-xs font-semibold bg-green-50 text-green-700 px-3 py-1.5 rounded-full border border-green-200">
+                            <i class="fa-solid fa-truck-ramp-box mr-1"></i> Free Wholesale Delivery Inside Dhaka
+                        </span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-rose-50/70 text-[11px] font-bold uppercase tracking-wider text-gray-600 border-b border-rose-100">
+                                    <th class="py-3.5 px-6">Product / SKU</th>
+                                    <th class="py-3.5 px-4">Origin</th>
+                                    <th class="py-3.5 px-4">Retail MRP</th>
+                                    <th class="py-3.5 px-4 text-rose-700">Dealer Wholesale Price</th>
+                                    <th class="py-3.5 px-4">MOQ</th>
+                                    <th class="py-3.5 px-4">Order Qty</th>
+                                    <th class="py-3.5 px-6 text-right">Line Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="b2b-table-body" class="divide-y divide-gray-100 text-sm">
+                                <!-- Populated via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="p-6 bg-rose-50/50 border-t border-rose-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="text-xs text-gray-600 space-y-1">
+                            <p><strong>Payment Terms:</strong> 30% Advance via Bank/bKash Merchant, 70% on Delivery.</p>
+                            <p id="b2b-quote-msg" class="text-green-700 font-bold hidden"></p>
+                        </div>
+                        <div class="flex items-center gap-6">
+                            <div class="text-right">
+                                <span class="text-xs text-gray-500 block">Estimated Wholesale Total</span>
+                                <span id="b2b-grand-total" class="font-serif text-2xl font-bold text-rose-700">৳ 0</span>
+                            </div>
+                            <button onclick="submitB2BBulkOrder()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-7 py-3.5 rounded-xl shadow-lg transition">
+                                Submit Wholesale Requisition
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 7. CONTACT & ORDER TRACKING VIEW           -->
+        <!-- ========================================== -->
+        <section id="contact-view" class="view-section hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                
+                <!-- Order Tracking & Courier Status -->
+                <div class="lg:col-span-6 bg-white p-8 rounded-3xl border border-rose-100 shadow-sm">
+                    <span class="text-xs font-bold uppercase tracking-widest text-rose-600">Pathao • Steadfast • RedX Integrated</span>
+                    <h2 class="font-serif text-2xl sm:text-3xl font-bold text-gray-900 mt-1 mb-2">Track Your Live Order</h2>
+                    <p class="text-xs text-gray-500 mb-6">Enter your Invoice ID (e.g., #RP-89241) and phone number to check live courier status.</p>
+
+                    <form onsubmit="handleTrackOrder(event)" class="space-y-4 mb-6">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-gray-700 mb-1">Order Invoice ID</label>
+                            <input type="text" id="track-id-input" value="#RP-89241" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-rose-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-gray-700 mb-1">Billing Phone Number</label>
+                            <input type="tel" placeholder="017XXXXXXXX" value="01711000000" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-rose-500" required>
+                        </div>
+                        <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl transition">
+                            Check Courier Status
+                        </button>
+                    </form>
+
+                    <!-- Simulated Tracking Timeline Result -->
+                    <div id="tracking-result" class="hidden bg-rose-50/70 p-5 rounded-2xl border border-rose-200 space-y-4">
+                        <div class="flex justify-between items-center border-b border-rose-200 pb-3">
+                            <div>
+                                <span class="text-xs text-gray-500">Order ID: <strong id="tracked-id-display" class="text-gray-900">#RP-89241</strong></span>
+                                <h4 class="font-bold text-sm text-green-700"><i class="fa-solid fa-truck-fast mr-1"></i> Out for Delivery (Steadfast Courier)</h4>
+                            </div>
+                            <span class="text-xs bg-white px-2.5 py-1 rounded-full border font-semibold">Dhaka Hub</span>
+                        </div>
+                        <ul class="space-y-2.5 text-xs">
+                            <li class="flex items-center gap-2.5 text-gray-800 font-medium"><i class="fa-solid fa-circle-check text-green-600"></i> Batch & Authenticity QC Passed at Banani Warehouse</li>
+                            <li class="flex items-center gap-2.5 text-gray-800 font-medium"><i class="fa-solid fa-circle-check text-green-600"></i> Handed over to Steadfast Express Rider</li>
+                            <li class="flex items-center gap-2.5 text-rose-700 font-bold"><i class="fa-solid fa-spinner fa-spin"></i> Rider is on the way to your delivery address</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Dhaka Head Office Contact & Map -->
+                <div class="lg:col-span-6 space-y-6">
+                    <div class="bg-white p-8 rounded-3xl border border-rose-100 shadow-sm space-y-5">
+                        <h2 class="font-serif text-2xl sm:text-3xl font-bold text-gray-900">Contact Ruposhi Head Office</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                            <div class="p-4 rounded-2xl bg-rose-50/60 border border-rose-100">
+                                <i class="fa-solid fa-location-dot text-rose-600 text-lg mb-2"></i>
+                                <h4 class="font-bold text-gray-900">Dhaka Corporate & Display Center</h4>
+                                <p class="text-xs text-gray-600 mt-1">Level 4, Block C, Road 11, Banani, Dhaka-1213, Bangladesh</p>
+                            </div>
+                            <div class="p-4 rounded-2xl bg-rose-50/60 border border-rose-100">
+                                <i class="fa-solid fa-phone-volume text-rose-600 text-lg mb-2"></i>
+                                <h4 class="font-bold text-gray-900">Hotline & WhatsApp</h4>
+                                <p class="text-xs text-gray-600 mt-1">+880 1711-889900 (10 AM – 8 PM)<br>import@ruposhi.com.bd</p>
+                            </div>
+                        </div>
+
+                        <!-- Interactive Map Placeholder -->
+                        <div class="rounded-2xl overflow-hidden border border-gray-200 h-52 bg-gray-100 relative flex items-center justify-center">
+                            <img src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1000&q=80" alt="Dhaka Map Location" class="w-full h-full object-cover opacity-50">
+                            <div class="absolute bg-white/95 backdrop-blur px-5 py-3 rounded-2xl shadow-lg border border-rose-200 text-center">
+                                <i class="fa-solid fa-map-pin text-rose-600 text-xl"></i>
+                                <p class="font-bold text-xs text-gray-900 mt-1">Ruposhi International — Banani Rd 11, Dhaka</p>
+                                <span class="text-[11px] text-rose-600 font-semibold">Open Saturday – Thursday</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 8. CHECKOUT VIEW (BANGLADESH PAYMENTS)     -->
+        <!-- ========================================== -->
+        <section id="checkout-view" class="view-section hidden max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <h1 class="font-serif text-3xl font-bold text-gray-900 mb-2">Secure Guest Checkout</h1>
+            <p class="text-xs text-gray-500 mb-8">No forced registration required. Fast delivery across all 64 districts of Bangladesh.</p>
+
+            <form onsubmit="placeFinalOrder(event)" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Left Column: Shipping & Payment Methods -->
+                <div class="lg:col-span-7 space-y-6">
+                    
+                    <!-- Customer Shipping Details -->
+                    <div class="bg-white p-6 sm:p-8 rounded-3xl border border-rose-100 shadow-sm space-y-4">
+                        <h3 class="font-bold text-lg text-gray-900 flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full bg-rose-600 text-white text-xs flex items-center justify-center">1</span>
+                            Delivery Information
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Full Name *</label>
+                                <input type="text" id="chk-name" placeholder="e.g. Sadia Islam" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-rose-500" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Mobile Number (For SMS Tracking) *</label>
+                                <input type="tel" id="chk-phone" placeholder="017XXXXXXXX" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-rose-500" required>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Delivery Area (Determines Courier Charge) *</label>
+                                <select id="chk-area" onchange="renderCheckoutSummary()" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-rose-500">
+                                    <option value="60">Inside Dhaka Metro (৳ 60 — 24h Pathao/Steadfast Delivery)</option>
+                                    <option value="100">Dhaka Suburbs - Savar, Gazipur, Narayanganj (৳ 100)</option>
+                                    <option value="120">Outside Dhaka - All Other Districts (৳ 120 — RedX / Sundarban)</option>
+                                </select>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Detailed Street Address (House, Road, Area) *</label>
+                                <textarea id="chk-address" rows="2" placeholder="House #, Road #, Flat #, Area..." class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-rose-500" required></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bangladeshi Payment Gateway Selection -->
+                    <div class="bg-white p-6 sm:p-8 rounded-3xl border border-rose-100 shadow-sm space-y-4">
+                        <h3 class="font-bold text-lg text-gray-900 flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full bg-rose-600 text-white text-xs flex items-center justify-center">2</span>
+                            Select Payment Method
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <label class="flex items-center gap-3 p-3.5 border-2 border-rose-600 bg-rose-50/40 rounded-2xl cursor-pointer">
+                                <input type="radio" name="payment_method" value="Cash on Delivery (COD)" checked class="accent-rose-600">
+                                <div>
+                                    <span class="font-bold text-sm text-gray-900 block">Cash on Delivery</span>
+                                    <span class="text-[11px] text-gray-500">Pay cash upon receiving parcel</span>
+                                </div>
+                            </label>
+                            <label class="flex items-center gap-3 p-3.5 border border-gray-200 hover:border-pink-500 rounded-2xl cursor-pointer">
+                                <input type="radio" name="payment_method" value="bKash Mobile Banking" class="accent-pink-600">
+                                <div>
+                                    <span class="font-extrabold text-sm text-pink-600 block">bKash Payment</span>
+                                    <span class="text-[11px] text-gray-500">Instant tokenized checkout</span>
+                                </div>
+                            </label>
+                            <label class="flex items-center gap-3 p-3.5 border border-gray-200 hover:border-orange-500 rounded-2xl cursor-pointer">
+                                <input type="radio" name="payment_method" value="Nagad / Rocket" class="accent-orange-600">
+                                <div>
+                                    <span class="font-extrabold text-sm text-orange-600 block">Nagad / Rocket</span>
+                                    <span class="text-[11px] text-gray-500">Mobile wallet transfer</span>
+                                </div>
+                            </label>
+                            <label class="flex items-center gap-3 p-3.5 border border-gray-200 hover:border-blue-600 rounded-2xl cursor-pointer">
+                                <input type="radio" name="payment_method" value="SSLCommerz (Visa/Mastercard/Amex)" class="accent-blue-600">
+                                <div>
+                                    <span class="font-bold text-sm text-blue-900 block">SSLCommerz Cards</span>
+                                    <span class="text-[11px] text-gray-500">Visa, Mastercard, DBBL Nexus</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Order Summary & Coupon -->
+                <div class="lg:col-span-5">
+                    <div class="bg-white p-6 sm:p-8 rounded-3xl border border-rose-100 shadow-sm sticky top-24 space-y-5">
+                        <h3 class="font-serif text-xl font-bold text-gray-900">Order Summary</h3>
+                        
+                        <div id="checkout-items-list" class="space-y-3 max-h-60 overflow-y-auto pr-1 divide-y divide-gray-100">
+                            <!-- Populated via JS -->
+                        </div>
+
+                        <!-- Promo / Coupon Code -->
+                        <div class="pt-3 border-t border-gray-100">
+                            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Have a Promo Code? (Try: <code class="text-rose-600 font-bold">RUPOSHI10</code>)</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="coupon-input" placeholder="Enter RUPOSHI10" class="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-xs uppercase outline-none focus:border-rose-500">
+                                <button type="button" onclick="applyCouponCode()" class="bg-gray-900 hover:bg-rose-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition">Apply</button>
+                            </div>
+                            <p id="coupon-feedback" class="text-xs mt-1.5 hidden"></p>
+                        </div>
+
+                        <!-- Totals Breakdown -->
+                        <div class="border-t border-gray-100 pt-4 space-y-2 text-sm">
+                            <div class="flex justify-between text-gray-600">
+                                <span>Subtotal</span>
+                                <span id="chk-subtotal" class="font-medium">৳ 0</span>
+                            </div>
+                            <div class="flex justify-between text-green-600" id="chk-discount-row">
+                                <span>Coupon Discount</span>
+                                <span id="chk-discount">- ৳ 0</span>
+                            </div>
+                            <div class="flex justify-between text-gray-600">
+                                <span>Courier Delivery Charge</span>
+                                <span id="chk-delivery" class="font-medium">৳ 60</span>
+                            </div>
+                            <div class="flex justify-between text-lg font-bold text-gray-900 border-t border-rose-100 pt-3">
+                                <span>Total Payable</span>
+                                <span id="chk-total" class="text-rose-600">৳ 0</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-4 rounded-2xl shadow-lg transition flex items-center justify-center gap-2 text-sm">
+                            <i class="fa-solid fa-shield-check"></i> Confirm & Place Order
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+    </main>
+
+    <!-- ========================================== -->
+    <!-- COMPREHENSIVE FOOTER                       -->
+    <!-- ========================================== -->
+    <footer class="bg-gray-950 text-gray-300 pt-16 pb-10 border-t border-rose-900/40 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-gray-800">
+                
+                <!-- Col 1: Brand Info -->
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-full bg-rose-600 flex items-center justify-center text-white font-serif font-bold text-lg">R</div>
+                        <span class="font-serif text-2xl font-bold text-white tracking-wider">RUPOSHI <span class="text-gold-400 text-xs uppercase tracking-widest block font-sans">International</span></span>
+                    </div>
+                    <p class="text-xs text-gray-400 leading-relaxed max-w-sm">
+                        Bangladesh&#39;s premier direct importer and distributor of 100% original international skincare, luxury makeup, haircare, and fragrances.
+                    </p>
+                    <div class="flex space-x-3 pt-1">
+                        <a href="#" onclick="showToast(&#39;Opening Ruposhi Facebook Page...&#39;); return false;" class="w-9 h-9 rounded-full bg-gray-800 hover:bg-rose-600 flex items-center justify-center text-white transition"><i class="fa-brands fa-facebook-f text-sm"></i></a>
+                        <a href="#" onclick="showToast(&#39;Opening Ruposhi Instagram...&#39;); return false;" class="w-9 h-9 rounded-full bg-gray-800 hover:bg-rose-600 flex items-center justify-center text-white transition"><i class="fa-brands fa-instagram text-sm"></i></a>
+                        <a href="#" onclick="showToast(&#39;Opening Ruposhi YouTube...&#39;); return false;" class="w-9 h-9 rounded-full bg-gray-800 hover:bg-rose-600 flex items-center justify-center text-white transition"><i class="fa-brands fa-youtube text-sm"></i></a>
+                        <a href="#" onclick="showToast(&#39;Opening Ruposhi TikTok...&#39;); return false;" class="w-9 h-9 rounded-full bg-gray-800 hover:bg-rose-600 flex items-center justify-center text-white transition"><i class="fa-brands fa-tiktok text-sm"></i></a>
+                    </div>
+                </div>
+
+                <!-- Col 2: Quick Categories -->
+                <div>
+                    <h4 class="text-white font-bold text-xs uppercase tracking-widest mb-4">Categories</h4>
+                    <ul class="space-y-2.5 text-xs text-gray-400">
+                        <li><button onclick="filterByCategoryAndGo(&#39;Skincare&#39;)" class="hover:text-rose-400 transition">Korean & Clinical Skincare</button></li>
+                        <li><button onclick="filterByCategoryAndGo(&#39;Makeup&#39;)" class="hover:text-rose-400 transition">Luxury Makeup</button></li>
+                        <li><button onclick="filterByCategoryAndGo(&#39;Haircare&#39;)" class="hover:text-rose-400 transition">Professional Haircare</button></li>
+                        <li><button onclick="filterByCategoryAndGo(&#39;Fragrance&#39;)" class="hover:text-rose-400 transition">Designer Fragrances</button></li>
+                        <li><button onclick="filterByCategoryAndGo(&#39;Bath & Body&#39;)" class="hover:text-rose-400 transition">Bath & Body Care</button></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Importer & B2B -->
+                <div>
+                    <h4 class="text-white font-bold text-xs uppercase tracking-widest mb-4">Company & B2B</h4>
+                    <ul class="space-y-2.5 text-xs text-gray-400">
+                        <li><button onclick="switchView(&#39;about-view&#39;)" class="hover:text-rose-400 transition">About Ruposhi International</button></li>
+                        <li><button onclick="switchView(&#39;b2b-view&#39;)" class="hover:text-gold-400 text-gold-300 font-semibold transition">B2B Wholesale Login (aaaa)</button></li>
+                        <li><button onclick="toggleDealerRegModal()" class="hover:text-rose-400 transition">Become a Wholesale Dealer</button></li>
+                        <li><button onclick="switchView(&#39;contact-view&#39;)" class="hover:text-rose-400 transition">Track Your Courier Order</button></li>
+                        <li><button onclick="switchView(&#39;blog-view&#39;)" class="hover:text-rose-400 transition">Beauty & Authenticity Blog</button></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Compliance & Policies -->
+                <div>
+                    <h4 class="text-white font-bold text-xs uppercase tracking-widest mb-4">Policies & Legal</h4>
+                    <ul class="space-y-2.5 text-xs text-gray-400">
+                        <li><button onclick="openPolicyModal(&#39;authenticity&#39;)" class="hover:text-rose-400 transition">100% Authenticity Guarantee</button></li>
+                        <li><button onclick="openPolicyModal(&#39;return&#39;)" class="hover:text-rose-400 transition">Return & Refund Policy</button></li>
+                        <li><button onclick="openPolicyModal(&#39;privacy&#39;)" class="hover:text-rose-400 transition">Privacy Policy</button></li>
+                        <li><button onclick="openPolicyModal(&#39;terms&#39;)" class="hover:text-rose-400 transition">Terms & Conditions</button></li>
+                        <li class="pt-1 text-[11px] text-gray-500">Trade License: TRAD/DNCC/048291/2026</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Payment Partners & Copyright -->
+            <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
+                <p>&copy; 2026 Ruposhi International Bangladesh. All Rights Reserved.</p>
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="px-2.5 py-1 rounded bg-gray-900 border border-gray-800 text-pink-400 font-bold">bKash</span>
+                    <span class="px-2.5 py-1 rounded bg-gray-900 border border-gray-800 text-orange-400 font-bold">Nagad</span>
+                    <span class="px-2.5 py-1 rounded bg-gray-900 border border-gray-800 text-purple-400 font-bold">Rocket</span>
+                    <span class="px-2.5 py-1 rounded bg-gray-900 border border-gray-800 text-blue-400 font-bold">SSLCommerz</span>
+                    <span class="px-2.5 py-1 rounded bg-gray-900 border border-gray-800 text-green-400 font-bold">Cash On Delivery</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ========================================== -->
+    <!-- SLIDE-OUT CART DRAWER                      -->
+    <!-- ========================================== -->
+    <div id="cart-drawer-overlay" onclick="toggleCartDrawer()" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden"></div>
+    <div id="cart-drawer" class="fixed top-0 right-0 h-full w-full sm:w-[400px] bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
+        <div class="p-5 border-b border-rose-100 flex justify-between items-center bg-rose-50/60">
+            <h3 class="font-serif font-bold text-lg text-gray-900 flex items-center gap-2">
+                <i class="fa-solid fa-bag-shopping text-rose-600"></i> Your Shopping Bag
+            </h3>
+            <button onclick="toggleCartDrawer()" class="w-8 h-8 rounded-full bg-white text-gray-500 hover:text-gray-900 flex items-center justify-center shadow-xs">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div id="cart-items-container" class="flex-grow p-5 overflow-y-auto space-y-4">
+            <!-- Populated via JS -->
+        </div>
+
+        <div class="p-5 border-t border-rose-100 bg-gray-50 space-y-4">
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600 font-medium">Subtotal</span>
+                <span id="drawer-subtotal" class="font-serif text-xl font-bold text-rose-600">৳ 0</span>
+            </div>
+            <button id="drawer-checkout-btn" onclick="proceedToCheckout()" class="w-full bg-rose-600 hover:bg-rose-700 disabled:opacity-40 text-white font-bold py-3.5 rounded-xl shadow-lg transition">
+                Proceed to Checkout
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- OTP PHONE LOGIN & CUSTOMER ACCOUNT MODAL   -->
+    <!-- ========================================== -->
+    <div id="login-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md p-7 relative shadow-2xl border border-rose-100 animate-fade-in">
+            <button onclick="toggleLoginModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-800"><i class="fa-solid fa-xmark text-xl"></i></button>
+            
+            <!-- Step 1: Phone Input -->
+            <div id="otp-step-1">
+                <span class="text-xs font-bold uppercase tracking-widest text-rose-600">Ruposhi Club Account</span>
+                <h3 class="font-serif text-2xl font-bold text-gray-900 mt-1 mb-2">Login with Mobile OTP</h3>
+                <p class="text-xs text-gray-500 mb-6">Instant passwordless login for Bangladeshi phone numbers.</p>
+                <form onsubmit="sendSimulatedOTP(event)" class="space-y-4">
+                    <div class="flex">
+                        <span class="bg-rose-50 border border-r-0 border-gray-300 rounded-l-xl px-3.5 py-3 text-xs font-bold text-gray-700 flex items-center">🇧🇩 +880</span>
+                        <input type="tel" id="otp-phone-input" placeholder="1711XXXXXX" class="flex-1 border border-gray-300 rounded-r-xl px-4 py-3 text-sm outline-none focus:border-rose-500" required>
+                    </div>
+                    <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3.5 rounded-xl transition shadow">
+                        Send 4-Digit OTP via SMS
+                    </button>
+                </form>
+            </div>
+
+            <!-- Step 2: OTP Verification -->
+            <div id="otp-step-2" class="hidden space-y-4">
+                <span class="text-xs font-bold uppercase tracking-widest text-green-600"><i class="fa-solid fa-comment-sms"></i> OTP Dispatched</span>
+                <h3 class="font-serif text-2xl font-bold text-gray-900">Enter Verification Code</h3>
+                <p class="text-xs text-gray-500">Demo OTP code auto-filled: <strong>4829</strong></p>
+                <input type="text" id="otp-code-input" value="4829" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-center tracking-[0.5em] font-bold text-lg outline-none focus:border-rose-500">
+                <button onclick="verifySimulatedOTP()" class="w-full bg-gray-900 hover:bg-rose-600 text-white font-bold py-3.5 rounded-xl transition">
+                    Verify & Sign In
+                </button>
+            </div>
+
+            <!-- Step 3: Logged-in Customer Profile -->
+            <div id="otp-step-3" class="hidden space-y-4">
+                <div class="flex items-center gap-3 pb-4 border-b border-gray-100">
+                    <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 font-bold flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-user-check"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-900">Verified Customer</h4>
+                        <p id="logged-phone-display" class="text-xs text-gray-500">+880 1711-XXXXXX</p>
+                    </div>
+                </div>
+                <div class="bg-rose-50/70 p-4 rounded-2xl text-xs space-y-2">
+                    <div class="font-bold text-gray-800">Recent Order History:</div>
+                    <div class="flex justify-between"><span>#RP-89241 (2 Items)</span><span class="text-green-600 font-semibold">Out for Delivery</span></div>
+                    <div class="flex justify-between"><span>#RP-74102 (1 Item)</span><span class="text-gray-500">Delivered</span></div>
+                </div>
+                <button onclick="toggleLoginModal()" class="w-full bg-rose-600 text-white font-bold py-3 rounded-xl text-xs">Continue Shopping</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- DEALER REGISTRATION MODAL (B2B)            -->
+    <!-- ========================================== -->
+    <div id="dealer-reg-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-lg p-7 relative shadow-2xl border border-rose-100 animate-fade-in">
+            <button onclick="toggleDealerRegModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-800"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <span class="text-xs font-bold uppercase tracking-widest text-gold-600">B2B Trade Application</span>
+            <h3 class="font-serif text-2xl font-bold text-gray-900 mt-1 mb-4">Register as an Approved Wholesale Dealer</h3>
+            <form onsubmit="submitDealerApplication(event)" class="space-y-3.5 text-sm">
+                <input type="text" placeholder="Business / Store / Salon Name *" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 outline-none focus:border-rose-500" required>
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="text" placeholder="Trade License No. *" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 outline-none focus:border-rose-500" required>
+                    <input type="tel" placeholder="Owner Mobile No. *" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 outline-none focus:border-rose-500" required>
+                </div>
+                <input type="text" placeholder="Shop / Salon Full Address & District *" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 outline-none focus:border-rose-500" required>
+                <button type="submit" class="w-full bg-gray-900 hover:bg-rose-600 text-white font-bold py-3.5 rounded-xl transition">
+                    Submit Dealer Application
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- UNIVERSAL INFO / POLICY / RECEIPT MODAL    -->
+    <!-- ========================================== -->
+    <div id="universal-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-lg p-7 relative shadow-2xl border border-rose-100 max-h-[85vh] overflow-y-auto animate-fade-in">
+            <button onclick="closeUniversalModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-800"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <div id="universal-modal-body"></div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- FLOATING WHATSAPP LIVE CHAT & TOAST        -->
+    <!-- ========================================== -->
+    <button onclick="openWhatsAppChat()" class="fixed bottom-6 right-6 z-40 bg-[#25D366] hover:bg-[#1ebe57] text-white pl-4 pr-5 py-3 rounded-full shadow-2xl flex items-center gap-2.5 hover:scale-105 transition duration-300">
+        <i class="fa-brands fa-whatsapp text-2xl"></i>
+        <div class="text-left leading-tight hidden sm:block">
+            <span class="text-[10px] uppercase tracking-wider block opacity-90">Beauty Consultant</span>
+            <span class="text-xs font-bold">Live Chat</span>
+        </div>
+    </button>
+
+    <div id="toast-notification" class="fixed bottom-6 left-6 z-50 bg-gray-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-rose-500/40 text-xs font-medium flex items-center gap-2.5 hidden animate-fade-in">
+        <i class="fa-solid fa-circle-check text-rose-400 text-base"></i>
+        <span id="toast-text">Notification</span>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- APPLICATION JAVASCRIPT                     -->
+    <!-- ========================================== -->
+    <script>
+        // 1. PRODUCT CATALOG DATABASE (High-res Cosmetics & Beauty Photography)
+        const products = [
+            {
+                id: 1,
+                title: "The Ordinary Niacinamide 10% + Zinc 1% Serum",
+                brand: "The Ordinary",
+                category: "Skincare",
+                origin: "Canada",
+                flag: "🇨🇦",
+                skinType: "Oily & Acne-Prone",
+                price: 1450,
+                oldPrice: 1750,
+                wholesalePrice: 980,
+                badge: "Best Seller",
+                batch: "ORD-2609A",
+                expiry: "Oct 2028",
+                img: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=700&q=85",
+                gallery: [
+                    "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=700&q=85",
+                    "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=700&q=80"
+                ],
+                shortDesc: "High-strength vitamin and mineral blemish formula that visibly regulates sebum and minimizes enlarged pores.",
+                ingredients: "Aqua (Water), Niacinamide (10%), Pentylene Glycol, Zinc PCA (1%), Dimethyl Isosorbide, Tamarindus Indica Seed Gum.",
+                usage: "Apply 2-3 drops to the entire face morning and evening before heavier creams."
+            },
+            {
+                id: 2,
+                title: "COSRX Advanced Snail 96 Mucin Power Essence",
+                brand: "COSRX",
+                category: "Skincare",
+                origin: "South Korea",
+                flag: "🇰🇷",
+                skinType: "All Skin Types",
+                price: 1850,
+                oldPrice: 2200,
+                wholesalePrice: 1290,
+                badge: "Best Seller",
+                batch: "KR-CSX992",
+                expiry: "Dec 2028",
+                img: "https://images.unsplash.com/photo-1608248597359-0e6d526a6828?auto=format&fit=crop&w=700&q=85",
+                gallery: [
+                    "https://images.unsplash.com/photo-1608248597359-0e6d526a6828?auto=format&fit=crop&w=700&q=85",
+                    "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=700&q=80"
+                ],
+                shortDesc: "Authentic Korean glass-skin essence formulated with 96.3% Snail Secretion Filtrate to repair and deeply hydrate.",
+                ingredients: "Snail Secretion Filtrate, Betaine, Butylene Glycol, 1,2-Hexanediol, Sodium Polyacrylate, Panthenol, Allantoin.",
+                usage: "After cleansing and toning, apply a small amount on your entire face and gently pat using fingertips."
+            },
+            {
+                id: 3,
+                title: "MAC Retro Matte Lipstick — Ruby Woo",
+                brand: "MAC Cosmetics",
+                category: "Makeup",
+                origin: "USA",
+                flag: "🇺🇸",
+                skinType: "All Skin Types",
+                price: 2950,
+                oldPrice: 3400,
+                wholesalePrice: 2150,
+                badge: "Festive Offer",
+                batch: "MAC-US441",
+                expiry: "Aug 2028",
+                img: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=700&q=85",
+                gallery: [
+                    "https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=700&q=85",
+                    "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=700&q=80"
+                ],
+                shortDesc: "The iconic vivid blue-red lipstick with full-coverage payoff and a completely zero-shine matte finish.",
+                ingredients: "Dimethicone, Isoeicosane, Kaolin, Ceresin, Paraffin, Isononyl Isononanoate, Microcrystalline Wax.",
+                usage: "Apply directly to lips from the bullet or use a lip brush for runway precision."
+            },
+            {
+                id: 4,
+                title: "CeraVe Hydrating Facial Cleanser (473ml)",
+                brand: "CeraVe",
+                category: "Skincare",
+                origin: "USA",
+                flag: "🇺🇸",
+                skinType: "Dry & Sensitive",
+                price: 2100,
+                oldPrice: 2450,
+                wholesalePrice: 1520,
+                badge: "Best Seller",
+                batch: "CRV-8812U",
+                expiry: "Jan 2029",
+                img: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=700&q=85",
+                gallery: [
+                    "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=700&q=85"
+                ],
+                shortDesc: "Developed with dermatologists, this gentle cleanser contains 3 essential ceramides and hyaluronic acid.",
+                ingredients: "Purified Water, Glycerin, Behentrimonium Methosulfate, Ceramide NP, Ceramide AP, Ceramide EOP, Hyaluronic Acid.",
+                usage: "Wet skin with lukewarm water. Massage cleanser into skin in a gentle, circular motion and rinse."
+            },
+            {
+                id: 5,
+                title: "Laneige Lip Sleeping Mask — Berry (20g)",
+                brand: "Laneige",
+                category: "Skincare",
+                origin: "South Korea",
+                flag: "🇰🇷",
+                skinType: "Dry & Sensitive",
+                price: 1950,
+                oldPrice: 2300,
+                wholesalePrice: 1380,
+                badge: "New Arrival",
+                batch: "LNG-KR309",
+                expiry: "Sep 2028",
+                img: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=700&q=85",
+                gallery: [
+                    "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=700&q=85"
+                ],
+                shortDesc: "Leave-on overnight lip mask powered by Korean Berry Mix Complex™ and Vitamin C for baby-soft lips.",
+                ingredients: "Diisostearyl Malate, Hydrogenated Polyisobutene, Shea Butter, Murumuru Seed Butter, Ascorbic Acid.",
+                usage: "Apply generously to the lips in the evening before going to bed and wipe gently the next morning."
+            },
+            {
+                id: 6,
+                title: "Maybelline Fit Me Matte + Poreless Foundation",
+                brand: "Maybelline",
+                category: "Makeup",
+                origin: "USA",
+                flag: "🇺🇸",
+                skinType: "Combination",
+                price: 1150,
+                oldPrice: 1350,
+                wholesalePrice: 790,
+                badge: "Festive Offer",
+                batch: "MBL-228B",
+                expiry: "May 2028",
+                img: "https://images.unsplash.com/photo-1631214524020-7e18db9a8f92?auto=format&fit=crop&w=700&q=85",
+                gallery: [
+                    "https://images.unsplash.com/photo-1631214524020-7e18db9a8f92?auto=format&fit=crop&w=700&q=85"
+                ],
+                shortDesc: "Ultra-blendable liquid foundation with micro-powders that control shine and blur pores in humid weather.",
+                ingredients: "Aqua, Cyclohexasiloxane, Nylon-12, Isododecane, Alcohol Denat., Tocopherol, Titanium Dioxide.",
+                usage: "Apply foundation onto skin and blend with fingertips or a damp beauty sponge."
+            },
+            {
+                id: 7,
+                title: "L&#39;Oréal Professionnel Absolut Repair Gold Mask",
+                brand: "L&#39;Oréal Paris",
+                category: "Haircare",
+                origin: "France",
+                flag: "🇫🇷",
+                skinType: "All Skin Types",
+                price: 2450,
+                oldPrice: 2800,
+                wholesalePrice: 1790,
+                badge: "New Arrival",
+                batch: "LOR-FR710",
+                expiry: "Nov 2028",
+                img: "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?auto=format&fit=crop&w=700&q=85",
+                gallery: [
+                    "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?auto=format&fit=crop&w=700&q=85"
+                ],
+                shortDesc: "French salon-grade resurfacing hair mask infused with Gold Quinoa + Protein for damaged hair.",
+                ingredients: "Aqua, Cetearyl Alcohol, Behentrimonium Chloride, Chenopodium Quinoa Seed Extract, Hydrolyzed Wheat Protein.",
+                usage: "After shampooing, apply to towel-dried hair. Leave in for 3 to 5 minutes then rinse thoroughly."
+            },
+            {
+                id: 8,
+                title: "Miss Dior Blooming Bouquet Eau De Toilette (100ml)",
+                brand: "Dior Beauty",
+                category: "Fragrance",
+                origin: "France",
+                flag: "🇫🇷",
+                skinType: "All Skin Types",
+                price: 12800,
+                oldPrice: 14500,
+                wholesalePrice: 9800,
+                badge: "New Arrival",
+                batch: "DIR-FR019",
+                expiry: "Dec 2029",
+                img: "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=700&q=85",
+                gallery: [
+                    "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=700&q=85"
+                ],
+                shortDesc: "An authentic French floral couture fragrance crafted with Peony, Damascus Rose, and White Musk.",
+                ingredients: "Alcohol, Parfum (Fragrance), Aqua, Limonene, Linalool, Citronellol, Rosa Damascena Flower Water.",
+                usage: "Spritz onto pulse points (wrists, neck, and behind ears)."
+            }
+        ];
+
+        // 2. BILINGUAL DICTIONARY (ENGLISH & BANGLA)
+        const translations = {
+            en: {
+                top_auth: "100% Original Imported Products Guaranteed",
+                top_delivery: "Fast Nationwide Delivery (Cash on Delivery Available)",
+                track_order: "Track Order",
+                nav_home: "Home",
+                nav_shop: "Shop Catalog",
+                nav_about: "About Us",
+                nav_blog: "Beauty Blog",
+                nav_b2b: "B2B Wholesale",
+                nav_contact: "Contact",
+                login_btn: "Sign In",
+                search_placeholder: "Search CeraVe, MAC, Korean Skincare, Serums...",
+                hero1_badge: "Festive Radiance Campaign 2026",
+                hero1_title: "Unveil Your Purest Luminous Glow",
+                hero1_desc: "Experience 100% authentic global skincare and luxury makeup imported directly from France, South Korea, USA, and the UK to Bangladesh.",
+                shop_now_btn: "Explore Collection",
+                our_authenticity_btn: "Authenticity Guarantee",
+                trust1_title: "100% Authentic Import",
+                trust2_title: "Batch & Expiry Verified",
+                trust3_title: "Cash on Delivery",
+                trust4_title: "Retail & B2B Wholesale",
+                cat_heading: "Shop By Beauty Category",
+                featured_heading: "Trending Cosmetics in Bangladesh"
+            },
+            bn: {
+                top_auth: "১০০% আসল আমদানিকৃত প্রসাধনীর নিশ্চয়তা",
+                top_delivery: "সারাদেশে দ্রুত হোম ডেলিভারি (ক্যাশ অন ডেলিভারি)",
+                track_order: "অর্ডার ট্র্যাক করুন",
+                nav_home: "হোম",
+                nav_shop: "সব পণ্য",
+                nav_about: "আমাদের সম্পর্কে",
+                nav_blog: "বিউটি ব্লগ",
+                nav_b2b: "পাইকারি পোর্টাল (B2B)",
+                nav_contact: "যোগাযোগ",
+                login_btn: "লগইন",
+                search_placeholder: "সিরাম, ম্যাক লিপস্টিক, কোরিয়ান স্কিনকেয়ার খুঁজুন...",
+                hero1_badge: "উৎসবের বিশেষ গ্লো ক্যাম্পেইন ২০২৬",
+                hero1_title: "আপনার ত্বকের আসল উজ্জ্বলতা প্রকাশ করুন",
+                hero1_desc: "ফ্রান্স, দক্ষিণ কোরিয়া, আমেরিকা এবং যুক্তরাজ্য থেকে সরাসরি বাংলাদেশে আমদানিকৃত ১০০% আসল স্কিনকেয়ার এবং মেকআপ।",
+                shop_now_btn: "কালেকশন দেখুন",
+                our_authenticity_btn: "আসল পণ্যের নিশ্চয়তা",
+                trust1_title: "১০০% আসল ইমপোর্ট",
+                trust2_title: "ব্যাচ ও মেয়াদ যাচাইকৃত",
+                trust3_title: "ক্যাশ অন ডেলিভারি",
+                trust4_title: "খুচরা ও পাইকারি ডিলার",
+                cat_heading: "ক্যাটাগরি অনুযায়ী কেনাকাটা করুন",
+                featured_heading: "বাংলাদেশে জনপ্রিয় প্রসাধনী"
+            }
+        };
+
+        // 3. STATE VARIABLES
+        let currentSlide = 0;
+        let slideInterval = null;
+        let cart = [
+            { ...products[0], qty: 1 }
+        ];
+        let wishlist = [1, 3];
+        let currentDetailProduct = products[0];
+        let appliedDiscount = 0;
+        let b2bQuantities = {};
+
+        // Initialize B2B default MOQs
+        products.forEach(p => { b2bQuantities[p.id] = 10; });
+
+        // 4. INITIALIZATION
+        document.addEventListener("DOMContentLoaded", () => {
+            renderProductGrid("home-products-grid", products);
+            applyShopFilters();
+            updateCartUI();
+            renderB2BTable();
+            startHeroSlider();
+
+            // Close search dropdown when clicking outside
+            document.addEventListener("click", (e) => {
+                const box = document.getElementById("search-suggestions");
+                const input = document.getElementById("header-search-input");
+                if (box && input && !box.contains(e.target) && !input.contains(e.target)) {
+                    box.classList.add("hidden");
+                }
+            });
+        });
+
+        // 5. HERO SLIDER LOGIC
+        function startHeroSlider() {
+            slideInterval = setInterval(() => { nextSlide(); }, 5500);
+        }
+
+        function goToSlide(index) {
+            const slides = document.querySelectorAll(".hero-slide");
+            const dots = document.querySelectorAll(".slide-dot");
+            currentSlide = (index + slides.length) % slides.length;
+
+            slides.forEach((s, i) => {
+                if (i === currentSlide) {
+                    s.classList.remove("opacity-0", "z-0");
+                    s.classList.add("opacity-100", "z-10");
+                } else {
+                    s.classList.remove("opacity-100", "z-10");
+                    s.classList.add("opacity-0", "z-0");
+                }
+            });
+
+            dots.forEach((d, i) => {
+                if (i === currentSlide) {
+                    d.className = "slide-dot w-8 h-2 rounded-full bg-gold-400 transition-all";
+                } else {
+                    d.className = "slide-dot w-2.5 h-2 rounded-full bg-white/50 hover:bg-white transition-all";
+                }
+            });
+        }
+
+        function nextSlide() { goToSlide(currentSlide + 1); }
+        function prevSlide() { goToSlide(currentSlide - 1); }
+
+        // 6. LANGUAGE SWITCHER (ENGLISH / বাংলা)
+        function setLanguage(lang) {
+            const dict = translations[lang];
+            document.querySelectorAll("[data-i18n]").forEach(el => {
+                const key = el.getAttribute("data-i18n");
+                if (dict[key]) el.innerText = dict[key];
+            });
+            document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+                const key = el.getAttribute("data-i18n-placeholder");
+                if (dict[key]) el.placeholder = dict[key];
+            });
+
+            const btnEn = document.getElementById("lang-en");
+            const btnBn = document.getElementById("lang-bn");
+            if (lang === "bn") {
+                btnBn.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bangla font-bold bg-gold-400 text-rose-950 transition";
+                btnEn.className = "px-2.5 py-0.5 rounded-full text-[11px] text-rose-200 hover:text-white transition";
+                showToast("ভাষা বাংলায় পরিবর্তন করা হয়েছে (Language set to Bangla)");
+            } else {
+                btnEn.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-gold-400 text-rose-950 transition";
+                btnBn.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bangla text-rose-200 hover:text-white transition";
+                showToast("Language switched to English");
+            }
+        }
+
+        // 7. SPA VIEW NAVIGATION
+        function switchView(viewId) {
+            document.querySelectorAll(".view-section").forEach(sec => {
+                sec.classList.add("hidden");
+                sec.classList.remove("animate-fade-in");
+            });
+
+            const target = document.getElementById(viewId);
+            if (target) {
+                target.classList.remove("hidden");
+                void target.offsetWidth;
+                target.classList.add("animate-fade-in");
+            }
+
+            // Highlight active desktop nav button
+            document.querySelectorAll(".nav-tab").forEach(btn => {
+                if (btn.getAttribute("data-view") === viewId && viewId !== "b2b-view") {
+                    btn.classList.add("text-rose-600", "font-semibold");
+                    btn.classList.remove("text-gray-700");
+                } else if (btn.getAttribute("data-view") !== "b2b-view") {
+                    btn.classList.remove("text-rose-600", "font-semibold");
+                    btn.classList.add("text-gray-700");
+                }
+            });
+
+            if (viewId === "checkout-view") renderCheckoutSummary();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById("mobile-menu").classList.toggle("hidden");
+        }
+
+        // 8. PRODUCT CARD RENDERER
+        function renderProductGrid(containerId, list) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full bg-white p-12 rounded-3xl border border-rose-100 text-center">
+                        <i class="fa-solid fa-magnifying-glass text-3xl text-rose-300 mb-3"></i>
+                        <h4 class="font-serif text-xl font-bold text-gray-800">No Matching Cosmetics Found</h4>
+                        <p class="text-xs text-gray-500 mt-1 mb-4">Try resetting your filters or broadening your price range.</p>
+                        <button onclick="resetShopFilters()" class="bg-rose-600 text-white text-xs font-bold px-5 py-2.5 rounded-full">Reset All Filters</button>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = list.map(p => {
+                const isWished = wishlist.includes(p.id);
+                return `
+                <div class="bg-white rounded-2xl border border-rose-100/90 shadow-xs hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group">
+                    <div class="relative aspect-square bg-rose-50/40 overflow-hidden cursor-pointer" onclick="openProductDetail(${p.id})">
+                        <img src="${p.img}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <span class="absolute top-3 left-3 bg-rose-600 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow">
+                            ${p.badge}
+                        </span>
+                        <span class="absolute bottom-3 left-3 bg-white/90 backdrop-blur text-gray-800 text-[10px] font-semibold px-2.5 py-0.5 rounded-full border border-gray-200">
+                            ${p.flag} ${p.origin}
+                        </span>
+                        <button onclick="event.stopPropagation(); toggleWishlistItem(${p.id})" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-rose-600 flex items-center justify-center shadow transition">
+                            <i class="${isWished ? &#39;fa-solid&#39; : &#39;fa-regular&#39;} fa-heart text-sm"></i>
+                        </button>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between text-[11px] text-gray-500 mb-1">
+                                <span class="font-bold uppercase tracking-wider text-rose-600">${p.brand}</span>
+                                <span>Batch: ${p.batch}</span>
+                            </div>
+                            <h3 onclick="openProductDetail(${p.id})" class="font-serif font-bold text-gray-900 text-base leading-snug hover:text-rose-600 cursor-pointer line-clamp-2 mb-2">
+                                ${p.title}
+                            </h3>
+                        </div>
+                        <div class="pt-3 border-t border-gray-100 flex items-center justify-between">
+                            <div>
+                                <span class="text-lg font-bold text-gray-900">৳ ${p.price.toLocaleString()}</span>
+                                <span class="text-xs text-gray-400 line-through ml-1">৳ ${p.oldPrice.toLocaleString()}</span>
+                            </div>
+                            <button onclick="addToCart(${p.id}, 1)" class="bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white font-bold text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-bag-shopping"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join("");
+        }
+
+        // 9. HOME TABS & SHOP FILTERING
+        function filterHomeTab(tag, btnEl) {
+            document.querySelectorAll(".home-tab-btn").forEach(b => {
+                b.className = "home-tab-btn px-5 py-2 rounded-full text-xs font-bold text-gray-600 hover:text-rose-600 transition";
+            });
+            btnEl.className = "home-tab-btn px-5 py-2 rounded-full text-xs font-bold bg-rose-600 text-white transition";
+
+            const filtered = tag === "all" ? products : products.filter(p => p.badge === tag);
+            renderProductGrid("home-products-grid", filtered);
+        }
+
+        function filterByCategoryAndGo(category) {
+            document.getElementById("filter-category").value = category;
+            applyShopFilters();
+            switchView("shop-view");
+        }
+
+        function filterByBrandAndGo(brand) {
+            document.getElementById("filter-brand").value = brand;
+            applyShopFilters();
+            switchView("shop-view");
+        }
+
+        function applyShopFilters() {
+            const cat = document.getElementById("filter-category").value;
+            const brand = document.getElementById("filter-brand").value;
+            const origin = document.getElementById("filter-origin").value;
+            const skin = document.getElementById("filter-skin").value;
+            const maxPrice = Number(document.getElementById("filter-price").value);
+            const sort = document.getElementById("sort-select").value;
+
+            let list = products.filter(p => {
+                if (cat !== "all" && p.category !== cat) return false;
+                if (brand !== "all" && p.brand !== brand) return false;
+                if (origin !== "all" && p.origin !== origin) return false;
+                if (skin !== "all" && p.skinType !== skin && p.skinType !== "All Skin Types") return false;
+                if (p.price > maxPrice) return false;
+                return true;
+            });
+
+            if (sort === "price-asc") list.sort((a, b) => a.price - b.price);
+            if (sort === "price-desc") list.sort((a, b) => b.price - a.price);
+            if (sort === "name") list.sort((a, b) => a.title.localeCompare(b.title));
+
+            document.getElementById("shop-count").innerText = list.length;
+            renderProductGrid("shop-products-grid", list);
+        }
+
+        function resetShopFilters() {
+            document.getElementById("filter-category").value = "all";
+            document.getElementById("filter-brand").value = "all";
+            document.getElementById("filter-origin").value = "all";
+            document.getElementById("filter-skin").value = "all";
+            document.getElementById("filter-price").value = 15000;
+            document.getElementById("price-range-label").innerText = "৳ 15,000";
+            applyShopFilters();
+        }
+
+        // 10. LIVE AUTO-SUGGESTION SEARCH BAR
+        function handleSearchSuggestions(query, isMobile = false) {
+            const box = document.getElementById("search-suggestions");
+            const clearBtn = document.getElementById("clear-search-btn");
+            const q = query.trim().toLowerCase();
+
+            if (clearBtn) clearBtn.classList.toggle("hidden", q.length === 0);
+
+            if (q.length === 0) {
+                box.classList.add("hidden");
+                return;
+            }
+
+            const matches = products.filter(p =>
+                p.title.toLowerCase().includes(q) ||
+                p.brand.toLowerCase().includes(q) ||
+                p.category.toLowerCase().includes(q) ||
+                p.origin.toLowerCase().includes(q)
+            );
+
+            if (isMobile && matches.length > 0) {
+                renderProductGrid("shop-products-grid", matches);
+                switchView("shop-view");
+                return;
+            }
+
+            box.classList.remove("hidden");
+            if (matches.length === 0) {
+                box.innerHTML = `<div class="p-4 text-xs text-gray-500 text-center">No authentic products found for "${query}"</div>`;
+            } else {
+                box.innerHTML = matches.map(p => `
+                    <div onclick="openProductDetail(${p.id}); document.getElementById(&#39;search-suggestions&#39;).classList.add(&#39;hidden&#39;);" class="flex items-center gap-3 p-3 hover:bg-rose-50 cursor-pointer border-b border-gray-50 last:border-0 transition">
+                        <img src="${p.img}" class="w-11 h-11 rounded-lg object-cover flex-shrink-0">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-bold text-gray-900 truncate">${p.title}</p>
+                            <p class="text-[11px] text-gray-500">${p.brand} • ${p.flag} ${p.origin}</p>
+                        </div>
+                        <span class="text-xs font-bold text-rose-600">৳ ${p.price.toLocaleString()}</span>
+                    </div>
+                `).join("");
+            }
+        }
+
+        function clearSearch() {
+            const input = document.getElementById("header-search-input");
+            input.value = "";
+            document.getElementById("search-suggestions").classList.add("hidden");
+            document.getElementById("clear-search-btn").classList.add("hidden");
+        }
+
+        // 11. PRODUCT DETAIL VIEW LOGIC
+        function openProductDetail(id) {
+            const p = products.find(x => x.id === id) || products[0];
+            currentDetailProduct = p;
+
+            document.getElementById("detail-main-img").src = p.img;
+            document.getElementById("detail-badge").innerText = p.badge;
+            document.getElementById("detail-origin-pill").innerText = `${p.flag} ${p.origin}`;
+            document.getElementById("detail-brand").innerText = p.brand;
+            document.getElementById("detail-title").innerText = p.title;
+            document.getElementById("detail-price").innerText = `৳ ${p.price.toLocaleString()}`;
+            document.getElementById("detail-old-price").innerText = `৳ ${p.oldPrice.toLocaleString()}`;
+            document.getElementById("detail-short-desc").innerText = p.shortDesc;
+            document.getElementById("detail-batch").innerText = p.batch;
+            document.getElementById("detail-expiry").innerText = p.expiry;
+            document.getElementById("detail-qty").value = 1;
+
+            document.getElementById("detail-tab-desc").innerText = p.shortDesc + " Directly imported by Ruposhi International with full temperature-controlled storage in Dhaka.";
+            document.getElementById("detail-tab-ingr").innerText = p.ingredients;
+            document.getElementById("detail-tab-usage").innerText = p.usage;
+
+            const thumbs = document.getElementById("detail-thumbnails");
+            thumbs.innerHTML = p.gallery.map(imgUrl => `
+                <button onclick="document.getElementById(&#39;detail-main-img&#39;).src=&#39;${imgUrl}&#39;" class="aspect-square rounded-xl overflow-hidden border-2 border-rose-200 hover:border-rose-600 transition">
+                    <img src="${imgUrl}" class="w-full h-full object-cover">
+                </button>
+            `).join("");
+
+            switchView("product-detail-view");
+        }
+
+        function selectVariant(btn) {
+            document.querySelectorAll(".variant-btn").forEach(b => {
+                b.className = "variant-btn border border-gray-200 bg-white text-gray-600 hover:border-rose-400 px-4 py-2 rounded-xl text-xs";
+            });
+            btn.className = "variant-btn border-2 border-rose-600 bg-rose-50 text-rose-900 font-semibold px-4 py-2 rounded-xl text-xs";
+        }
+
+        function adjustDetailQty(delta) {
+            const el = document.getElementById("detail-qty");
+            let val = parseInt(el.value) + delta;
+            if (val < 1) val = 1;
+            el.value = val;
+        }
+
+        function switchDetailTab(tabKey, btn) {
+            document.querySelectorAll(".detail-tab-pane").forEach(p => p.classList.add("hidden"));
+            document.getElementById("detail-tab-" + tabKey).classList.remove("hidden");
+
+            document.querySelectorAll(".detail-tab-btn").forEach(b => {
+                b.className = "detail-tab-btn flex-1 py-3 px-4 text-gray-500 hover:text-gray-800";
+            });
+            btn.className = "detail-tab-btn flex-1 py-3 px-4 text-rose-600 border-b-2 border-rose-600";
+        }
+
+        function addCurrentProductToCart() {
+            const qty = parseInt(document.getElementById("detail-qty").value) || 1;
+            addToCart(currentDetailProduct.id, qty);
+        }
+
+        function buyNowCurrentProduct() {
+            const qty = parseInt(document.getElementById("detail-qty").value) || 1;
+            addToCart(currentDetailProduct.id, qty, false);
+            switchView("checkout-view");
+        }
+
+        // 12. CART & WISHLIST SYSTEM
+        function addToCart(id, qty = 1, openDrawer = true) {
+            const prod = products.find(p => p.id === id);
+            const existing = cart.find(item => item.id === id);
+            if (existing) {
+                existing.qty += qty;
+            } else {
+                cart.push({ ...prod, qty });
+            }
+            updateCartUI();
+            showToast(`Added "${prod.title}" to your bag`);
+            if (openDrawer && document.getElementById("cart-drawer").classList.contains("translate-x-full")) {
+                toggleCartDrawer();
+            }
+        }
+
+        function updateCartItemQty(id, delta) {
+            const item = cart.find(i => i.id === id);
+            if (!item) return;
+            item.qty += delta;
+            if (item.qty <= 0) {
+                cart = cart.filter(i => i.id !== id);
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const count = cart.reduce((sum, i) => sum + i.qty, 0);
+            document.getElementById("cart-badge").innerText = count;
+
+            const container = document.getElementById("cart-items-container");
+            const btn = document.getElementById("drawer-checkout-btn");
+            let subtotal = 0;
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-16 text-gray-400">
+                        <i class="fa-solid fa-bag-shopping text-4xl mb-3"></i>
+                        <p class="text-sm font-medium text-gray-600">Your shopping bag is empty</p>
+                    </div>`;
+                btn.disabled = true;
+            } else {
+                btn.disabled = false;
+                container.innerHTML = cart.map(item => {
+                    subtotal += item.price * item.qty;
+                    return `
+                    <div class="flex gap-3.5 bg-white p-3 rounded-2xl border border-rose-100 shadow-2xs">
+                        <img src="${item.img}" class="w-16 h-16 rounded-xl object-cover flex-shrink-0">
+                        <div class="flex-1 min-w-0">
+                            <h5 class="text-xs font-bold text-gray-900 line-clamp-1">${item.title}</h5>
+                            <p class="text-[11px] text-gray-500 mb-2">৳ ${item.price.toLocaleString()} each</p>
+                            <div class="flex items-center justify-between">
+                                <div class="inline-flex items-center border border-gray-200 rounded-lg text-xs">
+                                    <button onclick="updateCartItemQty(${item.id}, -1)" class="px-2 py-0.5 hover:bg-gray-100">-</button>
+                                    <span class="px-2 font-bold">${item.qty}</span>
+                                    <button onclick="updateCartItemQty(${item.id}, 1)" class="px-2 py-0.5 hover:bg-gray-100">+</button>
+                                </div>
+                                <span class="text-xs font-bold text-rose-600">৳ ${(item.price * item.qty).toLocaleString()}</span>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join("");
+            }
+
+            document.getElementById("drawer-subtotal").innerText = `৳ ${subtotal.toLocaleString()}`;
+        }
+
+        function toggleCartDrawer() {
+            const drawer = document.getElementById("cart-drawer");
+            const overlay = document.getElementById("cart-drawer-overlay");
+            drawer.classList.toggle("translate-x-full");
+            overlay.classList.toggle("hidden");
+        }
+
+        function toggleWishlistItem(id) {
+            if (wishlist.includes(id)) {
+                wishlist = wishlist.filter(x => x !== id);
+                showToast("Removed from your Wishlist");
+            } else {
+                wishlist.push(id);
+                showToast("Saved to your Wishlist");
+            }
+            document.getElementById("wishlist-badge").innerText = wishlist.length;
+            applyShopFilters();
+        }
+
+        function toggleWishlistModal() {
+            const wishedItems = products.filter(p => wishlist.includes(p.id));
+            const html = `
+                <span class="text-xs font-bold uppercase tracking-widest text-rose-600">Saved Favorites</span>
+                <h3 class="font-serif text-2xl font-bold text-gray-900 mt-1 mb-4">Your Beauty Wishlist (${wishedItems.length})</h3>
+                <div class="space-y-3">
+                    ${wishedItems.length === 0 ? &#39;<p class="text-xs text-gray-500">No items in your wishlist yet.</p>&#39; : wishedItems.map(p => `
+                        <div class="flex items-center justify-between gap-3 p-3 rounded-2xl border border-rose-100">
+                            <img src="${p.img}" class="w-12 h-12 rounded-xl object-cover">
+                            <div class="flex-1">
+                                <h5 class="text-xs font-bold text-gray-900">${p.title}</h5>
+                                <span class="text-xs text-rose-600 font-bold">৳ ${p.price.toLocaleString()}</span>
+                            </div>
+                            <button onclick="addToCart(${p.id}, 1); closeUniversalModal();" class="bg-rose-600 text-white text-xs font-bold px-3 py-2 rounded-xl">Add to Bag</button>
+                        </div>
+                    `).join("")}
+                </div>
+            `;
+            openUniversalModal(html);
+        }
+
+        // 13. B2B WHOLESALE PORTAL LOGIC (aaaa / aaaa)
+        function fillDemoB2B() {
+            document.getElementById("b2b-user").value = "aaaa";
+            document.getElementById("b2b-pass").value = "aaaa";
+            showToast("Credentials &#39;aaaa&#39; / &#39;aaaa&#39; filled! Click Unlock.");
+        }
+
+        function handleB2BLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById("b2b-user").value.trim();
+            const p = document.getElementById("b2b-pass").value.trim();
+            const err = document.getElementById("b2b-error");
+
+            if (u === "aaaa" && p === "aaaa") {
+                err.classList.add("hidden");
+                document.getElementById("b2b-login-gate").classList.add("hidden");
+                document.getElementById("b2b-dashboard").classList.remove("hidden");
+                renderB2BTable();
+                showToast("Welcome to Ruposhi B2B Wholesale Portal!");
+            } else {
+                err.classList.remove("hidden");
+            }
+        }
+
+        function logoutB2B() {
+            document.getElementById("b2b-dashboard").classList.add("hidden");
+            document.getElementById("b2b-login-gate").classList.remove("hidden");
+            document.getElementById("b2b-user").value = "";
+            document.getElementById("b2b-pass").value = "";
+            showToast("Logged out of B2B Wholesale Portal");
+        }
+
+        function renderB2BTable() {
+            const tbody = document.getElementById("b2b-table-body");
+            if (!tbody) return;
+            let grandTotal = 0;
+
+            tbody.innerHTML = products.map(p => {
+                const qty = b2bQuantities[p.id] || 0;
+                const lineTotal = qty * p.wholesalePrice;
+                grandTotal += lineTotal;
+                return `
+                <tr class="hover:bg-rose-50/30 transition">
+                    <td class="py-3.5 px-6 flex items-center gap-3">
+                        <img src="${p.img}" class="w-10 h-10 rounded-lg object-cover">
+                        <div>
+                            <div class="font-bold text-gray-900 text-xs">${p.title}</div>
+                            <div class="text-[11px] text-gray-400">Batch: ${p.batch}</div>
+                        </div>
+                    </td>
+                    <td class="py-3.5 px-4 text-xs">${p.flag} ${p.origin}</td>
+                    <td class="py-3.5 px-4 text-xs text-gray-400 line-through">৳ ${p.price.toLocaleString()}</td>
+                    <td class="py-3.5 px-4 text-xs font-bold text-rose-700">৳ ${p.wholesalePrice.toLocaleString()} / unit</td>
+                    <td class="py-3.5 px-4 text-xs font-semibold text-gray-600">10 pcs</td>
+                    <td class="py-3.5 px-4">
+                        <input type="number" min="0" step="5" value="${qty}" onchange="updateB2BQty(${p.id}, this.value)" class="w-20 border border-gray-300 rounded-lg px-2.5 py-1 text-xs font-bold outline-none focus:border-rose-500">
+                    </td>
+                    <td class="py-3.5 px-6 text-right font-bold text-gray-900 text-xs">৳ ${lineTotal.toLocaleString()}</td>
+                </tr>`;
+            }).join("");
+
+            document.getElementById("b2b-grand-total").innerText = `৳ ${grandTotal.toLocaleString()}`;
+        }
+
+        function updateB2BQty(id, val) {
+            let n = parseInt(val) || 0;
+            if (n > 0 && n < 10) {
+                n = 10;
+                showToast("Minimum Order Quantity (MOQ) is 10 units per SKU");
+            }
+            b2bQuantities[id] = n;
+            renderB2BTable();
+        }
+
+        function submitB2BBulkOrder() {
+            const totalText = document.getElementById("b2b-grand-total").innerText;
+            const msg = document.getElementById("b2b-quote-msg");
+            msg.innerText = `✓ Wholesale Requisition (#B2B-2026-991) for ${totalText} submitted! Our Key Account Manager will call you within 1 hour.`;
+            msg.classList.remove("hidden");
+            showToast("Wholesale Bulk Order Submitted Successfully!");
+        }
+
+        function downloadPriceListPDF() {
+            showToast("Downloading &#39;Ruposhi_2026_Wholesale_Catalog.pdf&#39;...");
+        }
+
+        function toggleDealerRegModal() {
+            const m = document.getElementById("dealer-reg-modal");
+            m.classList.toggle("hidden");
+            m.classList.toggle("flex");
+        }
+
+        function submitDealerApplication(e) {
+            e.preventDefault();
+            toggleDealerRegModal();
+            showToast("Dealer Application Received! Use &#39;aaaa&#39; / &#39;aaaa&#39; to preview the portal now.");
+        }
+
+        // 14. CHECKOUT & ORDER CONFIRMATION
+        function proceedToCheckout() {
+            toggleCartDrawer();
+            switchView("checkout-view");
+        }
+
+        function renderCheckoutSummary() {
+            const list = document.getElementById("checkout-items-list");
+            const delivery = parseInt(document.getElementById("chk-area").value) || 60;
+            let subtotal = 0;
+
+            list.innerHTML = cart.map(item => {
+                subtotal += item.price * item.qty;
+                return `
+                <div class="flex justify-between items-center py-2 text-xs">
+                    <span class="text-gray-700 font-medium">${item.qty}x ${item.title}</span>
+                    <span class="font-bold text-gray-900">৳ ${(item.price * item.qty).toLocaleString()}</span>
+                </div>`;
+            }).join("");
+
+            const discountAmount = Math.round(subtotal * appliedDiscount);
+            const total = Math.max(0, subtotal - discountAmount) + delivery;
+
+            document.getElementById("chk-subtotal").innerText = `৳ ${subtotal.toLocaleString()}`;
+            document.getElementById("chk-discount").innerText = `- ৳ ${discountAmount.toLocaleString()}`;
+            document.getElementById("chk-delivery").innerText = `৳ ${delivery}`;
+            document.getElementById("chk-total").innerText = `৳ ${total.toLocaleString()}`;
+        }
+
+        function applyCouponCode() {
+            const code = document.getElementById("coupon-input").value.trim().toUpperCase();
+            const fb = document.getElementById("coupon-feedback");
+            fb.classList.remove("hidden");
+
+            if (code === "RUPOSHI10" || code === "GLOW10") {
+                appliedDiscount = 0.10;
+                fb.className = "text-xs mt-1.5 text-green-600 font-bold";
+                fb.innerText = "✓ 10% Festive Discount Applied!";
+                renderCheckoutSummary();
+            } else {
+                appliedDiscount = 0;
+                fb.className = "text-xs mt-1.5 text-rose-600 font-semibold";
+                fb.innerText = "Invalid coupon code. Try RUPOSHI10";
+                renderCheckoutSummary();
+            }
+        }
+
+        function placeFinalOrder(e) {
+            e.preventDefault();
+            if (cart.length === 0) {
+                showToast("Your bag is empty!");
+                return;
+            }
+            const name = document.getElementById("chk-name").value;
+            const phone = document.getElementById("chk-phone").value;
+            const total = document.getElementById("chk-total").innerText;
+            const payment = document.querySelector(&#39;input[name="payment_method"]:checked&#39;).value;
+            const orderId = "#RP-" + Math.floor(10000 + Math.random() * 90000);
+
+            cart = [];
+            appliedDiscount = 0;
+            updateCartUI();
+
+            const receiptHTML = `
+                <div class="text-center space-y-4">
+                    <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto text-3xl">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <span class="text-xs font-bold uppercase tracking-widest text-rose-600">Order Confirmed</span>
+                    <h3 class="font-serif text-2xl font-bold text-gray-900">Thank You, ${name}!</h3>
+                    <p class="text-xs text-gray-500">SMS confirmation has been sent to <strong>${phone}</strong>.</p>
+                    <div class="bg-rose-50/70 p-4 rounded-2xl border border-rose-100 text-left text-xs space-y-2">
+                        <div class="flex justify-between"><span>Order Invoice ID:</span><strong class="text-rose-700">${orderId}</strong></div>
+                        <div class="flex justify-between"><span>Payment Method:</span><strong>${payment}</strong></div>
+                        <div class="flex justify-between"><span>Total Payable:</span><strong class="text-gray-900">${total}</strong></div>
+                        <div class="flex justify-between"><span>Authenticity QC:</span><strong class="text-green-700">100% Batch Verified</strong></div>
+                    </div>
+                    <button onclick="closeUniversalModal(); switchView(&#39;home-view&#39;);" class="w-full bg-rose-600 text-white font-bold py-3.5 rounded-xl text-xs">
+                        Back to Homepage
+                    </button>
+                </div>
+            `;
+            openUniversalModal(receiptHTML);
+        }
+
+        // 15. OTP LOGIN, TRACKING, BLOG & POLICY MODALS
+        function toggleLoginModal() {
+            const m = document.getElementById("login-modal");
+            m.classList.toggle("hidden");
+            m.classList.toggle("flex");
+        }
+
+        function sendSimulatedOTP(e) {
+            e.preventDefault();
+            const phone = document.getElementById("otp-phone-input").value;
+            document.getElementById("logged-phone-display").innerText = "+880 " + phone;
+            document.getElementById("otp-step-1").classList.add("hidden");
+            document.getElementById("otp-step-2").classList.remove("hidden");
+        }
+
+        function verifySimulatedOTP() {
+            document.getElementById("otp-step-2").classList.add("hidden");
+            document.getElementById("otp-step-3").classList.remove("hidden");
+            document.getElementById("header-user-status").innerText = "My Account";
+            showToast("Successfully logged in via OTP!");
+        }
+
+        function handleTrackOrder(e) {
+            e.preventDefault();
+            const id = document.getElementById("track-id-input").value;
+            document.getElementById("tracked-id-display").innerText = id;
+            document.getElementById("tracking-result").classList.remove("hidden");
+        }
+
+        function openBlogModal(idx) {
+            const articles = [
+                {
+                    title: "How to Build a 5-Step Korean Skincare Routine for Dhaka&#39;s Humid Weather",
+                    content: "In Bangladesh&#39;s warm and humid climate, layering heavy occlusive creams can trigger breakouts. Start with a gentle gel cleanser, follow with COSRX Snail Mucin Essence on damp skin, apply The Ordinary Niacinamide 10% + Zinc 1% to regulate sebum, and seal with an oil-free water gel moisturizer and SPF 50+ PA++++."
+                },
+                {
+                    title: "5 Ways to Spot Counterfeit The Ordinary & CeraVe Products in Bangladesh",
+                    content: "Always check for laser-etched batch codes on both the box bottom and bottle neck. Authentic formulations from Ruposhi International have a smooth, non-soapy texture, official importer stickers, and verifiable manufacturer lot numbers."
+                },
+                {
+                    title: "Top 7 Long-Wear Lip Shades That Flatter Warm South Asian Undertones",
+                    content: "Rich blue-reds like MAC Ruby Woo, warm terracotta rosewoods, and spiced berry shades complement golden and olive South Asian skin tones without washing out your complexion under bridal lighting."
+                }
+            ];
+            const a = articles[idx];
+            openUniversalModal(`
+                <span class="text-xs font-bold uppercase tracking-widest text-rose-600">Ruposhi Beauty Editorial</span>
+                <h3 class="font-serif text-2xl font-bold text-gray-900 mt-1 mb-4">${a.title}</h3>
+                <p class="text-sm text-gray-600 leading-relaxed mb-6">${a.content}</p>
+                <button onclick="closeUniversalModal(); switchView(&#39;shop-view&#39;)" class="bg-rose-600 text-white text-xs font-bold px-6 py-3 rounded-xl">Shop Featured Products</button>
+            `);
+        }
+
+        function openPolicyModal(type) {
+            const policies = {
+                authenticity: {
+                    title: "100% Original Imported Products Guarantee",
+                    body: "Ruposhi International imports directly from authorized brand distributors in the USA, South Korea, France, and the UK. Every item is batch-verified and cleared through Bangladesh Customs. If any product is ever proven non-authentic, we provide a 200% refund."
+                },
+                return: {
+                    title: "Easy 7-Day Return & Replacement Policy",
+                    body: "You may inspect your parcel in front of the delivery rider. Unopened products with intact security seals can be returned or exchanged within 7 days of delivery."
+                },
+                privacy: {
+                    title: "Customer & Dealer Privacy Policy",
+                    body: "Your phone number, delivery address, and B2B trade license records are strictly encrypted and used solely for order fulfillment via Pathao, Steadfast, or RedX."
+                },
+                terms: {
+                    title: "Terms & Conditions",
+                    body: "All retail prices are listed in Bangladeshi Taka (BDT ৳) inclusive of standard import duties. Wholesale B2B orders require a minimum order quantity (MOQ) of 10 units per SKU."
+                }
+            };
+            const p = policies[type];
+            openUniversalModal(`
+                <span class="text-xs font-bold uppercase tracking-widest text-rose-600">Compliance & Legal</span>
+                <h3 class="font-serif text-2xl font-bold text-gray-900 mt-1 mb-3">${p.title}</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">${p.body}</p>
+            `);
+        }
+
+        function openUniversalModal(htmlContent) {
+            document.getElementById("universal-modal-body").innerHTML = htmlContent;
+            const m = document.getElementById("universal-modal");
+            m.classList.remove("hidden");
+            m.classList.add("flex");
+        }
+
+        function closeUniversalModal() {
+            const m = document.getElementById("universal-modal");
+            m.classList.add("hidden");
+            m.classList.remove("flex");
+        }
+
+        function openWhatsAppChat() {
+            openUniversalModal(`
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 rounded-full bg-[#25D366] text-white flex items-center justify-center text-2xl"><i class="fa-brands fa-whatsapp"></i></div>
+                    <div>
+                        <h4 class="font-bold text-gray-900">Ruposhi Beauty Advisor (WhatsApp)</h4>
+                        <span class="text-xs text-green-600 font-semibold">● Online — Typically replies in 2 mins</span>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-600 bg-gray-50 p-3.5 rounded-2xl border mb-4">
+                    "Assalamu Alaikum! Welcome to Ruposhi International. Need help choosing the right serum for your skin type or placing a B2B wholesale order?"
+                </p>
+                <div class="flex gap-2">
+                    <input type="text" id="wa-msg" placeholder="Ask about skincare, shades, or delivery..." class="flex-1 border rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-green-500">
+                    <button onclick="closeUniversalModal(); showToast(&#39;Message sent to Ruposhi WhatsApp Consultant!&#39;);" class="bg-[#25D366] text-white font-bold text-xs px-5 py-2.5 rounded-xl">Send</button>
+                </div>
+            `);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById("toast-notification");
+            document.getElementById("toast-text").innerText = msg;
+            toast.classList.remove("hidden");
+            setTimeout(() => { toast.classList.add("hidden"); }, 3200);
+        }
+    </script>
+</body>
+</html>
