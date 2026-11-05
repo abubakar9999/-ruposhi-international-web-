@@ -114,11 +114,23 @@ class StorefrontShell extends StatelessWidget {
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.business_center, color: AppTheme.gold600),
+                    leading: Icon(
+                      state.isB2BAuthenticated ? Icons.verified : Icons.business_center,
+                      color: state.isB2BAuthenticated ? const Color(0xFF047857) : AppTheme.gold600,
+                    ),
                     title: Text(
                       state.isBangla ? 'বিটুবি পাইকারি পোর্টাল (B2B)' : 'B2B Wholesale Portal',
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.gold600),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: state.isB2BAuthenticated ? const Color(0xFF047857) : AppTheme.gold600,
+                      ),
                     ),
+                    subtitle: state.isB2BAuthenticated && state.activeDealer != null
+                        ? Text(
+                            'Active: ${state.activeDealer!.businessName}',
+                            style: const TextStyle(fontSize: 11, color: Color(0xFF047857)),
+                          )
+                        : null,
                     selected: state.currentView == AppView.b2bPortal,
                     onTap: () {
                       Navigator.pop(context);

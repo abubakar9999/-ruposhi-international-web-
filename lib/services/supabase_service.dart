@@ -119,6 +119,53 @@ class SupabaseService {
     return [];
   }
 
+  /// Fetches registered B2B wholesale dealers from Supabase 'b2b_partners' table
+  static Future<List<B2BPartner>> fetchB2BPartners() async {
+    if (client == null) return [];
+    try {
+      final response = await client!
+          .from('b2b_partners')
+          .select()
+          .order('created_at', ascending: false);
+      if (response.isNotEmpty) {
+        return (response as List<dynamic>).map((row) {
+          final map = row as Map<String, dynamic>;
+          return B2BPartner.fromMap(map);
+        }).toList();
+      }
+    } catch (e) {
+      dev.log('Supabase fetchB2BPartners error: $e');
+    }
+    return [];
+  }
+
+  /// Inserts a new B2B dealer/wholesaler partner record into Supabase
+  static Future<bool> createB2BPartner(B2BPartner partner) async {
+    if (client == null) return false;
+    try {
+      await client!.from('b2b_partners').insert(partner.toMap());
+      return true;
+    } catch (e) {
+      dev.log('Supabase createB2BPartner notice: $e');
+      return false;
+    }
+  }
+
+  /// Updates a B2B partner's approval status or tier in Supabase
+  static Future<bool> updateB2BPartner(B2BPartner partner) async {
+    if (client == null) return false;
+    try {
+      await client!
+          .from('b2b_partners')
+          .update(partner.toMap())
+          .eq('id', partner.id);
+      return true;
+    } catch (e) {
+      dev.log('Supabase updateB2BPartner notice: $e');
+      return false;
+    }
+  }
+
   /// Inserts a new order into the Supabase 'orders' table & syncs customer CRM
   static Future<bool> createOrder({
     required String orderId,

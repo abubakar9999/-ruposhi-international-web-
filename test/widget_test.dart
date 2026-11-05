@@ -10,12 +10,73 @@ import 'package:ruposhi_international/main.dart';
 
 // 1x1 transparent PNG data for network image mocking in widget tests
 final _transparentPng = <int>[
-  0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49,
-  0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x06,
-  0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4, 0x89, 0x00, 0x00, 0x00, 0x0A, 0x49, 0x44,
-  0x41, 0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00, 0x05, 0x00, 0x01, 0x0D,
-  0x0A, 0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42,
-  0x60, 0x82,
+  0x89,
+  0x50,
+  0x4E,
+  0x47,
+  0x0D,
+  0x0A,
+  0x1A,
+  0x0A,
+  0x00,
+  0x00,
+  0x00,
+  0x0D,
+  0x49,
+  0x48,
+  0x44,
+  0x52,
+  0x00,
+  0x00,
+  0x00,
+  0x01,
+  0x00,
+  0x00,
+  0x00,
+  0x01,
+  0x08,
+  0x06,
+  0x00,
+  0x00,
+  0x00,
+  0x1F,
+  0x15,
+  0xC4,
+  0x89,
+  0x00,
+  0x00,
+  0x00,
+  0x0A,
+  0x49,
+  0x44,
+  0x41,
+  0x54,
+  0x78,
+  0x9C,
+  0x63,
+  0x00,
+  0x01,
+  0x00,
+  0x00,
+  0x05,
+  0x00,
+  0x01,
+  0x0D,
+  0x0A,
+  0x2D,
+  0xB4,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x49,
+  0x45,
+  0x4E,
+  0x44,
+  0xAE,
+  0x42,
+  0x60,
+  0x82,
 ];
 
 class _TestHttpOverrides extends HttpOverrides {
@@ -56,8 +117,7 @@ class _MockHttpClientResponse implements HttpClientResponse {
   int get contentLength => _transparentPng.length;
 
   @override
-  HttpClientResponseCompressionState get compressionState =>
-      HttpClientResponseCompressionState.notCompressed;
+  HttpClientResponseCompressionState get compressionState => HttpClientResponseCompressionState.notCompressed;
 
   @override
   StreamSubscription<List<int>> listen(
@@ -122,13 +182,88 @@ void main() {
       expect(cubit.state.discountAmount, product.retailPrice * 0.1);
     });
 
-    test('B2B login works with demo credentials', () {
+    test('B2B login works with demo credentials and registered dealer phone', () {
+      // 1. Demo login
       cubit.loginB2B('aaaa', 'aaaa');
       expect(cubit.state.isB2BAuthenticated, true);
+      expect(cubit.state.activeDealer, isNotNull);
       expect(cubit.state.b2bError, isNull);
 
       cubit.logoutB2B();
       expect(cubit.state.isB2BAuthenticated, false);
+      expect(cubit.state.activeDealer, isNull);
+
+      // 2. Login with registered dealer phone
+      cubit.loginB2B('+880 1711-234567', '1234');
+      expect(cubit.state.isB2BAuthenticated, true);
+      expect(cubit.state.activeDealer?.businessName, 'Radiance Beauty Studio & Spa');
+      expect(cubit.state.b2bError, isNull);
+
+      // 3. Login with unknown phone gives friendly error
+      cubit.logoutB2B();
+      cubit.loginB2B('01999999999', 'pass');
+      expect(cubit.state.isB2BAuthenticated, false);
+      expect(cubit.state.b2bError, isNotNull);
+    });
+
+    test('B2B dealer registration, admin upgrade, and approval workflow', () {
+      // Apply for dealership
+      const newApp = B2BPartner(
+        id: 'b2b_test_app',
+        businessName: 'Lotus Aesthetics Spa',
+        contactPerson: 'Mehnaz Parveen',
+        phone: '+880 1755-123456',
+        email: 'mehnaz@lotus.com',
+        tradeLicense: 'TRAD/DNCC/998811/2026',
+        district: 'Uttara, Dhaka',
+        tier: 'Wholesaler (20% off)',
+        status: 'Pending Review',
+        businessType: 'Salon & Spa',
+      );
+      cubit.applyForDealership(newApp);
+      expect(cubit.state.b2bPartners.any((p) => p.id == 'b2b_test_app'), true);
+
+      // Attempting login while pending review fails with pending message
+      cubit.loginB2B('+880 1755-123456', '1234');
+      expect(cubit.state.isB2BAuthenticated, false);
+      expect(cubit.state.b2bError?.contains('pending review'), true);
+
+      // Admin approves the dealership
+      cubit.approveB2BPartner('b2b_test_app');
+      final approved = cubit.state.b2bPartners.firstWhere((p) => p.id == 'b2b_test_app');
+      expect(approved.status, 'Approved');
+
+      // Now dealer login succeeds
+      cubit.loginB2B('+880 1755-123456', '1234');
+      expect(cubit.state.isB2BAuthenticated, true);
+      expect(cubit.state.activeDealer?.businessName, 'Lotus Aesthetics Spa');
+
+      // Admin upgrades a customer directly to Wholesaler
+      const customer = CustomerRecord(
+        phone: '+880 1611-001122',
+        name: 'Rubina Kabir',
+        district: 'Dhanmondi, Dhaka',
+        totalOrders: 5,
+        totalSpent: 45000,
+        lastOrderDate: 'Today',
+      );
+      cubit.grantDealerStatusToCustomer(
+        customer,
+        businessName: 'Rubina Beauty Corner',
+        tier: 'Platinum Partner (30% off)',
+        tradeLicense: 'TRAD/DSCC/443322',
+        businessType: 'Wholesaler',
+      );
+
+      final granted = cubit.state.b2bPartners.firstWhere((p) => p.phone == '+880 1611-001122');
+      expect(granted.status, 'Approved');
+      expect(granted.businessName, 'Rubina Beauty Corner');
+      expect(granted.businessType, 'Wholesaler');
+
+      // Customer can now log in at B2B portal using their phone
+      cubit.loginB2B('+880 1611-001122', '1234');
+      expect(cubit.state.isB2BAuthenticated, true);
+      expect(cubit.state.activeDealer?.businessName, 'Rubina Beauty Corner');
     });
 
     test('Wishlist toggle adds and removes product id', () {
@@ -140,8 +275,7 @@ void main() {
   });
 
   group('Widget Tests', () {
-    testWidgets('RuposhiCustomerApp renders luxury brand title and navigation on desktop (1400x900)',
-        (WidgetTester tester) async {
+    testWidgets('RuposhiCustomerApp renders luxury brand title and navigation on desktop (1400x900)', (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1400, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -155,8 +289,7 @@ void main() {
       expect(find.text('B2B Wholesale'), findsWidgets);
     });
 
-    testWidgets('RuposhiCustomerApp renders adaptively on tablet (768x1024)',
-        (WidgetTester tester) async {
+    testWidgets('RuposhiCustomerApp renders adaptively on tablet (768x1024)', (WidgetTester tester) async {
       tester.view.physicalSize = const Size(768, 1024);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -169,8 +302,7 @@ void main() {
       expect(find.byIcon(Icons.menu_rounded), findsOneWidget);
     });
 
-    testWidgets('RuposhiCustomerApp renders adaptively on mobile (375x812) with 0 overflows',
-        (WidgetTester tester) async {
+    testWidgets('RuposhiCustomerApp renders adaptively on mobile (375x812) with 0 overflows', (WidgetTester tester) async {
       tester.view.physicalSize = const Size(375, 812);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -184,8 +316,7 @@ void main() {
       expect(find.byIcon(Icons.shopping_bag_outlined), findsWidgets);
     });
 
-    testWidgets('RuposhiCustomerApp renders on compact mobile (320x568) with 0 overflows',
-        (WidgetTester tester) async {
+    testWidgets('RuposhiCustomerApp renders on compact mobile (320x568) with 0 overflows', (WidgetTester tester) async {
       tester.view.physicalSize = const Size(320, 568);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -198,8 +329,7 @@ void main() {
       expect(find.byIcon(Icons.menu_rounded), findsOneWidget);
     });
 
-    testWidgets('Mobile drawer navigation opens all views with 0 layout overflows',
-        (WidgetTester tester) async {
+    testWidgets('Mobile drawer navigation opens all views with 0 layout overflows', (WidgetTester tester) async {
       tester.view.physicalSize = const Size(375, 812);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -269,8 +399,7 @@ void main() {
       expect(find.text('ABOUT RUPOSHI INTERNATIONAL'), findsWidgets);
     });
 
-    testWidgets('Checkout and Cart Drawer render without overflow on compact mobile (320x568)',
-        (WidgetTester tester) async {
+    testWidgets('Checkout and Cart Drawer render without overflow on compact mobile (320x568)', (WidgetTester tester) async {
       tester.view.physicalSize = const Size(320, 568);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -308,8 +437,7 @@ void main() {
       expect(find.text('Order Summary'), findsOneWidget);
     });
 
-    testWidgets('Product Details view renders without overflow on compact mobile (320x568)',
-        (WidgetTester tester) async {
+    testWidgets('Product Details view renders without overflow on compact mobile (320x568)', (WidgetTester tester) async {
       tester.view.physicalSize = const Size(320, 568);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -327,8 +455,7 @@ void main() {
       expect(find.text('Add to Beauty Bag'), findsOneWidget);
     });
 
-    testWidgets('B2B authenticated portal renders without overflow on 320x568 and 768x1024',
-        (WidgetTester tester) async {
+    testWidgets('B2B authenticated portal renders without overflow on 320x568 and 768x1024', (WidgetTester tester) async {
       tester.view.physicalSize = const Size(320, 568);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -351,8 +478,7 @@ void main() {
       expect(find.text('B2B Wholesale Dealer Gate'), findsOneWidget);
     });
 
-    testWidgets('TopNavBar has centered nav items including B2B tab across multiple desktop breakpoints',
-        (WidgetTester tester) async {
+    testWidgets('TopNavBar has centered nav items including B2B tab across multiple desktop breakpoints', (WidgetTester tester) async {
       final desktopResolutions = [
         const Size(1100, 800),
         const Size(1280, 800),
@@ -384,8 +510,7 @@ void main() {
       expect(find.text('B2B Wholesale Dealer Gate'), findsOneWidget);
     });
 
-    testWidgets('Admin Management Console authentication and section switching works cleanly',
-        (WidgetTester tester) async {
+    testWidgets('Admin Management Console authentication and section switching works cleanly', (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1400, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -435,8 +560,7 @@ void main() {
       expect(find.text('INTERNATIONAL'), findsWidgets);
     });
 
-    testWidgets('Customer placed order is accurately visible in Admin Panel with complete customer details and in Customer Directory',
-        (WidgetTester tester) async {
+    testWidgets('Customer placed order is accurately visible in Admin Panel with complete customer details and in Customer Directory', (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1400, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -502,6 +626,65 @@ void main() {
       expect(find.text('Samira Akhtar'), findsWidgets);
       expect(find.text('+8801799887766'), findsWidgets);
       expect(find.text('Order History'), findsWidgets);
+    });
+
+    testWidgets('B2B Wholesale Portal renders Dealer Login and Application tabs, and Admin CRM shows Dealer badges and Make Dealer action', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1200, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(const RuposhiCustomerApp());
+      await tester.pumpAndSettle();
+
+      final cubit = tester.element(find.byType(Scaffold).first).read<StoreCubit>();
+
+      // Navigate to B2B Wholesale Portal
+      cubit.navigateTo(AppView.b2bPortal);
+      await tester.pumpAndSettle();
+
+      // Verify B2B portal header and tab switchers
+      expect(find.text('B2B Wholesale Dealer Gate'), findsOneWidget);
+      expect(find.text('Dealer Login'), findsOneWidget);
+      expect(find.text('Apply Dealership'), findsOneWidget);
+      expect(find.text('Unlock Wholesale Pricing'), findsOneWidget);
+      expect(find.text('1-Click Demo Login (aaaa / aaaa)'), findsOneWidget);
+
+      // Switch to Apply Dealership tab
+      await tester.tap(find.text('Apply Dealership'));
+      await tester.pumpAndSettle();
+      expect(find.text('Submit Dealership Application'), findsOneWidget);
+
+      // Switch back and log in as dealer
+      await tester.tap(find.text('Dealer Login'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('1-Click Demo Login (aaaa / aaaa)'));
+      await tester.pumpAndSettle();
+
+      // Verify authenticated dealer view
+      expect(find.text('OFFICIAL WHOLESALE DEALER ACTIVE'), findsWidgets);
+      expect(find.text('Lock Portal'), findsOneWidget);
+
+      // Now navigate to Admin Console
+      cubit.navigateTo(AppView.admin);
+      await tester.pumpAndSettle();
+      cubit.loginAdmin('admin', 'admin123');
+      await tester.pumpAndSettle();
+
+      // Switch to Customer Directory
+      await tester.tap(find.text('Customer Directory').first);
+      await tester.pumpAndSettle();
+
+      // Verify CRM shows Dealers / Wholesalers metric and "+ Make Dealer" or Wholesaler badge
+      expect(find.text('Dealers / Wholesalers'), findsOneWidget);
+      expect(find.text('+ Make Dealer'), findsWidgets);
+
+      // Switch to B2B Wholesale & Dealer Network in admin
+      await tester.tap(find.text('B2B Wholesale Partners').first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('B2B Wholesale & Dealer Network'), findsOneWidget);
+      expect(find.text('+ Onboard Partner'), findsOneWidget);
     });
   });
 }

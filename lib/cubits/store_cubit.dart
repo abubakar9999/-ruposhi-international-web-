@@ -22,6 +22,7 @@ class StoreState extends Equatable {
   final double discountPercent;
   final bool insideDhaka;
   final bool isB2BAuthenticated;
+  final B2BPartner? activeDealer;
   final String? b2bError;
   final bool isCustomerLoggedIn;
   final String customerPhone;
@@ -57,6 +58,7 @@ class StoreState extends Equatable {
     this.discountPercent = 0,
     this.insideDhaka = true,
     this.isB2BAuthenticated = false,
+    this.activeDealer,
     this.b2bError,
     this.isCustomerLoggedIn = false,
     this.customerPhone = '',
@@ -145,6 +147,8 @@ class StoreState extends Equatable {
     double? discountPercent,
     bool? insideDhaka,
     bool? isB2BAuthenticated,
+    B2BPartner? activeDealer,
+    bool clearActiveDealer = false,
     String? b2bError,
     bool? isCustomerLoggedIn,
     String? customerPhone,
@@ -176,6 +180,7 @@ class StoreState extends Equatable {
       discountPercent: discountPercent ?? this.discountPercent,
       insideDhaka: insideDhaka ?? this.insideDhaka,
       isB2BAuthenticated: isB2BAuthenticated ?? this.isB2BAuthenticated,
+      activeDealer: clearActiveDealer ? null : (activeDealer ?? this.activeDealer),
       b2bError: b2bError,
       isCustomerLoggedIn: isCustomerLoggedIn ?? this.isCustomerLoggedIn,
       customerPhone: customerPhone ?? this.customerPhone,
@@ -210,6 +215,7 @@ class StoreState extends Equatable {
         discountPercent,
         insideDhaka,
         isB2BAuthenticated,
+        activeDealer,
         b2bError,
         isCustomerLoggedIn,
         customerPhone,
@@ -246,12 +252,13 @@ class StoreCubit extends Cubit<StoreState> {
     }
   }
 
-  /// Refreshes live customer orders and customer CRM records from Supabase
+  /// Refreshes live customer orders, customer CRM records, and B2B partners from Supabase
   Future<void> loadAdminData() async {
     emit(state.copyWith(isLoadingAdminData: true));
     try {
       final fetchedOrders = await SupabaseService.fetchOrders();
       final fetchedCustomers = await SupabaseService.fetchCustomers();
+      final fetchedPartners = await SupabaseService.fetchB2BPartners();
 
       List<AdminOrder> combinedOrders = List<AdminOrder>.from(state.orders);
       if (fetchedOrders.isNotEmpty) {
@@ -296,9 +303,19 @@ class StoreCubit extends Cubit<StoreState> {
         }
       }
 
+      List<B2BPartner> combinedPartners = List<B2BPartner>.from(state.b2bPartners);
+      if (fetchedPartners.isNotEmpty) {
+        final fetchedPartnerIds = fetchedPartners.map((p) => p.id).toSet();
+        combinedPartners = [
+          ...fetchedPartners,
+          ...state.b2bPartners.where((p) => !fetchedPartnerIds.contains(p.id)),
+        ];
+      }
+
       emit(state.copyWith(
         orders: combinedOrders,
         customers: customerMap.values.toList(),
+        b2bPartners: combinedPartners,
         isLoadingAdminData: false,
       ));
     } catch (_) {
@@ -407,18 +424,91 @@ class StoreCubit extends Cubit<StoreState> {
   }
 
   void loginB2B(String username, String password) {
-    if (username.trim() == 'aaaa' && password.trim() == 'aaaa') {
-      emit(state.copyWith(isB2BAuthenticated: true, b2bError: null));
+    final cleanId = username.trim();
+    final cleanPass = password.trim();
+
+    // 1. One-click Demo Credentials
+    if (cleanId == 'aaaa' && cleanPass == 'aaaa') {
+      final demoDealer = state.b2bPartners.firstWhere(
+        (p) => p.status == 'Approved',
+        orElse: () => initialSampleB2BPartners.first,
+      );
+      emit(state.copyWith(
+        isB2BAuthenticated: true,
+        activeDealer: demoDealer,
+        b2bError: null,
+      ));
+      return;
+    }
+
+    if (cleanId.isEmpty) {
+      emit(state.copyWith(
+        isB2BAuthenticated: false,
+        b2bError: 'Please enter your registered dealer mobile phone or Trade License number.',
+      ));
+      return;
+    }
+
+    // 2. Validate against state.b2bPartners by phone, id, or trade license
+    final numericId = cleanId.replaceAll(RegExp(r'[^0-9]'), '');
+    B2BPartner? matchedPartner;
+
+    for (final p in state.b2bPartners) {
+      final pNumeric = p.phone.replaceAll(RegExp(r'[^0-9]'), '');
+      final bool phoneMatches = numericId.isNotEmpty &&
+          (pNumeric == numericId ||
+              (numericId.length >= 7 && pNumeric.endsWith(numericId)) ||
+              (pNumeric.length >= 7 && numericId.endsWith(pNumeric)));
+
+      final bool idMatches = p.id.toLowerCase() == cleanId.toLowerCase();
+      final bool licenseMatches = p.tradeLicense.isNotEmpty &&
+          p.tradeLicense.toLowerCase().contains(cleanId.toLowerCase());
+
+      if (phoneMatches || idMatches || licenseMatches) {
+        matchedPartner = p;
+        break;
+      }
+    }
+
+    if (matchedPartner != null) {
+      if (matchedPartner.status == 'Pending Review' || matchedPartner.status == 'Pending') {
+        emit(state.copyWith(
+          isB2BAuthenticated: false,
+          b2bError:
+              'Your B2B application for "${matchedPartner.businessName}" is pending review by Ruposhi B2B Accounts. We will verify your trade license and activate your portal within 2 hours. WhatsApp: +880 1700-000000',
+        ));
+        return;
+      }
+      if (matchedPartner.status == 'Suspended') {
+        emit(state.copyWith(
+          isB2BAuthenticated: false,
+          b2bError:
+              'Wholesale dealer access for "${matchedPartner.businessName}" is currently suspended. Please contact our trade relations team at support@ruposhi.com.',
+        ));
+        return;
+      }
+
+      // Approved dealer access granted
+      emit(state.copyWith(
+        isB2BAuthenticated: true,
+        activeDealer: matchedPartner,
+        b2bError: null,
+      ));
     } else {
       emit(state.copyWith(
         isB2BAuthenticated: false,
-        b2bError: 'Invalid credentials! Use demo login -> Username: aaaa & Password: aaaa',
+        b2bError:
+            'No approved wholesale dealer found for "$cleanId". Please verify your registered mobile number, use demo (aaaa / aaaa), or apply for a new dealership below.',
       ));
     }
   }
 
   void logoutB2B() {
-    emit(state.copyWith(isB2BAuthenticated: false, b2bError: null));
+    emit(state.copyWith(
+      isB2BAuthenticated: false,
+      clearActiveDealer: true,
+      b2bError: null,
+    ));
   }
 
   void loginCustomerOtp(String phone) {
@@ -606,14 +696,68 @@ class StoreCubit extends Cubit<StoreState> {
     final index = state.b2bPartners.indexWhere((p) => p.id == partnerId);
     if (index >= 0) {
       final updated = List<B2BPartner>.from(state.b2bPartners);
-      updated[index] = updated[index].copyWith(status: status);
+      final updatedPartner = updated[index].copyWith(status: status);
+      updated[index] = updatedPartner;
       emit(state.copyWith(b2bPartners: updated));
+      SupabaseService.updateB2BPartner(updatedPartner);
     }
+  }
+
+  void approveB2BPartner(String partnerId, {String? tier}) {
+    final index = state.b2bPartners.indexWhere((p) => p.id == partnerId);
+    if (index >= 0) {
+      final updated = List<B2BPartner>.from(state.b2bPartners);
+      final updatedPartner = updated[index].copyWith(
+        status: 'Approved',
+        tier: tier ?? updated[index].tier,
+      );
+      updated[index] = updatedPartner;
+      emit(state.copyWith(b2bPartners: updated));
+      SupabaseService.updateB2BPartner(updatedPartner);
+    }
+  }
+
+  void applyForDealership(B2BPartner application) {
+    final updated = List<B2BPartner>.from(state.b2bPartners)..insert(0, application);
+    emit(state.copyWith(b2bPartners: updated));
+    SupabaseService.createB2BPartner(application);
+  }
+
+  void grantDealerStatusToCustomer(
+    CustomerRecord customer, {
+    required String businessName,
+    required String tier,
+    required String tradeLicense,
+    String businessType = 'Wholesaler',
+  }) {
+    final newPartner = B2BPartner(
+      id: 'b2b_${DateTime.now().millisecondsSinceEpoch}',
+      businessName: businessName.trim().isNotEmpty
+          ? businessName.trim()
+          : '${customer.name} Enterprise',
+      contactPerson: customer.name,
+      phone: customer.phone,
+      email: '',
+      tradeLicense: tradeLicense.trim().isNotEmpty
+          ? tradeLicense.trim()
+          : 'TRAD/BD/${DateTime.now().millisecondsSinceEpoch % 100000}',
+      district: customer.district,
+      tier: tier,
+      status: 'Approved',
+      businessType: businessType,
+      totalOrders: customer.totalOrders,
+      totalSpend: customer.totalSpent,
+    );
+
+    final updated = List<B2BPartner>.from(state.b2bPartners)..insert(0, newPartner);
+    emit(state.copyWith(b2bPartners: updated));
+    SupabaseService.createB2BPartner(newPartner);
   }
 
   void addB2BPartner(B2BPartner partner) {
     final updated = List<B2BPartner>.from(state.b2bPartners)..insert(0, partner);
     emit(state.copyWith(b2bPartners: updated));
+    SupabaseService.createB2BPartner(partner);
   }
 
   void addCoupon(Coupon coupon) {

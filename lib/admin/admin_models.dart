@@ -92,9 +92,7 @@ class AdminOrder extends Equatable {
       grandTotal: (map['grand_total'] as num?)?.toDouble() ?? (map['grandTotal'] as num?)?.toDouble() ?? 0.0,
       items: itemsList,
       status: map['status'] ?? 'Pending',
-      createdAt: map['created_at'] != null
-          ? (DateTime.tryParse(map['created_at'].toString()) ?? DateTime.now())
-          : (map['createdAt'] is DateTime ? map['createdAt'] : DateTime.now()),
+      createdAt: map['created_at'] != null ? (DateTime.tryParse(map['created_at'].toString()) ?? DateTime.now()) : (map['createdAt'] is DateTime ? map['createdAt'] : DateTime.now()),
       courier: map['courier'],
       trackingCode: map['tracking_code'] ?? map['trackingCode'],
       notes: map['notes'],
@@ -130,8 +128,9 @@ class B2BPartner extends Equatable {
   final String email;
   final String tradeLicense;
   final String district;
-  final String tier; // 'Gold Salon (25% off)', 'Platinum Partner (30% off)', 'Master Distributor (35% off)'
+  final String tier; // 'Gold Salon (25% off)', 'Platinum Partner (30% off)', 'Master Distributor (35% off)', 'Wholesaler (20% off)'
   final String status; // 'Approved', 'Pending Review', 'Suspended'
+  final String businessType; // 'Wholesaler', 'Salon & Spa', 'Pharmacy', 'Distributor'
   final int totalOrders;
   final double totalSpend;
 
@@ -145,6 +144,7 @@ class B2BPartner extends Equatable {
     required this.district,
     required this.tier,
     this.status = 'Approved',
+    this.businessType = 'Wholesaler',
     this.totalOrders = 0,
     this.totalSpend = 0.0,
   });
@@ -159,6 +159,7 @@ class B2BPartner extends Equatable {
     String? district,
     String? tier,
     String? status,
+    String? businessType,
     int? totalOrders,
     double? totalSpend,
   }) {
@@ -172,13 +173,48 @@ class B2BPartner extends Equatable {
       district: district ?? this.district,
       tier: tier ?? this.tier,
       status: status ?? this.status,
+      businessType: businessType ?? this.businessType,
       totalOrders: totalOrders ?? this.totalOrders,
       totalSpend: totalSpend ?? this.totalSpend,
     );
   }
 
+  factory B2BPartner.fromMap(Map<String, dynamic> map) {
+    return B2BPartner(
+      id: map['id']?.toString() ?? 'b2b_${DateTime.now().millisecondsSinceEpoch}',
+      businessName: map['business_name'] ?? map['businessName'] ?? 'Wholesale Partner',
+      contactPerson: map['contact_person'] ?? map['contactPerson'] ?? 'Proprietor',
+      phone: map['phone'] ?? '',
+      email: map['email'] ?? '',
+      tradeLicense: map['trade_license'] ?? map['tradeLicense'] ?? '',
+      district: map['district'] ?? 'Dhaka',
+      tier: map['tier'] ?? 'Wholesaler (20% off)',
+      status: map['status'] ?? 'Pending Review',
+      businessType: map['business_type'] ?? map['businessType'] ?? 'Wholesaler',
+      totalOrders: (map['total_orders'] as num?)?.toInt() ?? 0,
+      totalSpend: (map['total_spend'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'business_name': businessName,
+      'contact_person': contactPerson,
+      'phone': phone,
+      'email': email,
+      'trade_license': tradeLicense,
+      'district': district,
+      'tier': tier,
+      'status': status,
+      'business_type': businessType,
+      'total_orders': totalOrders,
+      'total_spend': totalSpend,
+    };
+  }
+
   @override
-  List<Object?> get props => [id, businessName, phone, status, tier];
+  List<Object?> get props => [id, businessName, phone, status, tier, businessType];
 }
 
 class Coupon extends Equatable {
@@ -249,9 +285,7 @@ class CustomerRecord extends Equatable {
       district: map['district'] ?? 'Dhaka',
       totalOrders: (map['total_orders'] as num?)?.toInt() ?? 1,
       totalSpent: (map['total_spent'] as num?)?.toDouble() ?? 0.0,
-      lastOrderDate: map['last_order_date'] != null
-          ? map['last_order_date'].toString().split('T').first
-          : 'Recent',
+      lastOrderDate: map['last_order_date'] != null ? map['last_order_date'].toString().split('T').first : 'Recent',
       isVip: map['is_vip'] ?? false,
     );
   }
@@ -384,6 +418,7 @@ final List<B2BPartner> initialSampleB2BPartners = [
     district: 'Gulshan 2, Dhaka',
     tier: 'Platinum Partner (30% off)',
     status: 'Approved',
+    businessType: 'Salon & Spa',
     totalOrders: 18,
     totalSpend: 384000.0,
   ),
@@ -397,6 +432,7 @@ final List<B2BPartner> initialSampleB2BPartners = [
     district: 'Dhanmondi, Dhaka',
     tier: 'Gold Salon (25% off)',
     status: 'Approved',
+    businessType: 'Pharmacy',
     totalOrders: 12,
     totalSpend: 245000.0,
   ),
@@ -410,11 +446,26 @@ final List<B2BPartner> initialSampleB2BPartners = [
     district: 'Panchlaish, Chittagong',
     tier: 'Gold Salon (25% off)',
     status: 'Pending Review',
+    businessType: 'Salon & Spa',
     totalOrders: 0,
     totalSpend: 0.0,
   ),
   const B2BPartner(
     id: 'b2b_4',
+    businessName: 'Bengal Cosmetics Wholesalers Ltd',
+    contactPerson: 'Haji Mohammad Rafiq',
+    phone: '+880 1911-884422',
+    email: 'bengalwholesale.dhaka@gmail.com',
+    tradeLicense: 'TRAD/DSCC/008812/2022',
+    district: 'Chawkbazar, Dhaka',
+    tier: 'Wholesaler (20% off)',
+    status: 'Approved',
+    businessType: 'Wholesaler',
+    totalOrders: 34,
+    totalSpend: 840000.0,
+  ),
+  const B2BPartner(
+    id: 'b2b_5',
     businessName: 'Sylhet Aesthetics & Laser Clinic',
     contactPerson: 'Dr. Sabrina Ahmed',
     phone: '+880 1722-998877',
@@ -423,6 +474,7 @@ final List<B2BPartner> initialSampleB2BPartners = [
     district: 'Zindabazar, Sylhet',
     tier: 'Master Distributor (35% off)',
     status: 'Approved',
+    businessType: 'Distributor',
     totalOrders: 26,
     totalSpend: 620000.0,
   ),
@@ -536,4 +588,3 @@ final List<WarehouseBatch> initialSampleBatches = [
     status: 'Verified & Sealed',
   ),
 ];
-

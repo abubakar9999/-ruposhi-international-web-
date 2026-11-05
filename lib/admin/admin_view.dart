@@ -38,6 +38,7 @@ class _AdminViewState extends State<AdminView> {
   String _productCategoryFilter = 'All';
   bool _onlyLowStock = false;
   String _orderStatusFilter = 'All';
+  String _b2bFilter = 'All';
 
   @override
   void initState() {
@@ -2490,10 +2491,41 @@ class _AdminViewState extends State<AdminView> {
   }
 
   // ==========================================
-  // SECTION 4: B2B WHOLESALE & SALON PARTNERS
+  // SECTION 4: B2B WHOLESALE & DEALER NETWORK
   // ==========================================
   Widget _buildB2BSection(BuildContext context, StoreCubit cubit) {
-    final partners = widget.state.b2bPartners;
+    final allPartners = widget.state.b2bPartners;
+
+    // Filter partners based on _b2bFilter
+    final filteredPartners = allPartners.where((p) {
+      if (_b2bFilter == 'All') return true;
+      if (_b2bFilter == 'Pending Review') {
+        return p.status.toLowerCase().contains('pending');
+      }
+      if (_b2bFilter == 'Wholesaler') {
+        return p.businessType.toLowerCase() == 'wholesaler' || p.tier.toLowerCase().contains('wholesaler');
+      }
+      if (_b2bFilter == 'Salon & Spa') {
+        return p.businessType.toLowerCase().contains('salon') ||
+            p.businessName.toLowerCase().contains('salon') ||
+            p.businessName.toLowerCase().contains('parlour') ||
+            p.businessName.toLowerCase().contains('spa');
+      }
+      if (_b2bFilter == 'Pharmacy') {
+        return p.businessType.toLowerCase().contains('pharmacy') ||
+            p.businessName.toLowerCase().contains('pharmacy') ||
+            p.businessName.toLowerCase().contains('derma');
+      }
+      if (_b2bFilter == 'Distributor') {
+        return p.businessType.toLowerCase().contains('distributor') || p.tier.toLowerCase().contains('distributor');
+      }
+      return true;
+    }).toList();
+
+    final pendingCount = allPartners.where((p) => p.status.toLowerCase().contains('pending')).length;
+    final approvedCount = allPartners.where((p) => p.status == 'Approved').length;
+    final wholesalerCount = allPartners.where((p) => p.businessType == 'Wholesaler').length;
+    final totalWholesaleSpend = allPartners.fold<double>(0.0, (sum, p) => sum + p.totalSpend);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2505,8 +2537,8 @@ class _AdminViewState extends State<AdminView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('B2B Wholesale Salons, Spas & Pharmacies', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-                  Text('Manage trade license verifications, dealer tiers, and bulk order supply contracts.', style: TextStyle(color: Colors.grey.shade600, fontSize: 12.5)),
+                  const Text('B2B Wholesale & Dealer Network', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                  Text('Manage approved dealers, wholesalers, trade license verifications, and pending online dealership applications.', style: TextStyle(color: Colors.grey.shade600, fontSize: 12.5)),
                 ],
               ),
             ),
@@ -2523,80 +2555,266 @@ class _AdminViewState extends State<AdminView> {
           ],
         ),
 
-        const SizedBox(height: 20),
+        const SizedBox(height: 18),
 
-        ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: partners.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (context, index) {
-            final p = partners[index];
-            return Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+        // Dealer Login & Access Info Guide Banner
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFF334155)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
-              child: Row(
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppTheme.gold100,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(Icons.storefront, color: AppTheme.gold600, size: 24),
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(color: AppTheme.gold400.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8)),
+                    child: const Icon(Icons.verified_user, color: AppTheme.gold400, size: 18),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(p.businessName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: p.status == 'Approved' ? Colors.green.shade50 : Colors.amber.shade50,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: p.status == 'Approved' ? Colors.green.shade300 : Colors.amber.shade300),
-                              ),
-                              child: Text(
-                                p.status,
-                                style: TextStyle(
-                                  color: p.status == 'Approved' ? Colors.green.shade900 : Colors.amber.shade900,
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 2),
-                        Text('Contact: ${p.contactPerson} • ${p.phone} • ${p.email}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                        Text('Trade License: ${p.tradeLicense} • Region: ${p.district}', style: const TextStyle(color: Colors.blueGrey, fontSize: 11.5)),
-                        const SizedBox(height: 4),
-                        Text('Tier: ${p.tier} • Lifetime Spend: ৳${p.totalSpend.toStringAsFixed(0)} (${p.totalOrders} bulk orders)', style: const TextStyle(color: AppTheme.rose800, fontWeight: FontWeight.bold, fontSize: 12)),
-                      ],
+                  const SizedBox(width: 10),
+                  const Expanded(
+                    child: Text(
+                      'B2B Wholesale Dealer Authentication & Portal Access Guide',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13.5),
                     ),
-                  ),
-                  PopupMenuButton<String>(
-                    tooltip: 'Change Status',
-                    child: const Icon(Icons.more_vert, color: Colors.grey),
-                    onSelected: (val) => cubit.updateB2BPartnerStatus(p.id, val),
-                    itemBuilder: (_) => ['Approved', 'Pending Review', 'Suspended']
-                        .map((s) => PopupMenuItem(value: s, child: Text(s)))
-                        .toList(),
                   ),
                 ],
               ),
-            );
-          },
+              const SizedBox(height: 10),
+              const Text(
+                '• Dealers log in directly via the website top navigation under "B2B Wholesale" using their registered Mobile Number and security PIN (or demo "aaaa / aaaa").\n'
+                '• Approved dealers see exclusive wholesale rates with 15% to 35% margin discounts and bulk MOQ packaging with VAT 6.3 invoices.\n'
+                '• Applications submitted via the website form appear below under "Pending Review" for 1-click executive approval.',
+                style: TextStyle(color: Color(0xFFCBD5E1), fontSize: 12, height: 1.45),
+              ),
+            ],
+          ),
         ),
+
+        const SizedBox(height: 18),
+
+        // Top Metrics
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            _buildCustomerMetricCard('Approved Dealers', '$approvedCount', Icons.verified, const Color(0xFF10B981)),
+            _buildCustomerMetricCard('Pending Review', '$pendingCount', Icons.pending_actions, Colors.deepOrange),
+            _buildCustomerMetricCard('Wholesalers', '$wholesalerCount', Icons.storefront, const Color(0xFF0284C7)),
+            _buildCustomerMetricCard('Wholesale Volume', '৳${totalWholesaleSpend.toStringAsFixed(0)}', Icons.payments, AppTheme.rose900),
+          ],
+        ),
+
+        const SizedBox(height: 18),
+
+        // Filter Chips Row
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            ChoiceChip(
+              label: Text('All Partners (${allPartners.length})', style: const TextStyle(fontSize: 12)),
+              selected: _b2bFilter == 'All',
+              onSelected: (_) => setState(() => _b2bFilter = 'All'),
+            ),
+            ChoiceChip(
+              avatar: pendingCount > 0 ? const Icon(Icons.fiber_manual_record, color: Colors.deepOrange, size: 12) : null,
+              label: Text('Pending Review ($pendingCount)', style: TextStyle(fontSize: 12, color: pendingCount > 0 ? Colors.deepOrange : null, fontWeight: pendingCount > 0 ? FontWeight.bold : FontWeight.normal)),
+              selected: _b2bFilter == 'Pending Review',
+              selectedColor: Colors.deepOrange.shade100,
+              onSelected: (_) => setState(() => _b2bFilter = 'Pending Review'),
+            ),
+            ChoiceChip(
+              label: const Text('Wholesalers', style: TextStyle(fontSize: 12)),
+              selected: _b2bFilter == 'Wholesaler',
+              onSelected: (_) => setState(() => _b2bFilter = 'Wholesaler'),
+            ),
+            ChoiceChip(
+              label: const Text('Salons & Spas', style: TextStyle(fontSize: 12)),
+              selected: _b2bFilter == 'Salon & Spa',
+              onSelected: (_) => setState(() => _b2bFilter = 'Salon & Spa'),
+            ),
+            ChoiceChip(
+              label: const Text('Pharmacies', style: TextStyle(fontSize: 12)),
+              selected: _b2bFilter == 'Pharmacy',
+              onSelected: (_) => setState(() => _b2bFilter = 'Pharmacy'),
+            ),
+            ChoiceChip(
+              label: const Text('Distributors', style: TextStyle(fontSize: 12)),
+              selected: _b2bFilter == 'Distributor',
+              onSelected: (_) => setState(() => _b2bFilter = 'Distributor'),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 18),
+
+        if (filteredPartners.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
+            child: const Center(
+              child: Text('No B2B partners match the selected filter.', style: TextStyle(color: Colors.grey, fontSize: 13)),
+            ),
+          )
+        else
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: filteredPartners.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final p = filteredPartners[index];
+              final isPending = p.status.toLowerCase().contains('pending');
+
+              return Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: isPending ? const Color(0xFFFFFBEB) : Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isPending ? Colors.amber.shade400 : const Color(0xFFE2E8F0),
+                    width: isPending ? 1.5 : 1.0,
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isPending ? Colors.amber.shade100 : AppTheme.gold100,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        isPending ? Icons.pending_actions : Icons.storefront,
+                        color: isPending ? Colors.amber.shade900 : AppTheme.gold600,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(p.businessName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15), overflow: TextOverflow.ellipsis),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: p.status == 'Approved' ? Colors.green.shade50 : Colors.amber.shade100,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: p.status == 'Approved' ? Colors.green.shade300 : Colors.amber.shade400),
+                                ),
+                                child: Text(
+                                  p.status,
+                                  style: TextStyle(
+                                    color: p.status == 'Approved' ? Colors.green.shade900 : Colors.amber.shade900,
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF1F5F9),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  p.businessType,
+                                  style: const TextStyle(color: Colors.blueGrey, fontSize: 10.5, fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            'Proprietor: ${p.contactPerson} • Login Mobile: ${p.phone} • Email: ${p.email.isNotEmpty ? p.email : "N/A"}',
+                            style: const TextStyle(color: Colors.black87, fontSize: 12),
+                          ),
+                          Text(
+                            'Trade License: ${p.tradeLicense} • Region: ${p.district}',
+                            style: const TextStyle(color: Colors.blueGrey, fontSize: 11.5),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Tier: ${p.tier} • Lifetime Spend: ৳${p.totalSpend.toStringAsFixed(0)} (${p.totalOrders} bulk orders)',
+                            style: const TextStyle(color: AppTheme.rose800, fontWeight: FontWeight.bold, fontSize: 12),
+                          ),
+                          if (isPending) ...[
+                            const SizedBox(height: 10),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 6,
+                              children: [
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    cubit.approveB2BPartner(p.id);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Approved ${p.businessName} as official wholesale dealer!')),
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green.shade700,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  ),
+                                  icon: const Icon(Icons.check_circle_outline, size: 14),
+                                  label: const Text('Approve Dealership', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
+                                ),
+                                OutlinedButton.icon(
+                                  onPressed: () async {
+                                    final clean = p.phone.replaceAll(RegExp(r'[^0-9]'), '');
+                                    final msg = Uri.encodeComponent('Assalamu Alaikum ${p.contactPerson}! Regarding your B2B dealership application for ${p.businessName} on Ruposhi International.');
+                                    final url = Uri.parse('https://wa.me/$clean?text=$msg');
+                                    if (await canLaunchUrl(url)) await launchUrl(url, mode: LaunchMode.externalApplication);
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  ),
+                                  icon: const Icon(Icons.chat, size: 14, color: Color(0xFF25D366)),
+                                  label: const Text('WhatsApp Applicant', style: TextStyle(fontSize: 11.5)),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    PopupMenuButton<String>(
+                      tooltip: 'Change Status',
+                      child: const Icon(Icons.more_vert, color: Colors.grey),
+                      onSelected: (val) => cubit.updateB2BPartnerStatus(p.id, val),
+                      itemBuilder: (_) => ['Approved', 'Pending Review', 'Suspended']
+                          .map((s) => PopupMenuItem(value: s, child: Text(s)))
+                          .toList(),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
       ],
     );
   }
@@ -2608,7 +2826,8 @@ class _AdminViewState extends State<AdminView> {
     final emailCtrl = TextEditingController();
     final tradeCtrl = TextEditingController(text: 'TRAD/DNCC/');
     final districtCtrl = TextEditingController(text: 'Dhaka');
-    String tier = 'Gold Salon (25% off)';
+    String businessType = 'Wholesaler';
+    String tier = 'Wholesaler (20% off)';
 
     showDialog(
       context: context,
@@ -2635,12 +2854,28 @@ class _AdminViewState extends State<AdminView> {
                     const SizedBox(height: 10),
                     TextField(controller: districtCtrl, decoration: const InputDecoration(labelText: 'District / Location')),
                     const SizedBox(height: 10),
-                    DropdownButton<String>(
-                      value: tier,
+                    DropdownButtonFormField<String>(
+                      initialValue: businessType,
                       isExpanded: true,
-                      items: ['Gold Salon (25% off)', 'Platinum Partner (30% off)', 'Master Distributor (35% off)']
-                          .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                      decoration: const InputDecoration(labelText: 'Business Category'),
+                      items: ['Wholesaler', 'Salon & Spa', 'Pharmacy', 'Distributor']
+                          .map((t) => DropdownMenuItem(value: t, child: Text(t, overflow: TextOverflow.ellipsis)))
                           .toList(),
+                      onChanged: (val) {
+                        if (val != null) setDialogState(() => businessType = val);
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    DropdownButtonFormField<String>(
+                      initialValue: tier,
+                      isExpanded: true,
+                      decoration: const InputDecoration(labelText: 'Wholesale Discount Tier'),
+                      items: [
+                        'Wholesaler (20% off)',
+                        'Gold Salon (25% off)',
+                        'Platinum Partner (30% off)',
+                        'Master Distributor (35% off)'
+                      ].map((t) => DropdownMenuItem(value: t, child: Text(t, overflow: TextOverflow.ellipsis))).toList(),
                       onChanged: (val) {
                         if (val != null) setDialogState(() => tier = val);
                       },
@@ -2656,7 +2891,7 @@ class _AdminViewState extends State<AdminView> {
                 onPressed: () {
                   final newPartner = B2BPartner(
                     id: 'b2b_${DateTime.now().millisecondsSinceEpoch}',
-                    businessName: nameCtrl.text.trim().isNotEmpty ? nameCtrl.text.trim() : 'Elite Derma Salon',
+                    businessName: nameCtrl.text.trim().isNotEmpty ? nameCtrl.text.trim() : 'Elite Wholesale Enterprise',
                     contactPerson: personCtrl.text.trim(),
                     phone: phoneCtrl.text.trim(),
                     email: emailCtrl.text.trim(),
@@ -2664,10 +2899,11 @@ class _AdminViewState extends State<AdminView> {
                     district: districtCtrl.text.trim(),
                     tier: tier,
                     status: 'Approved',
+                    businessType: businessType,
                   );
                   cubit.addB2BPartner(newPartner);
                   Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Partner onboarded!')));
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Partner onboarded as Approved Dealer!')));
                 },
                 child: const Text('Approve & Onboard', style: TextStyle(color: Colors.white)),
               ),
@@ -2868,6 +3104,18 @@ class _AdminViewState extends State<AdminView> {
     final vipCount = allCustomers.where((c) => c.isVip).length;
     final repeatBuyersCount = allCustomers.where((c) => c.totalOrders > 1).length;
 
+    // Count how many customers are already registered as B2B Dealers or Wholesalers
+    final dealerCustomersCount = allCustomers.where((c) {
+      final cClean = c.phone.replaceAll(RegExp(r'[^0-9]'), '');
+      return widget.state.b2bPartners.any((p) {
+        final pClean = p.phone.replaceAll(RegExp(r'[^0-9]'), '');
+        return cClean.isNotEmpty &&
+            (pClean == cClean ||
+                (cClean.length >= 7 && pClean.endsWith(cClean)) ||
+                (pClean.length >= 7 && cClean.endsWith(pClean)));
+      });
+    }).length;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -2879,7 +3127,7 @@ class _AdminViewState extends State<AdminView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('Customer Directory & Real-Time CRM', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-                  Text('Direct phone contacts, delivery histories, and WhatsApp client relationship management.', style: TextStyle(color: Colors.grey.shade600, fontSize: 12.5)),
+                  Text('Direct phone contacts, delivery histories, and WhatsApp client relationship management. Identifies retail buyers vs B2B Dealers.', style: TextStyle(color: Colors.grey.shade600, fontSize: 12.5)),
                 ],
               ),
             ),
@@ -2895,7 +3143,8 @@ class _AdminViewState extends State<AdminView> {
           children: [
             _buildCustomerMetricCard('Total Customers', '${allCustomers.length}', Icons.people, const Color(0xFF0284C7)),
             _buildCustomerMetricCard('VIP Clients', '$vipCount', Icons.stars, const Color(0xFFD97706)),
-            _buildCustomerMetricCard('Repeat Buyers', '$repeatBuyersCount', Icons.repeat, const Color(0xFF10B981)),
+            _buildCustomerMetricCard('Dealers / Wholesalers', '$dealerCustomersCount', Icons.storefront, const Color(0xFF059669)),
+            _buildCustomerMetricCard('Repeat Buyers', '$repeatBuyersCount', Icons.repeat, const Color(0xFF4F46E5)),
             _buildCustomerMetricCard('Lifetime Value', '৳${totalSpentSum.toStringAsFixed(0)}', Icons.payments, AppTheme.rose900),
           ],
         ),
@@ -2961,24 +3210,59 @@ class _AdminViewState extends State<AdminView> {
             separatorBuilder: (_, __) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
               final c = filteredCustomers[index];
+
+              // Check if this customer has a matching B2B Partner / Wholesaler profile
+              final cCleanPhone = c.phone.replaceAll(RegExp(r'[^0-9]'), '');
+              B2BPartner? b2bMatch;
+              for (final p in widget.state.b2bPartners) {
+                final pClean = p.phone.replaceAll(RegExp(r'[^0-9]'), '');
+                if (cCleanPhone.isNotEmpty &&
+                    (pClean == cCleanPhone ||
+                        (cCleanPhone.length >= 7 && pClean.endsWith(cCleanPhone)) ||
+                        (pClean.length >= 7 && cCleanPhone.endsWith(pClean)))) {
+                  b2bMatch = p;
+                  break;
+                }
+              }
+
+              final dealerInfo = b2bMatch;
+              final isApprovedDealer = dealerInfo != null && dealerInfo.status == 'Approved';
+              final isPendingDealer = dealerInfo != null && dealerInfo.status.toLowerCase().contains('pending');
+
               return Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isApprovedDealer
+                      ? const Color(0xFFFEFDF8)
+                      : (isPendingDealer ? const Color(0xFFFFFBEB) : Colors.white),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  border: Border.all(
+                    color: isApprovedDealer
+                        ? const Color(0xFFFDE68A)
+                        : (isPendingDealer ? Colors.orange.shade300 : const Color(0xFFE2E8F0)),
+                    width: (isApprovedDealer || isPendingDealer) ? 1.4 : 1.0,
+                  ),
                   boxShadow: [
                     BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 6, offset: const Offset(0, 2)),
                   ],
                 ),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CircleAvatar(
                       radius: 22,
-                      backgroundColor: c.isVip ? const Color(0xFFFEF3C7) : AppTheme.rose100,
+                      backgroundColor: isApprovedDealer
+                          ? const Color(0xFFFEF3C7)
+                          : (c.isVip ? const Color(0xFFFEF3C7) : AppTheme.rose100),
                       child: Text(
                         c.name.isNotEmpty ? c.name[0].toUpperCase() : 'C',
-                        style: TextStyle(color: c.isVip ? const Color(0xFFB45309) : AppTheme.rose900, fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(
+                          color: isApprovedDealer
+                              ? const Color(0xFFB45309)
+                              : (c.isVip ? const Color(0xFFB45309) : AppTheme.rose900),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 14),
@@ -2986,13 +3270,50 @@ class _AdminViewState extends State<AdminView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                          Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 6,
+                            runSpacing: 4,
                             children: [
-                              Flexible(
-                                child: Text(c.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14.5), overflow: TextOverflow.ellipsis),
-                              ),
-                              if (c.isVip) ...[
-                                const SizedBox(width: 8),
+                              Text(c.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14.5)),
+                              if (isApprovedDealer) ...[
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFEF3C7),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: const Color(0xFFD97706)),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.verified, size: 12, color: Color(0xFFB45309)),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '★ ${dealerInfo.businessType.toUpperCase()} (${dealerInfo.tier.split('(').first.trim()})',
+                                        style: const TextStyle(
+                                          color: Color(0xFFB45309),
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ] else if (isPendingDealer) ...[
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFFF7ED),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: Colors.deepOrange.shade300),
+                                  ),
+                                  child: const Text(
+                                    '⏳ PENDING DEALER',
+                                    style: TextStyle(color: Colors.deepOrange, fontSize: 10, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ] else if (c.isVip) ...[
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                                   decoration: BoxDecoration(color: const Color(0xFFFEF3C7), borderRadius: BorderRadius.circular(6), border: Border.all(color: const Color(0xFFF59E0B))),
@@ -3019,6 +3340,19 @@ class _AdminViewState extends State<AdminView> {
                               Text('• District: ${c.district}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
                             ],
                           ),
+                          if (isApprovedDealer) ...[
+                            const SizedBox(height: 3),
+                            Text(
+                              'Enterprise: ${dealerInfo.businessName} • Trade License: ${dealerInfo.tradeLicense}',
+                              style: const TextStyle(color: Color(0xFFB45309), fontSize: 11.5, fontWeight: FontWeight.w600),
+                            ),
+                          ] else if (isPendingDealer) ...[
+                            const SizedBox(height: 3),
+                            Text(
+                              'Application: ${dealerInfo.businessName} (${dealerInfo.businessType}) • Awaiting Approval',
+                              style: const TextStyle(color: Colors.deepOrange, fontSize: 11.5, fontWeight: FontWeight.w600),
+                            ),
+                          ],
                           const SizedBox(height: 4),
                           Wrap(
                             spacing: 8,
@@ -3045,6 +3379,35 @@ class _AdminViewState extends State<AdminView> {
                       spacing: 8,
                       runSpacing: 6,
                       children: [
+                        // If not a dealer yet, provide 1-click option to make them a Dealer/Wholesaler
+                        if (!isApprovedDealer && !isPendingDealer)
+                          ElevatedButton.icon(
+                            onPressed: () => _openUpgradeCustomerToDealerDialog(context, cubit, c),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF831843), // deep plum
+                              foregroundColor: AppTheme.goldLight,
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            ),
+                            icon: const Icon(Icons.business_center, size: 13),
+                            label: const Text('+ Make Dealer', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                          )
+                        else if (isPendingDealer)
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              cubit.approveB2BPartner(dealerInfo.id);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Approved ${dealerInfo.businessName} as official wholesale dealer!')),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green.shade700,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            ),
+                            icon: const Icon(Icons.check_circle_outline, size: 13),
+                            label: const Text('Approve Dealer', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                          ),
+
                         OutlinedButton.icon(
                           onPressed: () => _openCustomerDetailsDialog(context, c),
                           style: OutlinedButton.styleFrom(
@@ -3078,6 +3441,150 @@ class _AdminViewState extends State<AdminView> {
             },
           ),
       ],
+    );
+  }
+
+  void _openUpgradeCustomerToDealerDialog(BuildContext context, StoreCubit cubit, CustomerRecord customer) {
+    final businessNameCtrl = TextEditingController(text: '${customer.name} Cosmetics & Parlour');
+    final tradeCtrl = TextEditingController(text: 'TRAD/DNCC/${DateTime.now().millisecondsSinceEpoch % 100000}/2026');
+    final districtCtrl = TextEditingController(text: customer.district);
+    String businessType = 'Wholesaler';
+    String tier = 'Wholesaler (20% off)';
+
+    showDialog(
+      context: context,
+      builder: (_) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: AppTheme.gold100, borderRadius: BorderRadius.circular(8)),
+                  child: const Icon(Icons.storefront, color: AppTheme.gold600, size: 22),
+                ),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Text(
+                    'Grant Dealer / Wholesaler Status',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                  ),
+                ),
+              ],
+            ),
+            content: SizedBox(
+              width: 480,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.person, color: Colors.blueGrey, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Customer: ${customer.name} (${customer.phone})\nDistrict: ${customer.district} • Lifetime: ৳${customer.totalSpent.toStringAsFixed(0)}',
+                              style: const TextStyle(fontSize: 12, color: Colors.black87),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    TextField(
+                      controller: businessNameCtrl,
+                      decoration: const InputDecoration(labelText: 'Salon / Business / Enterprise Name'),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            initialValue: businessType,
+                            isExpanded: true,
+                            decoration: const InputDecoration(labelText: 'Business Category'),
+                            items: ['Wholesaler', 'Salon & Spa', 'Pharmacy', 'Distributor']
+                                .map((t) => DropdownMenuItem(value: t, child: Text(t, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13))))
+                                .toList(),
+                            onChanged: (val) {
+                              if (val != null) setDialogState(() => businessType = val);
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextField(
+                            controller: districtCtrl,
+                            decoration: const InputDecoration(labelText: 'Business Region / District'),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    DropdownButtonFormField<String>(
+                      initialValue: tier,
+                      isExpanded: true,
+                      decoration: const InputDecoration(labelText: 'Wholesale Discount Tier'),
+                      items: [
+                        'Wholesaler (20% off)',
+                        'Gold Salon (25% off)',
+                        'Platinum Partner (30% off)',
+                        'Master Distributor (35% off)'
+                      ].map((t) => DropdownMenuItem(value: t, child: Text(t, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13)))).toList(),
+                      onChanged: (val) {
+                        if (val != null) setDialogState(() => tier = val);
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: tradeCtrl,
+                      decoration: const InputDecoration(labelText: 'Trade License Number'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.rose900,
+                  foregroundColor: AppTheme.goldLight,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                ),
+                onPressed: () {
+                  cubit.grantDealerStatusToCustomer(
+                    customer,
+                    businessName: businessNameCtrl.text.trim(),
+                    tier: tier,
+                    tradeLicense: tradeCtrl.text.trim(),
+                    businessType: businessType,
+                  );
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: AppTheme.midnightPlum,
+                      content: Text('${customer.name} is now an Approved Wholesale Dealer! They can now log in at B2B portal using ${customer.phone}.'),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.verified, size: 16),
+                label: const Text('Confirm & Grant Dealer Login', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 

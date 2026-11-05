@@ -348,6 +348,8 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
                 _B2BGoldPillLink(
                   isBangla: state.isBangla,
                   isActive: state.currentView == AppView.b2bPortal,
+                  isDealerActive: state.isB2BAuthenticated,
+                  dealerName: state.activeDealer?.businessName,
                   onTap: () => cubit.navigateTo(AppView.b2bPortal),
                 ),
                 const SizedBox(width: 6),
@@ -649,31 +651,49 @@ class _NavLink extends StatelessWidget {
 class _B2BGoldPillLink extends StatelessWidget {
   final bool isBangla;
   final bool isActive;
+  final bool isDealerActive;
+  final String? dealerName;
   final VoidCallback onTap;
 
   const _B2BGoldPillLink({
     required this.isBangla,
     required this.isActive,
+    this.isDealerActive = false,
+    this.dealerName,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    String label = isBangla ? 'বিটুবি পাইকারি' : 'B2B Wholesale';
+    if (isDealerActive) {
+      final shortName = dealerName != null && dealerName!.isNotEmpty
+          ? (dealerName!.length > 14 ? '${dealerName!.substring(0, 12)}…' : dealerName!)
+          : 'Dealer';
+      label = isBangla ? 'ডিলার: $shortName' : 'Dealer: $shortName';
+    }
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
         decoration: BoxDecoration(
-          color: isActive ? const Color(0xFFFBF1D3) : AppTheme.gold100,
+          color: isDealerActive
+              ? const Color(0xFFECFDF5)
+              : (isActive ? const Color(0xFFFBF1D3) : AppTheme.gold100),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isActive ? AppTheme.goldAccent : AppTheme.gold300,
-            width: isActive ? 1.6 : 1.2,
+            color: isDealerActive
+                ? const Color(0xFF10B981)
+                : (isActive ? AppTheme.goldAccent : AppTheme.gold300),
+            width: (isActive || isDealerActive) ? 1.6 : 1.2,
           ),
           boxShadow: [
             BoxShadow(
-              color: AppTheme.goldAccent.withValues(alpha: 0.18),
+              color: isDealerActive
+                  ? const Color(0xFF10B981).withValues(alpha: 0.2)
+                  : AppTheme.goldAccent.withValues(alpha: 0.18),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -682,12 +702,16 @@ class _B2BGoldPillLink extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.business_center, size: 14, color: AppTheme.gold600),
+            Icon(
+              isDealerActive ? Icons.verified : Icons.business_center,
+              size: 14,
+              color: isDealerActive ? const Color(0xFF047857) : AppTheme.gold600,
+            ),
             const SizedBox(width: 5),
             Text(
-              isBangla ? 'বিটুবি পাইকারি' : 'B2B Wholesale',
-              style: const TextStyle(
-                color: AppTheme.gold600,
+              label,
+              style: TextStyle(
+                color: isDealerActive ? const Color(0xFF047857) : AppTheme.gold600,
                 fontWeight: FontWeight.bold,
                 fontSize: 12.5,
               ),
