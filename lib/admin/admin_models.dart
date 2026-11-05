@@ -463,3 +463,4 @@ final List<WarehouseBatch> initialSampleBatches = [
     status: 'Verified & Sealed',
   ),
 ];
+

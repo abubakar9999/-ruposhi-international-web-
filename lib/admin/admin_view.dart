@@ -3,8 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../core/app_theme.dart';
 import '../cubits/store_cubit.dart';
-import '../models/admin_models.dart';
 import '../models/product_model.dart';
+import 'admin_models.dart';
+import 'bulk_product_dialog.dart';
+import 'image_upload_service.dart';
 
 enum AdminSection {
   overview,
@@ -332,7 +334,7 @@ class _AdminViewState extends State<AdminView> {
                       children: [
                         Icon(Icons.cloud_done, color: Colors.lightGreenAccent, size: 14),
                         SizedBox(width: 6),
-                        Text('Supabase Sync Active', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600)),
+                        Text('Supabase Live Storage', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),
@@ -664,7 +666,7 @@ class _AdminViewState extends State<AdminView> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Monitoring imported beauty inventory from Seoul, Paris, London & NY. All 64 Bangladesh delivery corridors active.',
+                      'Direct cosmetics importer from Seoul, Paris, London & NY. All 64 Bangladesh delivery corridors active.',
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.white.withValues(alpha: 0.85),
@@ -1089,7 +1091,7 @@ class _AdminViewState extends State<AdminView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Action Bar
+        // Action Bar with Bulk Import Button
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -1103,15 +1105,36 @@ class _AdminViewState extends State<AdminView> {
               ),
             ),
             const SizedBox(width: 12),
-            ElevatedButton.icon(
-              onPressed: () => _openAddEditProductDialog(context, cubit, null),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.rose800,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              ),
-              icon: const Icon(Icons.add_circle_outline, size: 18),
-              label: const Text('+ Add New SKU', style: TextStyle(fontWeight: FontWeight.bold)),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (_) => BulkProductDialog(cubit: cubit),
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.rose900,
+                    side: const BorderSide(color: AppTheme.rose900),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  ),
+                  icon: const Icon(Icons.playlist_add, size: 18),
+                  label: const Text('Bulk Item Entries', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _openAddEditProductDialog(context, cubit, null),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.rose800,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                  icon: const Icon(Icons.add_circle_outline, size: 18),
+                  label: const Text('+ Add New SKU', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ],
             ),
           ],
         ),
@@ -1389,6 +1412,7 @@ class _AdminViewState extends State<AdminView> {
 
     bool isBestSeller = existing?.isBestSeller ?? false;
     bool isNewArrival = existing?.isNewArrival ?? false;
+    bool isUploadingImage = false;
 
     showDialog(
       context: context,
@@ -1398,10 +1422,11 @@ class _AdminViewState extends State<AdminView> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             title: Text(isEdit ? 'Edit Product SKU' : 'Add New Imported Cosmetics SKU'),
             content: SizedBox(
-              width: 580,
+              width: 600,
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Product Name (English)')),
                     const SizedBox(height: 10),
@@ -1450,8 +1475,96 @@ class _AdminViewState extends State<AdminView> {
                     ),
                     const SizedBox(height: 10),
                     TextField(controller: skinTypeCtrl, decoration: const InputDecoration(labelText: 'Skin Type Recommendation')),
-                    const SizedBox(height: 10),
-                    TextField(controller: imageCtrl, decoration: const InputDecoration(labelText: 'Image Web URL (HTTPS)')),
+                    const SizedBox(height: 12),
+
+                    // ==========================================
+                    // SUPABASE STORAGE IMAGE UPLOAD & COMPRESSION
+                    // ==========================================
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFCBD5E1)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          TextField(
+                            controller: imageCtrl,
+                            decoration: const InputDecoration(
+                              labelText: 'Product Image Public URL',
+                              hintText: 'https://...',
+                              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF0284C7),
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                ),
+                                onPressed: isUploadingImage
+                                    ? null
+                                    : () async {
+                                        setDialogState(() => isUploadingImage = true);
+                                        final res = await ImageUploadService.pickCompressAndUpload();
+                                        setDialogState(() => isUploadingImage = false);
+
+                                        if (res != null) {
+                                          if (res.success) {
+                                            imageCtrl.text = res.publicUrl;
+                                            setDialogState(() {});
+                                            if (ctx.mounted) {
+                                              ScaffoldMessenger.of(ctx).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    'Uploaded & Compressed! ${res.originalSizeFormatted} -> ${res.compressedSizeFormatted} (${res.savingsPercent}% saved).',
+                                                  ),
+                                                  backgroundColor: Colors.green.shade800,
+                                                ),
+                                              );
+                                            }
+                                          } else {
+                                            if (res.publicUrl.isNotEmpty) {
+                                              imageCtrl.text = res.publicUrl;
+                                              setDialogState(() {});
+                                            }
+                                            if (ctx.mounted) {
+                                              ScaffoldMessenger.of(ctx).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    'Notice: ${res.errorMessage ?? "Storage error"}. URL generated, but ensure "product-images" bucket exists in Supabase.',
+                                                  ),
+                                                  backgroundColor: Colors.orange.shade800,
+                                                  duration: const Duration(seconds: 5),
+                                                ),
+                                              );
+                                            }
+                                          }
+                                        }
+                                      },
+                                icon: isUploadingImage
+                                    ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                    : const Icon(Icons.cloud_upload_outlined, size: 16),
+                                label: Text(
+                                  isUploadingImage ? 'Compressing (<=100KB)...' : 'Upload Image (Auto <= 100KB Compress)',
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Expanded(
+                                child: Text('Auto-compresses to strictly <= 100 KB before Supabase Storage upload.', style: TextStyle(fontSize: 10.5, color: Colors.blueGrey)),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
                     const SizedBox(height: 10),
                     TextField(controller: descCtrl, maxLines: 2, decoration: const InputDecoration(labelText: 'Description')),
                     const SizedBox(height: 10),
@@ -1880,14 +1993,17 @@ class _AdminViewState extends State<AdminView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('RUPOSHI INTERNATIONAL', style: TextStyle(fontFamily: 'Playfair Display', fontWeight: FontWeight.bold, fontSize: 18, color: AppTheme.rose950)),
-                      Text('100% Authentic Imported Cosmetics', style: TextStyle(fontSize: 10, color: AppTheme.gold600, fontWeight: FontWeight.bold)),
-                      Text('Central Fulfillment Hub • Dhaka, Bangladesh', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                    ],
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('RUPOSHI INTERNATIONAL', style: TextStyle(fontFamily: 'Playfair Display', fontWeight: FontWeight.bold, fontSize: 18, color: AppTheme.rose950)),
+                        Text('100% Authentic Imported Cosmetics', style: TextStyle(fontSize: 10, color: AppTheme.gold600, fontWeight: FontWeight.bold)),
+                        Text('Central Fulfillment Hub • Dhaka, Bangladesh', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(border: Border.all(color: Colors.black12)),
@@ -2528,3 +2644,4 @@ class _AdminViewState extends State<AdminView> {
     );
   }
 }
+

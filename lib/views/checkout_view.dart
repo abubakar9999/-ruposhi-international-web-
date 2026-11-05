@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../core/app_theme.dart';
 import '../cubits/store_cubit.dart';
-import '../models/admin_models.dart';
+import '../admin/admin_models.dart';
 import '../services/supabase_service.dart';
 
 class CheckoutView extends StatefulWidget {
@@ -80,12 +80,14 @@ class _CheckoutViewState extends State<CheckoutView> {
     final savedSubtotal = widget.state.subtotal;
     final savedDeliveryFee = widget.state.deliveryFee;
     final savedItemsCount = widget.state.totalCartUnits;
-    final cartItemsPayload = widget.state.cart.map((item) => {
-      'id': item.product.id,
-      'name': item.product.name,
-      'price': item.unitPrice,
-      'quantity': item.quantity,
-    }).toList();
+    final cartItemsPayload = widget.state.cart
+        .map((item) => {
+              'id': item.product.id,
+              'name': item.product.name,
+              'price': item.unitPrice,
+              'quantity': item.quantity,
+            })
+        .toList();
 
     // Record in local admin order stream
     cubit.recordCustomerOrder(
@@ -171,9 +173,7 @@ class _CheckoutViewState extends State<CheckoutView> {
             ),
             const SizedBox(height: 14),
             Text(
-              widget.state.isBangla
-                  ? 'আপনার ফোনে ট্র্যাকিং এসএমএস পাঠানো হবে। যেকোনো প্রশ্নে আমাদের কনসিয়ার্জে যোগাযোগ করুন।'
-                  : 'An SMS confirmation has been queued for your mobile. Our logistics team will dispatch in cold-chain packaging.',
+              widget.state.isBangla ? 'আপনার ফোনে ট্র্যাকিং এসএমএস পাঠানো হবে। যেকোনো প্রশ্নে আমাদের কনসিয়ার্জে যোগাযোগ করুন।' : 'An SMS confirmation has been queued for your mobile. Our logistics team will dispatch in cold-chain packaging.',
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
             ),
@@ -294,409 +294,405 @@ class _CheckoutViewState extends State<CheckoutView> {
                     // ==========================================
                     SizedBox(
                       width: leftWidth,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.state.isBangla ? 'ডেলিভারি ও চেকআউট তথ্য' : 'Delivery & Express Checkout',
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        widget.state.isBangla
-                            ? 'সঠিক তথ্য প্রদান করুন যেন আমরা দ্রুত ডেলিভারি নিশ্চিত করতে পারি'
-                            : 'No account required. Fast checkout with cash on delivery or instant MFS.',
-                        style: TextStyle(color: Colors.grey.shade600, fontSize: 13.5),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Delivery Form Card
-                      Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: AppTheme.borderSubtle),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.03),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Recipient Details',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                            ),
-                            const SizedBox(height: 16),
-                            TextFormField(
-                              controller: _nameCtrl,
-                              decoration: const InputDecoration(
-                                labelText: 'Full Name *',
-                                prefixIcon: Icon(Icons.person_outline),
-                              ),
-                              validator: (v) => v == null || v.trim().isEmpty ? 'Please enter your name' : null,
-                            ),
-                            const SizedBox(height: 14),
-                            TextFormField(
-                              controller: _phoneCtrl,
-                              decoration: const InputDecoration(
-                                labelText: 'Mobile Number (+880...) *',
-                                prefixIcon: Icon(Icons.phone_iphone),
-                              ),
-                              validator: (v) =>
-                                  v == null || v.trim().length < 10 ? 'Enter valid mobile number' : null,
-                            ),
-                            const SizedBox(height: 14),
-                            TextFormField(
-                              controller: _addrCtrl,
-                              maxLines: 2,
-                              decoration: const InputDecoration(
-                                labelText: 'Complete Delivery Address (House, Road, Area) *',
-                                prefixIcon: Icon(Icons.home_outlined),
-                              ),
-                              validator: (v) =>
-                                  v == null || v.trim().isEmpty ? 'Please provide detailed address' : null,
-                            ),
-                            const SizedBox(height: 14),
-                            TextFormField(
-                              controller: _cityCtrl,
-                              decoration: const InputDecoration(
-                                labelText: 'City / District *',
-                                prefixIcon: Icon(Icons.location_city_outlined),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-
-                            // Delivery Zone Selector
-                            const Text(
-                              'Select Delivery Zone:',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
-                            ),
-                            const SizedBox(height: 10),
-                            isSmallMobile
-                                ? Column(
-                                    children: [
-                                      _DeliveryZoneCard(
-                                        title: 'Inside Dhaka',
-                                        time: '24-48 Hours',
-                                        cost: widget.state.isFreeDeliveryEligible ? 'FREE' : '৳70',
-                                        isSelected: widget.state.insideDhaka,
-                                        onTap: () => cubit.toggleDeliveryZone(true),
-                                      ),
-                                      const SizedBox(height: 10),
-                                      _DeliveryZoneCard(
-                                        title: 'Outside Dhaka',
-                                        time: '48-72 Hours',
-                                        cost: widget.state.isFreeDeliveryEligible ? 'FREE' : '৳130',
-                                        isSelected: !widget.state.insideDhaka,
-                                        onTap: () => cubit.toggleDeliveryZone(false),
-                                      ),
-                                    ],
-                                  )
-                                : Row(
-                                    children: [
-                                      Expanded(
-                                        child: _DeliveryZoneCard(
-                                          title: 'Inside Dhaka',
-                                          time: '24-48 Hours',
-                                          cost: widget.state.isFreeDeliveryEligible ? 'FREE' : '৳70',
-                                          isSelected: widget.state.insideDhaka,
-                                          onTap: () => cubit.toggleDeliveryZone(true),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 14),
-                                      Expanded(
-                                        child: _DeliveryZoneCard(
-                                          title: 'Outside Dhaka',
-                                          time: '48-72 Hours',
-                                          cost: widget.state.isFreeDeliveryEligible ? 'FREE' : '৳130',
-                                          isSelected: !widget.state.insideDhaka,
-                                          onTap: () => cubit.toggleDeliveryZone(false),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 28),
-
-                      // Payment Method Card
-                      Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: AppTheme.borderSubtle),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.03),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Payment Method',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                            ),
-                            const SizedBox(height: 16),
-                            _PaymentOptionTile(
-                              title: 'Cash on Delivery (COD)',
-                              subtitle: 'Pay after inspecting package at your doorstep',
-                              icon: Icons.payments_outlined,
-                              color: Colors.green,
-                              isSelected: _paymentMethod == 'Cash on Delivery (COD)',
-                              onTap: () => setState(() => _paymentMethod = 'Cash on Delivery (COD)'),
-                            ),
-                            _PaymentOptionTile(
-                              title: 'bKash Merchant Pay',
-                              subtitle: 'Instant mobile verification via bKash gateway',
-                              icon: Icons.account_balance_wallet_outlined,
-                              color: const Color(0xFFE2136E),
-                              isSelected: _paymentMethod == 'bKash Merchant Pay',
-                              onTap: () => setState(() => _paymentMethod = 'bKash Merchant Pay'),
-                            ),
-                            _PaymentOptionTile(
-                              title: 'Nagad Instant Pay',
-                              subtitle: 'Fast postal digital wallet payment',
-                              icon: Icons.mobile_friendly_outlined,
-                              color: const Color(0xFFF7941D),
-                              isSelected: _paymentMethod == 'Nagad Instant Pay',
-                              onTap: () => setState(() => _paymentMethod = 'Nagad Instant Pay'),
-                            ),
-                            _PaymentOptionTile(
-                              title: 'SSLCommerz (Visa / Mastercard / Amex)',
-                              subtitle: 'Secure card checkout with 128-bit encryption',
-                              icon: Icons.credit_card_outlined,
-                              color: Colors.blue.shade800,
-                              isSelected: _paymentMethod == 'SSLCommerz (Cards)',
-                              onTap: () => setState(() => _paymentMethod = 'SSLCommerz (Cards)'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // ==========================================
-                // RIGHT: Order Summary Card
-                // ==========================================
-                SizedBox(
-                  width: rightWidth,
-                  child: Container(
-                    padding: const EdgeInsets.all(26),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(22),
-                      border: Border.all(color: AppTheme.borderSubtle),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.04),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Flexible(
-                              child: Text(
-                                'Order Summary',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '${widget.state.totalCartUnits} Items',
-                              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-                            ),
-                          ],
-                        ),
-                        const Divider(height: 24),
-
-                        // Mini items preview list
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(maxHeight: 220),
-                          child: ListView.separated(
-                            shrinkWrap: true,
-                            itemCount: widget.state.cart.length,
-                            separatorBuilder: (_, __) => const SizedBox(height: 10),
-                            itemBuilder: (context, idx) {
-                              final it = widget.state.cart[idx];
-                              return Row(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.network(
-                                      it.product.imageUrl,
-                                      width: 44,
-                                      height: 44,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          it.product.name,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5),
-                                        ),
-                                        Text(
-                                          '${it.quantity} x ৳${it.unitPrice.toStringAsFixed(0)}',
-                                          style: TextStyle(color: Colors.grey.shade600, fontSize: 11.5),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Text(
-                                    '৳${it.total.toStringAsFixed(0)}',
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                        ),
-
-                        const Divider(height: 24),
-
-                        // Coupon Code Input
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _couponCtrl,
-                                textCapitalization: TextCapitalization.characters,
-                                decoration: const InputDecoration(
-                                  hintText: 'Promo Code (e.g. RUPOSHI10)',
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            ElevatedButton(
-                              onPressed: () => _handleApplyCoupon(cubit),
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                              ),
-                              child: const Text('Apply'),
-                            ),
-                          ],
-                        ),
-
-                        if (_couponMessage != null) ...[
-                          const SizedBox(height: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Text(
-                            _couponMessage!,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: _couponSuccess ? Colors.green.shade800 : Colors.red,
-                              fontWeight: FontWeight.w600,
+                            widget.state.isBangla ? 'ডেলিভারি ও চেকআউট তথ্য' : 'Delivery & Express Checkout',
+                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            widget.state.isBangla ? 'সঠিক তথ্য প্রদান করুন যেন আমরা দ্রুত ডেলিভারি নিশ্চিত করতে পারি' : 'No account required. Fast checkout with cash on delivery or instant MFS.',
+                            style: TextStyle(color: Colors.grey.shade600, fontSize: 13.5),
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Delivery Form Card
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: AppTheme.borderSubtle),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.03),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Recipient Details',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                ),
+                                const SizedBox(height: 16),
+                                TextFormField(
+                                  controller: _nameCtrl,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Full Name *',
+                                    prefixIcon: Icon(Icons.person_outline),
+                                  ),
+                                  validator: (v) => v == null || v.trim().isEmpty ? 'Please enter your name' : null,
+                                ),
+                                const SizedBox(height: 14),
+                                TextFormField(
+                                  controller: _phoneCtrl,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Mobile Number (+880...) *',
+                                    prefixIcon: Icon(Icons.phone_iphone),
+                                  ),
+                                  validator: (v) => v == null || v.trim().length < 10 ? 'Enter valid mobile number' : null,
+                                ),
+                                const SizedBox(height: 14),
+                                TextFormField(
+                                  controller: _addrCtrl,
+                                  maxLines: 2,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Complete Delivery Address (House, Road, Area) *',
+                                    prefixIcon: Icon(Icons.home_outlined),
+                                  ),
+                                  validator: (v) => v == null || v.trim().isEmpty ? 'Please provide detailed address' : null,
+                                ),
+                                const SizedBox(height: 14),
+                                TextFormField(
+                                  controller: _cityCtrl,
+                                  decoration: const InputDecoration(
+                                    labelText: 'City / District *',
+                                    prefixIcon: Icon(Icons.location_city_outlined),
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+
+                                // Delivery Zone Selector
+                                const Text(
+                                  'Select Delivery Zone:',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
+                                ),
+                                const SizedBox(height: 10),
+                                isSmallMobile
+                                    ? Column(
+                                        children: [
+                                          _DeliveryZoneCard(
+                                            title: 'Inside Dhaka',
+                                            time: '24-48 Hours',
+                                            cost: widget.state.isFreeDeliveryEligible ? 'FREE' : '৳70',
+                                            isSelected: widget.state.insideDhaka,
+                                            onTap: () => cubit.toggleDeliveryZone(true),
+                                          ),
+                                          const SizedBox(height: 10),
+                                          _DeliveryZoneCard(
+                                            title: 'Outside Dhaka',
+                                            time: '48-72 Hours',
+                                            cost: widget.state.isFreeDeliveryEligible ? 'FREE' : '৳130',
+                                            isSelected: !widget.state.insideDhaka,
+                                            onTap: () => cubit.toggleDeliveryZone(false),
+                                          ),
+                                        ],
+                                      )
+                                    : Row(
+                                        children: [
+                                          Expanded(
+                                            child: _DeliveryZoneCard(
+                                              title: 'Inside Dhaka',
+                                              time: '24-48 Hours',
+                                              cost: widget.state.isFreeDeliveryEligible ? 'FREE' : '৳70',
+                                              isSelected: widget.state.insideDhaka,
+                                              onTap: () => cubit.toggleDeliveryZone(true),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 14),
+                                          Expanded(
+                                            child: _DeliveryZoneCard(
+                                              title: 'Outside Dhaka',
+                                              time: '48-72 Hours',
+                                              cost: widget.state.isFreeDeliveryEligible ? 'FREE' : '৳130',
+                                              isSelected: !widget.state.insideDhaka,
+                                              onTap: () => cubit.toggleDeliveryZone(false),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 28),
+
+                          // Payment Method Card
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: AppTheme.borderSubtle),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.03),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Payment Method',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                ),
+                                const SizedBox(height: 16),
+                                _PaymentOptionTile(
+                                  title: 'Cash on Delivery (COD)',
+                                  subtitle: 'Pay after inspecting package at your doorstep',
+                                  icon: Icons.payments_outlined,
+                                  color: Colors.green,
+                                  isSelected: _paymentMethod == 'Cash on Delivery (COD)',
+                                  onTap: () => setState(() => _paymentMethod = 'Cash on Delivery (COD)'),
+                                ),
+                                _PaymentOptionTile(
+                                  title: 'bKash Merchant Pay',
+                                  subtitle: 'Instant mobile verification via bKash gateway',
+                                  icon: Icons.account_balance_wallet_outlined,
+                                  color: const Color(0xFFE2136E),
+                                  isSelected: _paymentMethod == 'bKash Merchant Pay',
+                                  onTap: () => setState(() => _paymentMethod = 'bKash Merchant Pay'),
+                                ),
+                                _PaymentOptionTile(
+                                  title: 'Nagad Instant Pay',
+                                  subtitle: 'Fast postal digital wallet payment',
+                                  icon: Icons.mobile_friendly_outlined,
+                                  color: const Color(0xFFF7941D),
+                                  isSelected: _paymentMethod == 'Nagad Instant Pay',
+                                  onTap: () => setState(() => _paymentMethod = 'Nagad Instant Pay'),
+                                ),
+                                _PaymentOptionTile(
+                                  title: 'SSLCommerz (Visa / Mastercard / Amex)',
+                                  subtitle: 'Secure card checkout with 128-bit encryption',
+                                  icon: Icons.credit_card_outlined,
+                                  color: Colors.blue.shade800,
+                                  isSelected: _paymentMethod == 'SSLCommerz (Cards)',
+                                  onTap: () => setState(() => _paymentMethod = 'SSLCommerz (Cards)'),
+                                ),
+                              ],
                             ),
                           ),
                         ],
+                      ),
+                    ),
 
-                        const SizedBox(height: 18),
-
-                        // Pricing Math
-                        _summaryRow('Subtotal', '৳${widget.state.subtotal.toStringAsFixed(0)}'),
-                        if (widget.state.discountAmount > 0)
-                          _summaryRow(
-                            'Coupon Discount (${widget.state.discountPercent.toStringAsFixed(0)}%)',
-                            '-৳${widget.state.discountAmount.toStringAsFixed(0)}',
-                            color: Colors.green.shade800,
-                          ),
-                        _summaryRow(
-                          'Delivery Fee',
-                          widget.state.deliveryFee == 0 ? 'FREE' : '৳${widget.state.deliveryFee.toStringAsFixed(0)}',
-                          color: widget.state.deliveryFee == 0 ? Colors.green.shade800 : null,
+                    // ==========================================
+                    // RIGHT: Order Summary Card
+                    // ==========================================
+                    SizedBox(
+                      width: rightWidth,
+                      child: Container(
+                        padding: const EdgeInsets.all(26),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(22),
+                          border: Border.all(color: AppTheme.borderSubtle),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.04),
+                              blurRadius: 16,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
                         ),
-
-                        const Divider(height: 24),
-
-                        // Total Payable
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            const Flexible(
-                              child: Text(
-                                'Total Payable',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                                overflow: TextOverflow.ellipsis,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Flexible(
+                                  child: Text(
+                                    'Order Summary',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  '${widget.state.totalCartUnits} Items',
+                                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                                ),
+                              ],
+                            ),
+                            const Divider(height: 24),
+
+                            // Mini items preview list
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxHeight: 220),
+                              child: ListView.separated(
+                                shrinkWrap: true,
+                                itemCount: widget.state.cart.length,
+                                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                                itemBuilder: (context, idx) {
+                                  final it = widget.state.cart[idx];
+                                  return Row(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          it.product.imageUrl,
+                                          width: 44,
+                                          height: 44,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              it.product.name,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5),
+                                            ),
+                                            Text(
+                                              '${it.quantity} x ৳${it.unitPrice.toStringAsFixed(0)}',
+                                              style: TextStyle(color: Colors.grey.shade600, fontSize: 11.5),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Text(
+                                        '৳${it.total.toStringAsFixed(0)}',
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                      ),
+                                    ],
+                                  );
+                                },
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                '৳${widget.state.grandTotal.toStringAsFixed(0)} BDT',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 18,
-                                  color: AppTheme.primaryRose,
+
+                            const Divider(height: 24),
+
+                            // Coupon Code Input
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    controller: _couponCtrl,
+                                    textCapitalization: TextCapitalization.characters,
+                                    decoration: const InputDecoration(
+                                      hintText: 'Promo Code (e.g. RUPOSHI10)',
+                                      contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                    ),
+                                  ),
                                 ),
+                                const SizedBox(width: 10),
+                                ElevatedButton(
+                                  onPressed: () => _handleApplyCoupon(cubit),
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                                  ),
+                                  child: const Text('Apply'),
+                                ),
+                              ],
+                            ),
+
+                            if (_couponMessage != null) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                _couponMessage!,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: _couponSuccess ? Colors.green.shade800 : Colors.red,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+
+                            const SizedBox(height: 18),
+
+                            // Pricing Math
+                            _summaryRow('Subtotal', '৳${widget.state.subtotal.toStringAsFixed(0)}'),
+                            if (widget.state.discountAmount > 0)
+                              _summaryRow(
+                                'Coupon Discount (${widget.state.discountPercent.toStringAsFixed(0)}%)',
+                                '-৳${widget.state.discountAmount.toStringAsFixed(0)}',
+                                color: Colors.green.shade800,
+                              ),
+                            _summaryRow(
+                              'Delivery Fee',
+                              widget.state.deliveryFee == 0 ? 'FREE' : '৳${widget.state.deliveryFee.toStringAsFixed(0)}',
+                              color: widget.state.deliveryFee == 0 ? Colors.green.shade800 : null,
+                            ),
+
+                            const Divider(height: 24),
+
+                            // Total Payable
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Flexible(
+                                  child: Text(
+                                    'Total Payable',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    '৳${widget.state.grandTotal.toStringAsFixed(0)} BDT',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 18,
+                                      color: AppTheme.primaryRose,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 24),
+
+                            // Confirm Button
+                            ElevatedButton(
+                              onPressed: () => _confirmOrder(context, cubit),
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.lock_outline, size: 18),
+                                  const SizedBox(width: 8),
+                                  Flexible(
+                                    child: Text(
+                                      widget.state.isBangla ? 'অর্ডার কনফার্ম করুন' : 'Confirm Order',
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            const Center(
+                              child: Text(
+                                '🔒 256-bit SSL encrypted & authentic cosmetics guarantee',
+                                style: TextStyle(fontSize: 11, color: Colors.grey),
                               ),
                             ),
                           ],
                         ),
-
-                        const SizedBox(height: 24),
-
-                        // Confirm Button
-                        ElevatedButton(
-                          onPressed: () => _confirmOrder(context, cubit),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.lock_outline, size: 18),
-                              const SizedBox(width: 8),
-                              Flexible(
-                                child: Text(
-                                  widget.state.isBangla ? 'অর্ডার কনফার্ম করুন' : 'Confirm Order',
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        const Center(
-                          child: Text(
-                            '🔒 256-bit SSL encrypted & authentic cosmetics guarantee',
-                            style: TextStyle(fontSize: 11, color: Colors.grey),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
                   ],
                 );
               },

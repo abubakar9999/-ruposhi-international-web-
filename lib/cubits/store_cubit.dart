@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../models/product_model.dart';
-import '../models/admin_models.dart';
+import '../admin/admin_models.dart';
 import '../services/supabase_service.dart';
 
 enum AppView { home, shop, productDetails, aboutUs, beautyBlog, b2bPortal, contact, checkout, admin }

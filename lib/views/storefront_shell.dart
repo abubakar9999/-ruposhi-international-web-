@@ -7,7 +7,7 @@ import '../widgets/cart_drawer.dart';
 import '../widgets/footer_section.dart';
 import '../widgets/top_nav_bar.dart';
 import 'about_view.dart';
-import 'admin_view.dart';
+import '../admin/admin_view.dart';
 import 'b2b_view.dart';
 import 'blog_view.dart';
 import 'checkout_view.dart';
