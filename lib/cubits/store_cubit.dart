@@ -1,9 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../models/product_model.dart';
+import '../models/admin_models.dart';
 import '../services/supabase_service.dart';
 
-enum AppView { home, shop, productDetails, aboutUs, beautyBlog, b2bPortal, contact, checkout }
+enum AppView { home, shop, productDetails, aboutUs, beautyBlog, b2bPortal, contact, checkout, admin }
 
 class StoreState extends Equatable {
   final AppView currentView;
@@ -27,6 +28,17 @@ class StoreState extends Equatable {
   final String? trackedOrderId;
   final String? trackOrderStatus;
 
+  // ==========================================
+  // ADMIN PANEL STATE
+  // ==========================================
+  final bool isAdminLoggedIn;
+  final String? adminLoginError;
+  final List<AdminOrder> orders;
+  final List<B2BPartner> b2bPartners;
+  final List<Coupon> coupons;
+  final String announcementEn;
+  final String announcementBn;
+
   const StoreState({
     this.currentView = AppView.home,
     this.isBangla = false,
@@ -48,6 +60,13 @@ class StoreState extends Equatable {
     this.customerPhone = '',
     this.trackedOrderId,
     this.trackOrderStatus,
+    this.isAdminLoggedIn = false,
+    this.adminLoginError,
+    this.orders = const [],
+    this.b2bPartners = const [],
+    this.coupons = const [],
+    this.announcementEn = '100% Original Imported Products Guaranteed | Fast Nationwide Delivery (Cash on Delivery Available)',
+    this.announcementBn = '১০০% আসল আমদানিকৃত প্রসাধনীর নিশ্চয়তা | সারাদেশে দ্রুত হোম ডেলিভারি (ক্যাশ অন ডেলিভারি)',
   });
 
   List<Product> get filteredProducts {
@@ -127,6 +146,13 @@ class StoreState extends Equatable {
     String? customerPhone,
     String? trackedOrderId,
     String? trackOrderStatus,
+    bool? isAdminLoggedIn,
+    String? adminLoginError,
+    List<AdminOrder>? orders,
+    List<B2BPartner>? b2bPartners,
+    List<Coupon>? coupons,
+    String? announcementEn,
+    String? announcementBn,
   }) {
     return StoreState(
       currentView: currentView ?? this.currentView,
@@ -149,6 +175,13 @@ class StoreState extends Equatable {
       customerPhone: customerPhone ?? this.customerPhone,
       trackedOrderId: trackedOrderId ?? this.trackedOrderId,
       trackOrderStatus: trackOrderStatus ?? this.trackOrderStatus,
+      isAdminLoggedIn: isAdminLoggedIn ?? this.isAdminLoggedIn,
+      adminLoginError: adminLoginError,
+      orders: orders ?? this.orders,
+      b2bPartners: b2bPartners ?? this.b2bPartners,
+      coupons: coupons ?? this.coupons,
+      announcementEn: announcementEn ?? this.announcementEn,
+      announcementBn: announcementBn ?? this.announcementBn,
     );
   }
 
@@ -174,11 +207,23 @@ class StoreState extends Equatable {
         customerPhone,
         trackedOrderId,
         trackOrderStatus,
+        isAdminLoggedIn,
+        adminLoginError,
+        orders,
+        b2bPartners,
+        coupons,
+        announcementEn,
+        announcementBn,
       ];
 }
 
 class StoreCubit extends Cubit<StoreState> {
-  StoreCubit() : super(const StoreState());
+  StoreCubit()
+      : super(StoreState(
+          orders: initialSampleOrders,
+          b2bPartners: initialSampleB2BPartners,
+          coupons: initialSampleCoupons,
+        ));
 
   Future<void> loadProducts() async {
     emit(state.copyWith(isLoadingProducts: true));
@@ -196,6 +241,7 @@ class StoreCubit extends Cubit<StoreState> {
       activeProduct: product ?? state.activeProduct,
       selectedCategory: category ?? state.selectedCategory,
       b2bError: null,
+      adminLoginError: null,
     ));
   }
 
@@ -327,5 +373,166 @@ class StoreCubit extends Cubit<StoreState> {
 
   void clearCart() {
     emit(state.copyWith(cart: [], discountPercent: 0, couponCode: ''));
+  }
+
+  // ==========================================
+  // BUSINESS MANAGEMENT / ADMIN OPERATIONS
+  // ==========================================
+  void loginAdmin(String username, String password) {
+    final u = username.trim().toLowerCase();
+    final p = password.trim();
+
+    // Support demo credentials or executive PIN
+    if ((u == 'admin' && p == 'admin123') || p == '2026' || (u == 'ruposhi' && p == 'admin')) {
+      emit(state.copyWith(
+        isAdminLoggedIn: true,
+        adminLoginError: null,
+        currentView: AppView.admin,
+      ));
+    } else {
+      emit(state.copyWith(
+        isAdminLoggedIn: false,
+        adminLoginError: 'Invalid Admin Credentials! Use Username: admin & Password: admin123 (or PIN: 2026)',
+      ));
+    }
+  }
+
+  void logoutAdmin() {
+    emit(state.copyWith(
+      isAdminLoggedIn: false,
+      adminLoginError: null,
+      currentView: AppView.home,
+    ));
+  }
+
+  void addProduct(Product product) {
+    final updated = List<Product>.from(state.products)..insert(0, product);
+    emit(state.copyWith(products: updated));
+    SupabaseService.addProduct(product);
+  }
+
+  void updateProduct(Product product) {
+    final index = state.products.indexWhere((p) => p.id == product.id);
+    if (index >= 0) {
+      final updated = List<Product>.from(state.products);
+      updated[index] = product;
+      emit(state.copyWith(products: updated));
+      SupabaseService.updateProduct(product);
+    }
+  }
+
+  void deleteProduct(String productId) {
+    final updated = state.products.where((p) => p.id != productId).toList();
+    emit(state.copyWith(products: updated));
+    SupabaseService.deleteProduct(productId);
+  }
+
+  void adjustProductStock(String productId, int delta) {
+    final index = state.products.indexWhere((p) => p.id == productId);
+    if (index >= 0) {
+      final current = state.products[index];
+      final newStock = (current.stock + delta).clamp(0, 9999);
+      final updatedProduct = Product(
+        id: current.id,
+        name: current.name,
+        nameBn: current.nameBn,
+        brand: current.brand,
+        category: current.category,
+        originCountry: current.originCountry,
+        countryFlag: current.countryFlag,
+        retailPrice: current.retailPrice,
+        oldPrice: current.oldPrice,
+        wholesalePrice: current.wholesalePrice,
+        moq: current.moq,
+        batchNo: current.batchNo,
+        expiryDate: current.expiryDate,
+        skinType: current.skinType,
+        shadesOrSizes: current.shadesOrSizes,
+        description: current.description,
+        descriptionBn: current.descriptionBn,
+        ingredients: current.ingredients,
+        usageInstructions: current.usageInstructions,
+        imageUrl: current.imageUrl,
+        gallery: current.gallery,
+        isNewArrival: current.isNewArrival,
+        isBestSeller: current.isBestSeller,
+        stock: newStock,
+        rating: current.rating,
+        reviewsCount: current.reviewsCount,
+        keyBenefits: current.keyBenefits,
+      );
+      updateProduct(updatedProduct);
+    }
+  }
+
+  void updateOrderStatus(
+    String orderId,
+    String newStatus, {
+    String? courier,
+    String? trackingCode,
+  }) {
+    final index = state.orders.indexWhere((o) => o.orderId == orderId);
+    if (index >= 0) {
+      final updated = List<AdminOrder>.from(state.orders);
+      updated[index] = updated[index].copyWith(
+        status: newStatus,
+        courier: courier,
+        trackingCode: trackingCode,
+      );
+      emit(state.copyWith(orders: updated));
+      SupabaseService.updateOrderStatus(
+        orderId,
+        newStatus,
+        courier: courier,
+        trackingCode: trackingCode,
+      );
+    }
+  }
+
+  void assignCourier(String orderId, String courier, String trackingCode) {
+    updateOrderStatus(orderId, 'Shipped', courier: courier, trackingCode: trackingCode);
+  }
+
+  void recordCustomerOrder(AdminOrder order) {
+    final updated = List<AdminOrder>.from(state.orders)..insert(0, order);
+    emit(state.copyWith(orders: updated));
+  }
+
+  void updateB2BPartnerStatus(String partnerId, String status) {
+    final index = state.b2bPartners.indexWhere((p) => p.id == partnerId);
+    if (index >= 0) {
+      final updated = List<B2BPartner>.from(state.b2bPartners);
+      updated[index] = updated[index].copyWith(status: status);
+      emit(state.copyWith(b2bPartners: updated));
+    }
+  }
+
+  void addB2BPartner(B2BPartner partner) {
+    final updated = List<B2BPartner>.from(state.b2bPartners)..insert(0, partner);
+    emit(state.copyWith(b2bPartners: updated));
+  }
+
+  void addCoupon(Coupon coupon) {
+    final updated = List<Coupon>.from(state.coupons)..insert(0, coupon);
+    emit(state.copyWith(coupons: updated));
+  }
+
+  void toggleCoupon(String code) {
+    final index = state.coupons.indexWhere((c) => c.code == code);
+    if (index >= 0) {
+      final updated = List<Coupon>.from(state.coupons);
+      final current = updated[index];
+      updated[index] = current.copyWith(isActive: !current.isActive);
+      emit(state.copyWith(coupons: updated));
+    }
+  }
+
+  void deleteCoupon(String code) {
+    final updated = state.coupons.where((c) => c.code != code).toList();
+    emit(state.copyWith(coupons: updated));
+  }
+
+  void updateAnnouncement(String en, String bn) {
+    emit(state.copyWith(announcementEn: en, announcementBn: bn));
   }
 }

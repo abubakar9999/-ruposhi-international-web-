@@ -95,6 +95,7 @@ class FooterSection extends StatelessWidget {
                         _footerLink('Contact & Live Tracking', () => cubit.navigateTo(AppView.contact)),
                         _footerLink('B2B Wholesale Portal', () => cubit.navigateTo(AppView.b2bPortal)),
                         _footerLink('Shopping Bag & Checkout', () => cubit.navigateTo(AppView.checkout)),
+                        _footerLink('Executive Admin Console', () => cubit.navigateTo(AppView.admin)),
                       ],
                     ),
                   ),

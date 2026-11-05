@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../core/app_theme.dart';
 import '../cubits/store_cubit.dart';
+import '../models/admin_models.dart';
 import '../services/supabase_service.dart';
 
 class CheckoutView extends StatefulWidget {
@@ -85,6 +86,24 @@ class _CheckoutViewState extends State<CheckoutView> {
       'price': item.unitPrice,
       'quantity': item.quantity,
     }).toList();
+
+    // Record in local admin order stream
+    cubit.recordCustomerOrder(
+      AdminOrder(
+        orderId: randId,
+        customerName: _nameCtrl.text.trim(),
+        customerPhone: _phoneCtrl.text.trim(),
+        customerAddress: _addrCtrl.text.trim(),
+        city: _cityCtrl.text.trim(),
+        paymentMethod: _paymentMethod,
+        subtotal: savedSubtotal,
+        deliveryFee: savedDeliveryFee,
+        grandTotal: savedGrandTotal,
+        items: cartItemsPayload,
+        status: 'Pending',
+        createdAt: DateTime.now(),
+      ),
+    );
 
     // Persist to Supabase in background
     SupabaseService.createOrder(

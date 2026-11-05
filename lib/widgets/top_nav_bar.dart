@@ -55,9 +55,7 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
                               const Icon(Icons.workspace_premium, size: 14, color: AppTheme.gold400),
                               const SizedBox(width: 6),
                               Text(
-                                state.isBangla
-                                    ? '১০০% আসল আমদানিকৃত প্রসাধনীর নিশ্চয়তা'
-                                    : '100% Original Imported Products Guaranteed',
+                                state.isBangla ? state.announcementBn : state.announcementEn,
                                 style: const TextStyle(
                                   color: AppTheme.rose100,
                                   fontSize: 11.5,
@@ -98,6 +96,24 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
                                   Text(
                                     state.isBangla ? 'অর্ডার ট্র্যাক' : 'Track Order',
                                     style: const TextStyle(color: AppTheme.gold300, fontSize: 11.5, fontWeight: FontWeight.w500),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Text('|', style: TextStyle(color: Colors.white.withValues(alpha: 0.3))),
+                            const SizedBox(width: 10),
+                          ],
+                          if (!isMobile) ...[
+                            InkWell(
+                              onTap: () => cubit.navigateTo(AppView.admin),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.admin_panel_settings_outlined, size: 13, color: AppTheme.rose200),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    state.isBangla ? 'অ্যাডমিন' : 'Admin',
+                                    style: const TextStyle(color: AppTheme.rose200, fontSize: 11.5, fontWeight: FontWeight.w500),
                                   ),
                                 ],
                               ),

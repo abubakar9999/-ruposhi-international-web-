@@ -113,4 +113,109 @@ class SupabaseService {
       return false;
     }
   }
+
+  /// Adds a new product to Supabase 'products' table
+  static Future<bool> addProduct(Product product) async {
+    if (client == null) return false;
+    try {
+      await client!.from('products').insert({
+        'id': product.id,
+        'title': product.name,
+        'title_bn': product.nameBn,
+        'brand': product.brand,
+        'category': product.category,
+        'origin': product.originCountry,
+        'flag': product.countryFlag,
+        'price': product.retailPrice,
+        'old_price': product.oldPrice,
+        'wholesale_price': product.wholesalePrice,
+        'moq': product.moq,
+        'batch': product.batchNo,
+        'expiry': product.expiryDate,
+        'skin_type': product.skinType,
+        'shades': product.shadesOrSizes,
+        'short_desc': product.description,
+        'description_bn': product.descriptionBn,
+        'ingredients': product.ingredients,
+        'usage': product.usageInstructions,
+        'img': product.imageUrl,
+        'is_best_seller': product.isBestSeller,
+        'is_new_arrival': product.isNewArrival,
+        'stock': product.stock,
+        'rating': product.rating,
+        'reviews_count': product.reviewsCount,
+      });
+      return true;
+    } catch (e) {
+      dev.log('Supabase addProduct notice: $e');
+      return false;
+    }
+  }
+
+  /// Updates an existing product in Supabase 'products' table
+  static Future<bool> updateProduct(Product product) async {
+    if (client == null) return false;
+    try {
+      await client!.from('products').update({
+        'title': product.name,
+        'title_bn': product.nameBn,
+        'brand': product.brand,
+        'category': product.category,
+        'origin': product.originCountry,
+        'flag': product.countryFlag,
+        'price': product.retailPrice,
+        'old_price': product.oldPrice,
+        'wholesale_price': product.wholesalePrice,
+        'moq': product.moq,
+        'batch': product.batchNo,
+        'expiry': product.expiryDate,
+        'skin_type': product.skinType,
+        'shades': product.shadesOrSizes,
+        'short_desc': product.description,
+        'description_bn': product.descriptionBn,
+        'ingredients': product.ingredients,
+        'usage': product.usageInstructions,
+        'img': product.imageUrl,
+        'is_best_seller': product.isBestSeller,
+        'is_new_arrival': product.isNewArrival,
+        'stock': product.stock,
+      }).eq('id', product.id);
+      return true;
+    } catch (e) {
+      dev.log('Supabase updateProduct notice: $e');
+      return false;
+    }
+  }
+
+  /// Deletes a product from Supabase 'products' table
+  static Future<bool> deleteProduct(String productId) async {
+    if (client == null) return false;
+    try {
+      await client!.from('products').delete().eq('id', productId);
+      return true;
+    } catch (e) {
+      dev.log('Supabase deleteProduct notice: $e');
+      return false;
+    }
+  }
+
+  /// Updates an order status and courier info in Supabase
+  static Future<bool> updateOrderStatus(
+    String orderId,
+    String status, {
+    String? courier,
+    String? trackingCode,
+  }) async {
+    if (client == null) return false;
+    try {
+      final payload = <String, dynamic>{'status': status};
+      if (courier != null) payload['courier'] = courier;
+      if (trackingCode != null) payload['tracking_code'] = trackingCode;
+      await client!.from('orders').update(payload).eq('order_id', orderId);
+      return true;
+    } catch (e) {
+      dev.log('Supabase updateOrderStatus notice: $e');
+      return false;
+    }
+  }
 }

@@ -382,5 +382,56 @@ void main() {
 
       expect(find.text('B2B Wholesale Dealer Gate'), findsOneWidget);
     });
+
+    testWidgets('Admin Management Console authentication and section switching works cleanly',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1400, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(const RuposhiCustomerApp());
+      await tester.pump();
+
+      final cubit = tester.element(find.byType(Scaffold).first).read<StoreCubit>();
+
+      // Navigate to Admin Gate
+      cubit.navigateTo(AppView.admin);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Executive Business Management Console'), findsOneWidget);
+      expect(find.text('Enter Executive Console'), findsOneWidget);
+
+      // Perform Admin Login
+      cubit.loginAdmin('admin', 'admin123');
+      await tester.pumpAndSettle();
+
+      // Check Admin Console is active
+      expect(find.text('RUPOSHI ADMIN'), findsOneWidget);
+      expect(find.text('Welcome to Ruposhi International Executive Suite'), findsOneWidget);
+      expect(find.text('Executive Overview'), findsWidgets);
+      expect(find.text('Products & Inventory'), findsWidgets);
+
+      // Test section switching
+      final productsTile = find.text('Products & Inventory').first;
+      await tester.tap(productsTile);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cosmetics Catalog & Warehouse Inventory'), findsOneWidget);
+      expect(find.text('+ Add New SKU'), findsOneWidget);
+
+      // Switch to Orders section
+      final ordersTile = find.text('Orders & Shipping').first;
+      await tester.tap(ordersTile);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Customer Orders & Express Fulfillment'), findsOneWidget);
+
+      // Logout Admin
+      cubit.logoutAdmin();
+      await tester.pumpAndSettle();
+
+      expect(find.text('INTERNATIONAL'), findsWidgets);
+    });
   });
 }

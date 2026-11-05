@@ -7,6 +7,7 @@ import '../widgets/cart_drawer.dart';
 import '../widgets/footer_section.dart';
 import '../widgets/top_nav_bar.dart';
 import 'about_view.dart';
+import 'admin_view.dart';
 import 'b2b_view.dart';
 import 'blog_view.dart';
 import 'checkout_view.dart';
@@ -47,6 +48,11 @@ class StorefrontShell extends StatelessWidget {
     return BlocBuilder<StoreCubit, StoreState>(
       builder: (context, state) {
         final cubit = context.read<StoreCubit>();
+
+        // Full-screen dedicated Executive Admin Console
+        if (state.currentView == AppView.admin) {
+          return AdminView(state: state);
+        }
 
         return Scaffold(
           appBar: TopNavBar(state: state),
@@ -167,6 +173,18 @@ class StorefrontShell extends StatelessWidget {
                       Navigator.pop(context);
                     },
                   ),
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.admin_panel_settings, color: AppTheme.rose900),
+                    title: Text(
+                      state.isBangla ? 'অ্যাডমিন কনসোল' : 'Executive Admin Console',
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.rose900),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      cubit.navigateTo(AppView.admin);
+                    },
+                  ),
                 ],
               ),
             ),
@@ -216,6 +234,8 @@ class StorefrontShell extends StatelessWidget {
         return B2BWholesaleView(state: state);
       case AppView.checkout:
         return CheckoutView(state: state);
+      case AppView.admin:
+        return AdminView(state: state);
     }
   }
 }
