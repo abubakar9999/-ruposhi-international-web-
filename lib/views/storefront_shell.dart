@@ -108,12 +108,15 @@ class StorefrontShell extends StatelessWidget {
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.info_outline),
-                    title: Text(state.isBangla ? 'আমাদের সম্পর্কে' : 'Our Story & Warehousing'),
-                    selected: state.currentView == AppView.aboutUs,
+                    leading: const Icon(Icons.business_center, color: AppTheme.gold600),
+                    title: Text(
+                      state.isBangla ? 'বিটুবি পাইকারি পোর্টাল (B2B)' : 'B2B Wholesale Portal',
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.gold600),
+                    ),
+                    selected: state.currentView == AppView.b2bPortal,
                     onTap: () {
                       Navigator.pop(context);
-                      cubit.navigateTo(AppView.aboutUs);
+                      cubit.navigateTo(AppView.b2bPortal);
                     },
                   ),
                   ListTile(
@@ -126,24 +129,21 @@ class StorefrontShell extends StatelessWidget {
                     },
                   ),
                   ListTile(
+                    leading: const Icon(Icons.info_outline),
+                    title: Text(state.isBangla ? 'আমাদের সম্পর্কে' : 'Our Story & Warehousing'),
+                    selected: state.currentView == AppView.aboutUs,
+                    onTap: () {
+                      Navigator.pop(context);
+                      cubit.navigateTo(AppView.aboutUs);
+                    },
+                  ),
+                  ListTile(
                     leading: const Icon(Icons.headset_mic_outlined),
                     title: Text(state.isBangla ? 'যোগাযোগ ও ট্র্যাকিং' : 'Contact & Live Tracking'),
                     selected: state.currentView == AppView.contact,
                     onTap: () {
                       Navigator.pop(context);
                       cubit.navigateTo(AppView.contact);
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.business_center_outlined, color: Colors.green),
-                    title: Text(
-                      state.isBangla ? 'বিটুবি পাইকারি পোর্টাল' : 'B2B Wholesale Portal',
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
-                    ),
-                    selected: state.currentView == AppView.b2bPortal,
-                    onTap: () {
-                      Navigator.pop(context);
-                      cubit.navigateTo(AppView.b2bPortal);
                     },
                   ),
                   const Divider(),

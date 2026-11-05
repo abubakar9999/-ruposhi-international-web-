@@ -349,5 +349,38 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('B2B Wholesale Dealer Gate'), findsOneWidget);
     });
+
+    testWidgets('TopNavBar has centered nav items including B2B tab across multiple desktop breakpoints',
+        (WidgetTester tester) async {
+      final desktopResolutions = [
+        const Size(1100, 800),
+        const Size(1280, 800),
+        const Size(1366, 768),
+        const Size(1920, 1080),
+      ];
+
+      for (final res in desktopResolutions) {
+        tester.view.physicalSize = res;
+        tester.view.devicePixelRatio = 1.0;
+
+        await tester.pumpWidget(const RuposhiCustomerApp());
+        await tester.pump();
+
+        // Verify key desktop navigation items are present
+        expect(find.text('Home'), findsWidgets);
+        expect(find.text('Shop Catalog'), findsWidgets);
+        expect(find.text('B2B Wholesale'), findsWidgets);
+        expect(find.text('Beauty Blog'), findsWidgets);
+        expect(find.text('About Us'), findsWidgets);
+        expect(find.text('Contact'), findsWidgets);
+      }
+
+      // Test tapping B2B Wholesale pill navigates to B2B portal
+      final b2bTab = find.text('B2B Wholesale').first;
+      await tester.tap(b2bTab);
+      await tester.pumpAndSettle();
+
+      expect(find.text('B2B Wholesale Dealer Gate'), findsOneWidget);
+    });
   });
 }

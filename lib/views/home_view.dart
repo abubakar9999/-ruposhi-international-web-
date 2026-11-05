@@ -483,27 +483,46 @@ class _HomeViewState extends State<HomeView> {
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: ['All', 'Best Sellers', 'New Arrivals'].map((tab) {
-                        final isSelected = _activeTab == tab;
-                        return Padding(
+                      children: [
+                        ...['All', 'Best Sellers', 'New Arrivals'].map((tab) {
+                          final isSelected = _activeTab == tab;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 10),
+                            child: ChoiceChip(
+                              label: Text(tab),
+                              selected: isSelected,
+                              selectedColor: AppTheme.rose600,
+                              labelStyle: TextStyle(
+                                color: isSelected ? Colors.white : AppTheme.textDark,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
+                              backgroundColor: AppTheme.rose50,
+                              side: BorderSide(
+                                color: isSelected ? AppTheme.rose600 : AppTheme.borderSubtle,
+                              ),
+                              onSelected: (_) => setState(() => _activeTab = tab),
+                            ),
+                          );
+                        }),
+                        Padding(
                           padding: const EdgeInsets.only(right: 10),
-                          child: ChoiceChip(
-                            label: Text(tab),
-                            selected: isSelected,
-                            selectedColor: AppTheme.rose600,
-                            labelStyle: TextStyle(
-                              color: isSelected ? Colors.white : AppTheme.textDark,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13,
+                          child: ActionChip(
+                            avatar: const Icon(Icons.business_center, size: 14, color: AppTheme.gold600),
+                            label: Text(
+                              widget.state.isBangla ? 'বিটুবি ডিলার পোর্টাল' : 'B2B Wholesale Portal',
+                              style: const TextStyle(
+                                color: AppTheme.gold600,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
                             ),
-                            backgroundColor: AppTheme.rose50,
-                            side: BorderSide(
-                              color: isSelected ? AppTheme.rose600 : AppTheme.borderSubtle,
-                            ),
-                            onSelected: (_) => setState(() => _activeTab = tab),
+                            backgroundColor: AppTheme.gold100,
+                            side: const BorderSide(color: AppTheme.gold300),
+                            onPressed: () => cubit.navigateTo(AppView.b2bPortal),
                           ),
-                        );
-                      }).toList(),
+                        ),
+                      ],
                     ),
                   ),
 
