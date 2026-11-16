@@ -13,6 +13,7 @@ class StoreState extends Equatable {
   final bool isLoadingProducts;
   final String selectedCategory;
   final String selectedBrand;
+  final String selectedSkinConcern;
   final String searchQuery;
   final String sortBy;
   final Product? activeProduct;
@@ -46,10 +47,11 @@ class StoreState extends Equatable {
   const StoreState({
     this.currentView = AppView.home,
     this.isBangla = false,
-    this.products = const [],
-    this.isLoadingProducts = true,
+    this.products = sampleProducts,
+    this.isLoadingProducts = false,
     this.selectedCategory = 'All',
     this.selectedBrand = 'All',
+    this.selectedSkinConcern = 'All',
     this.searchQuery = '',
     this.sortBy = 'Featured',
     this.activeProduct,
@@ -81,6 +83,11 @@ class StoreState extends Equatable {
     var list = products.where((p) {
       final matchCat = selectedCategory == 'All' || p.category.toLowerCase() == selectedCategory.toLowerCase();
       final matchBrand = selectedBrand == 'All' || p.brand.toLowerCase() == selectedBrand.toLowerCase();
+      final matchConcern = selectedSkinConcern == 'All' ||
+          p.skinType.toLowerCase().contains(selectedSkinConcern.toLowerCase()) ||
+          p.keyBenefits.any((b) => b.toLowerCase().contains(selectedSkinConcern.toLowerCase())) ||
+          p.description.toLowerCase().contains(selectedSkinConcern.toLowerCase()) ||
+          p.name.toLowerCase().contains(selectedSkinConcern.toLowerCase());
       final q = searchQuery.trim().toLowerCase();
       final matchSearch = q.isEmpty ||
           p.name.toLowerCase().contains(q) ||
@@ -88,7 +95,7 @@ class StoreState extends Equatable {
           p.brand.toLowerCase().contains(q) ||
           p.category.toLowerCase().contains(q) ||
           p.originCountry.toLowerCase().contains(q);
-      return matchCat && matchBrand && matchSearch;
+      return matchCat && matchBrand && matchConcern && matchSearch;
     }).toList();
 
     switch (sortBy) {
@@ -139,6 +146,7 @@ class StoreState extends Equatable {
     bool? isLoadingProducts,
     String? selectedCategory,
     String? selectedBrand,
+    String? selectedSkinConcern,
     String? searchQuery,
     String? sortBy,
     Product? activeProduct,
@@ -173,6 +181,7 @@ class StoreState extends Equatable {
       isLoadingProducts: isLoadingProducts ?? this.isLoadingProducts,
       selectedCategory: selectedCategory ?? this.selectedCategory,
       selectedBrand: selectedBrand ?? this.selectedBrand,
+      selectedSkinConcern: selectedSkinConcern ?? this.selectedSkinConcern,
       searchQuery: searchQuery ?? this.searchQuery,
       sortBy: sortBy ?? this.sortBy,
       activeProduct: activeProduct ?? this.activeProduct,
@@ -209,6 +218,7 @@ class StoreState extends Equatable {
         isLoadingProducts,
         selectedCategory,
         selectedBrand,
+        selectedSkinConcern,
         searchQuery,
         sortBy,
         activeProduct,
@@ -261,9 +271,12 @@ class StoreCubit extends Cubit<StoreState> {
     emit(state.copyWith(isLoadingProducts: true));
     try {
       final fetched = await SupabaseService.fetchProducts();
-      emit(state.copyWith(products: fetched, isLoadingProducts: false));
+      emit(state.copyWith(
+        products: fetched.isNotEmpty ? fetched : sampleProducts,
+        isLoadingProducts: false,
+      ));
     } catch (_) {
-      emit(state.copyWith(products: const [], isLoadingProducts: false));
+      emit(state.copyWith(products: sampleProducts, isLoadingProducts: false));
     }
   }
 
@@ -351,7 +364,15 @@ class StoreCubit extends Cubit<StoreState> {
   }
 
   void setCategory(String category) {
-    emit(state.copyWith(selectedCategory: category, currentView: AppView.shop));
+    emit(state.copyWith(selectedCategory: category, selectedSkinConcern: 'All', currentView: AppView.shop));
+  }
+
+  void setSkinConcern(String concern) {
+    emit(state.copyWith(selectedSkinConcern: concern, selectedCategory: 'All', currentView: AppView.shop));
+  }
+
+  void updateAnnouncement(String en, String bn) {
+    emit(state.copyWith(announcementEn: en, announcementBn: bn));
   }
 
   void setBrand(String brand) {
@@ -848,9 +869,5 @@ class StoreCubit extends Cubit<StoreState> {
     final updated = state.coupons.where((c) => c.code != code).toList();
     emit(state.copyWith(coupons: updated));
     SupabaseService.deleteCoupon(code);
-  }
-
-  void updateAnnouncement(String en, String bn) {
-    emit(state.copyWith(announcementEn: en, announcementBn: bn));
   }
 }

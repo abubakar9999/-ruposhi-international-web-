@@ -83,19 +83,19 @@ class FooterSection extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'QUICK NAVIGATION',
-                          style: TextStyle(color: AppTheme.goldLight, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2),
+                        Text(
+                          state.isBangla ? 'গুরুত্বপূর্ণ লিংক' : 'QUICK NAVIGATION',
+                          style: const TextStyle(color: AppTheme.goldLight, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2),
                         ),
                         const SizedBox(height: 14),
-                        _footerLink('Home Storefront', () => cubit.navigateTo(AppView.home)),
-                        _footerLink('Cosmetics Catalog', () => cubit.navigateTo(AppView.shop)),
-                        _footerLink('Company Overview', () => cubit.navigateTo(AppView.aboutUs)),
-                        _footerLink('Beauty Blog & Guides', () => cubit.navigateTo(AppView.beautyBlog)),
-                        _footerLink('Contact & Live Tracking', () => cubit.navigateTo(AppView.contact)),
-                        _footerLink('B2B Wholesale Portal', () => cubit.navigateTo(AppView.b2bPortal)),
-                        _footerLink('Shopping Bag & Checkout', () => cubit.navigateTo(AppView.checkout)),
-                        _footerLink('Executive Admin Console', () => cubit.navigateTo(AppView.admin)),
+                        _footerLink(state.isBangla ? 'হোম পেইজ' : 'Home Storefront', () => cubit.navigateTo(AppView.home)),
+                        _footerLink(state.isBangla ? 'প্রসাধনী ক্যাটালগ' : 'Cosmetics Catalog', () => cubit.navigateTo(AppView.shop)),
+                        _footerLink(state.isBangla ? 'আমাদের সম্পর্কে' : 'Company Overview', () => cubit.navigateTo(AppView.aboutUs)),
+                        _footerLink(state.isBangla ? 'বিউটি ব্লগ ও টিপস' : 'Beauty Blog & Guides', () => cubit.navigateTo(AppView.beautyBlog)),
+                        _footerLink(state.isBangla ? 'অর্ডার ট্র্যাকিং ও যোগাযোগ' : 'Contact & Live Tracking', () => cubit.navigateTo(AppView.contact)),
+                        _footerLink(state.isBangla ? 'বিটুবি ডিলার পোর্টাল' : 'B2B Wholesale Portal', () => cubit.navigateTo(AppView.b2bPortal)),
+                        _footerLink(state.isBangla ? 'শপিং ব্যাগ ও চেকআউট' : 'Shopping Bag & Checkout', () => cubit.navigateTo(AppView.checkout)),
+                        _footerLink(state.isBangla ? 'অ্যাডমিন কনসোল' : 'Executive Admin Console', () => cubit.navigateTo(AppView.admin)),
                       ],
                     ),
                   ),
@@ -106,16 +106,16 @@ class FooterSection extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'PRODUCT CATEGORIES',
-                          style: TextStyle(color: AppTheme.goldLight, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2),
+                        Text(
+                          state.isBangla ? 'প্রসাধনী ক্যাটাগরি' : 'PRODUCT CATEGORIES',
+                          style: const TextStyle(color: AppTheme.goldLight, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2),
                         ),
                         const SizedBox(height: 14),
-                        _footerLink('Korean Skincare', () => cubit.setCategory('Skincare')),
-                        _footerLink('Luxury Makeup', () => cubit.setCategory('Makeup')),
-                        _footerLink('Salon Haircare Masks', () => cubit.setCategory('Haircare')),
-                        _footerLink('French Fragrances', () => cubit.setCategory('Fragrance')),
-                        _footerLink('New Arrivals', () => cubit.navigateTo(AppView.shop)),
+                        _footerLink(state.isBangla ? 'কোরিয়ান স্কিনকেয়ার' : 'Korean Skincare', () => cubit.setCategory('Skincare')),
+                        _footerLink(state.isBangla ? 'লাক্সারি মেকআপ' : 'Luxury Makeup', () => cubit.setCategory('Makeup')),
+                        _footerLink(state.isBangla ? 'সেলুন হেয়ারকেয়ার' : 'Salon Haircare Masks', () => cubit.setCategory('Haircare')),
+                        _footerLink(state.isBangla ? 'ফ্রেঞ্চ পারফিউম' : 'French Fragrances', () => cubit.setCategory('Fragrance')),
+                        _footerLink(state.isBangla ? 'নতুন কালেকশন' : 'New Arrivals', () => cubit.navigateTo(AppView.shop)),
                       ],
                     ),
                   ),
@@ -126,13 +126,15 @@ class FooterSection extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'SUPPORT & CONCIERGE',
-                          style: TextStyle(color: AppTheme.goldLight, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2),
+                        Text(
+                          state.isBangla ? 'সহায়তা ও কাস্টমার কেয়ার' : 'SUPPORT & CONCIERGE',
+                          style: const TextStyle(color: AppTheme.goldLight, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2),
                         ),
                         const SizedBox(height: 14),
                         Text(
-                          'Hotline: +880 1700-000000\nWhatsApp: +880 1700-000000\nEmail: concierge@ruposhi.com.bd\nWarehouse: Banani, Dhaka-1213',
+                          state.isBangla
+                              ? 'হটলাইন: +৮৮০ ১৭০০-০০০০০০\nহোয়াটসঅ্যাপ: +৮৮০ ১৭০০-০০০০০০\nইমেইল: concierge@ruposhi.com.bd\nওয়্যারহাউস: বনানী, ঢাকা-১২১৩'
+                              : 'Hotline: +880 1700-000000\nWhatsApp: +880 1700-000000\nEmail: concierge@ruposhi.com.bd\nWarehouse: Banani, Dhaka-1213',
                           style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 13, height: 1.6),
                         ),
                       ],

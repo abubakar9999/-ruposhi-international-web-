@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../core/app_theme.dart';
 import '../cubits/store_cubit.dart';
 import '../models/product_model.dart';
+import '../widgets/product_card.dart';
 
 class ProductDetailsView extends StatefulWidget {
   final Product product;
@@ -23,6 +25,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
   late String _selectedOption;
   int _quantity = 1;
   int _activeInfoTab = 0; // 0: Description & Benefits, 1: Ingredients, 2: How to Use, 3: Authenticity
+  int _selectedImageIndex = 0;
 
   @override
   void initState() {
@@ -52,6 +55,154 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
         );
       }
     }
+  }
+
+  void _openImageLightbox(BuildContext context, List<String> images, int initialIndex) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.90),
+      builder: (dialogCtx) {
+        int currentIndex = initialIndex;
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) {
+            final activeUrl = images[currentIndex];
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Top bar: counter and close button
+                      Container(
+                        constraints: const BoxConstraints(maxWidth: 820),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.18),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: Colors.white24),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.zoom_in, color: AppTheme.gold400, size: 16),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    '${currentIndex + 1} / ${images.length} • Pinch / Scroll to Zoom',
+                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              tooltip: 'Close Preview',
+                              icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                              onPressed: () => Navigator.pop(dialogCtx),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      // Interactive Viewer for Pinch-to-zoom & pan
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: MediaQuery.of(context).size.height * 0.70,
+                          maxWidth: 820,
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: InteractiveViewer(
+                            panEnabled: true,
+                            minScale: 1.0,
+                            maxScale: 4.0,
+                            child: Image.network(
+                              activeUrl,
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, __, ___) => const Center(
+                                child: Icon(Icons.broken_image, color: Colors.white70, size: 64),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // Thumbnail selector row in lightbox
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(images.length, (idx) {
+                            final isSel = idx == currentIndex;
+                            return GestureDetector(
+                              onTap: () => setDialogState(() => currentIndex = idx),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                margin: const EdgeInsets.symmetric(horizontal: 5),
+                                width: 56,
+                                height: 56,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: isSel ? AppTheme.gold400 : Colors.white24,
+                                    width: isSel ? 2.5 : 1,
+                                  ),
+                                  boxShadow: isSel
+                                      ? [
+                                          BoxShadow(
+                                            color: AppTheme.gold400.withValues(alpha: 0.5),
+                                            blurRadius: 10,
+                                          ),
+                                        ]
+                                      : null,
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    images[idx],
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                    ],
+                  ),
+                  // Left arrow
+                  if (currentIndex > 0)
+                    Positioned(
+                      left: 10,
+                      child: IconButton(
+                        iconSize: 44,
+                        icon: const Icon(Icons.chevron_left_rounded, color: Colors.white),
+                        onPressed: () => setDialogState(() => currentIndex--),
+                      ),
+                    ),
+                  // Right arrow
+                  if (currentIndex < images.length - 1)
+                    Positioned(
+                      right: 10,
+                      child: IconButton(
+                        iconSize: 44,
+                        icon: const Icon(Icons.chevron_right_rounded, color: Colors.white),
+                        onPressed: () => setDialogState(() => currentIndex++),
+                      ),
+                    ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -130,129 +281,290 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                     width: isMobile ? double.infinity : 480,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Image Card
-                        Container(
-                          height: isMobile ? 360 : 480,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: AppTheme.borderSubtle),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.05),
-                                blurRadius: 20,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
-                          ),
-                          child: Stack(
-                            children: [
-                              ClipRRect(
+                      children: () {
+                        final List<String> allImages = p.allImages;
+                        final safeIndex = _selectedImageIndex.clamp(0, allImages.length - 1);
+                        final activeImg = allImages[safeIndex];
+
+                        final angleLabels = [
+                          'Front Hero',
+                          'Texture Swatch',
+                          'Packaging & Box',
+                          'Routine & In-Hand',
+                          'Authentic Seal',
+                        ];
+
+                        return [
+                          // Main Image Card (Clickable Lightbox & Nav Arrows)
+                          GestureDetector(
+                            onTap: () => _openImageLightbox(context, allImages, safeIndex),
+                            onHorizontalDragEnd: (details) {
+                              if (details.primaryVelocity != null) {
+                                if (details.primaryVelocity! < 0 && safeIndex < allImages.length - 1) {
+                                  setState(() => _selectedImageIndex = safeIndex + 1);
+                                } else if (details.primaryVelocity! > 0 && safeIndex > 0) {
+                                  setState(() => _selectedImageIndex = safeIndex - 1);
+                                }
+                              }
+                            },
+                            child: Container(
+                              height: isMobile ? 360 : 460,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
                                 borderRadius: BorderRadius.circular(24),
-                                child: Image.network(
-                                  p.imageUrl,
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => const Center(
-                                    child: Icon(Icons.spa_outlined, size: 64, color: Colors.grey),
+                                border: Border.all(color: AppTheme.borderSubtle),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.05),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 8),
                                   ),
-                                ),
+                                ],
                               ),
-                              // Badges
-                              Positioned(
-                                top: 12,
-                                left: 12,
-                                child: Container(
-                                  constraints: BoxConstraints(maxWidth: isSmallMobile ? 180 : 300),
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.94),
-                                    borderRadius: BorderRadius.circular(20),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.1),
-                                        blurRadius: 6,
+                              child: Stack(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(24),
+                                    child: Image.network(
+                                      activeImg,
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => const Center(
+                                        child: Icon(Icons.spa_outlined, size: 64, color: Colors.grey),
                                       ),
-                                    ],
+                                    ),
                                   ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(p.countryFlag, style: const TextStyle(fontSize: 13)),
-                                      const SizedBox(width: 5),
-                                      Flexible(
-                                        child: Text(
-                                          'Imported from ${p.originCountry}',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 11.5,
-                                            color: AppTheme.darkPlum,
+                                  // Badges
+                                  Positioned(
+                                    top: 12,
+                                    left: 12,
+                                    child: Container(
+                                      constraints: BoxConstraints(maxWidth: isSmallMobile ? 180 : 300),
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withValues(alpha: 0.94),
+                                        borderRadius: BorderRadius.circular(20),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(alpha: 0.1),
+                                            blurRadius: 6,
                                           ),
-                                          overflow: TextOverflow.ellipsis,
+                                        ],
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(p.countryFlag, style: const TextStyle(fontSize: 13)),
+                                          const SizedBox(width: 5),
+                                          Flexible(
+                                            child: Text(
+                                              'Imported from ${p.originCountry}',
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 11.5,
+                                                color: AppTheme.darkPlum,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  // Wishlist Button
+                                  Positioned(
+                                    top: 12,
+                                    right: 12,
+                                    child: InkWell(
+                                      onTap: () => cubit.toggleWishlist(p.id),
+                                      borderRadius: BorderRadius.circular(20),
+                                      child: Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withValues(alpha: 0.92),
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withValues(alpha: 0.1),
+                                              blurRadius: 8,
+                                            ),
+                                          ],
+                                        ),
+                                        child: Icon(
+                                          isWishlisted ? Icons.favorite : Icons.favorite_border_rounded,
+                                          color: isWishlisted ? Colors.redAccent : AppTheme.darkPlum,
+                                          size: 20,
                                         ),
                                       ),
-                                    ],
+                                    ),
                                   ),
-                                ),
+                                  // Left Arrow (Bioxin style)
+                                  if (safeIndex > 0)
+                                    Positioned(
+                                      left: 10,
+                                      top: 0,
+                                      bottom: 0,
+                                      child: Center(
+                                        child: InkWell(
+                                          onTap: () => setState(() => _selectedImageIndex = safeIndex - 1),
+                                          borderRadius: BorderRadius.circular(20),
+                                          child: Container(
+                                            width: 36,
+                                            height: 36,
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withValues(alpha: 0.92),
+                                              shape: BoxShape.circle,
+                                              boxShadow: [
+                                                BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 6),
+                                              ],
+                                            ),
+                                            child: const Icon(Icons.chevron_left, color: AppTheme.darkPlum, size: 22),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  // Right Arrow (Bioxin style)
+                                  if (safeIndex < allImages.length - 1)
+                                    Positioned(
+                                      right: 10,
+                                      top: 0,
+                                      bottom: 0,
+                                      child: Center(
+                                        child: InkWell(
+                                          onTap: () => setState(() => _selectedImageIndex = safeIndex + 1),
+                                          borderRadius: BorderRadius.circular(20),
+                                          child: Container(
+                                            width: 36,
+                                            height: 36,
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withValues(alpha: 0.92),
+                                              shape: BoxShape.circle,
+                                              boxShadow: [
+                                                BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 6),
+                                              ],
+                                            ),
+                                            child: const Icon(Icons.chevron_right, color: AppTheme.darkPlum, size: 22),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  // Zoom & Counter Pill (Bioxin style)
+                                  Positioned(
+                                    bottom: 12,
+                                    right: 12,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withValues(alpha: 0.72),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(Icons.fullscreen, color: Colors.white, size: 16),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            '${safeIndex + 1} / ${allImages.length}',
+                                            style: const TextStyle(color: Colors.white, fontSize: 11.5, fontWeight: FontWeight.bold),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              // Wishlist Button
-                              Positioned(
-                                top: 12,
-                                right: 12,
-                                child: InkWell(
-                                  onTap: () => cubit.toggleWishlist(p.id),
-                                  borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+
+                          // Thumbnails Carousel Row (Bioxin style, at least 5 images guaranteed)
+                          const SizedBox(height: 14),
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: List.generate(allImages.length, (idx) {
+                                final isSelected = safeIndex == idx;
+                                final label = idx < angleLabels.length ? angleLabels[idx] : 'Angle ${idx + 1}';
+                                return InkWell(
+                                  onTap: () => setState(() => _selectedImageIndex = idx),
+                                  borderRadius: BorderRadius.circular(12),
                                   child: Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withValues(alpha: 0.92),
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.1),
-                                          blurRadius: 8,
+                                    margin: const EdgeInsets.only(right: 10),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        AnimatedContainer(
+                                          duration: const Duration(milliseconds: 200),
+                                          width: 68,
+                                          height: 68,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(12),
+                                            border: Border.all(
+                                              color: isSelected ? AppTheme.rose600 : AppTheme.borderSubtle,
+                                              width: isSelected ? 2.5 : 1,
+                                            ),
+                                            boxShadow: isSelected
+                                                ? [
+                                                    BoxShadow(
+                                                      color: AppTheme.rose600.withValues(alpha: 0.25),
+                                                      blurRadius: 8,
+                                                      offset: const Offset(0, 3),
+                                                    ),
+                                                  ]
+                                                : null,
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(10),
+                                            child: Image.network(
+                                              allImages[idx],
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) => const Icon(Icons.image, size: 24, color: Colors.grey),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          label,
+                                          style: TextStyle(
+                                            fontSize: 9.5,
+                                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                            color: isSelected ? AppTheme.rose600 : Colors.grey.shade600,
+                                          ),
                                         ),
                                       ],
                                     ),
-                                    child: Icon(
-                                      isWishlisted ? Icons.favorite : Icons.favorite_border_rounded,
-                                      color: isWishlisted ? Colors.redAccent : AppTheme.darkPlum,
-                                      size: 20,
-                                    ),
                                   ),
-                                ),
-                              ),
-                            ],
+                                );
+                              }),
+                            ),
                           ),
-                        ),
 
-                        const SizedBox(height: 18),
+                          const SizedBox(height: 18),
 
-                        // Trust Badges Under Image
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: AppTheme.borderSubtle),
+                          // Trust Badges Under Image
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: AppTheme.borderSubtle),
+                            ),
+                            child: const Wrap(
+                              alignment: WrapAlignment.spaceAround,
+                              spacing: 12,
+                              runSpacing: 10,
+                              children: [
+                                _MiniTrust(icon: Icons.shield_outlined, label: '100% Authentic'),
+                                _MiniTrust(icon: Icons.ac_unit, label: '20°C Stored'),
+                                _MiniTrust(icon: Icons.verified_outlined, label: 'Batch Verified'),
+                                _MiniTrust(icon: Icons.local_shipping_outlined, label: 'Fast Dispatch'),
+                              ],
+                            ),
                           ),
-                          child: const Wrap(
-                            alignment: WrapAlignment.spaceAround,
-                            spacing: 12,
-                            runSpacing: 10,
-                            children: [
-                              _MiniTrust(icon: Icons.shield_outlined, label: '100% Authentic'),
-                              _MiniTrust(icon: Icons.ac_unit, label: '20°C Stored'),
-                              _MiniTrust(icon: Icons.verified_outlined, label: 'Batch Verified'),
-                              _MiniTrust(icon: Icons.local_shipping_outlined, label: 'Fast Dispatch'),
-                            ],
-                          ),
-                        ),
-                      ],
+                        ];
+                      }(),
                     ),
                   ),
 
@@ -609,6 +921,68 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                             ),
                           ),
                         ),
+
+                        const SizedBox(height: 16),
+
+                        // Social Sharing & Wishlist quick actions
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppTheme.borderSubtle),
+                          ),
+                          child: Row(
+                            children: [
+                              Text(
+                                widget.state.isBangla ? 'শেয়ার করুন:' : 'Share Product:',
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade700),
+                              ),
+                              const SizedBox(width: 10),
+                              IconButton(
+                                icon: const Icon(Icons.share, size: 18, color: AppTheme.rose600),
+                                tooltip: 'Copy Product Link',
+                                onPressed: () {
+                                  Clipboard.setData(ClipboardData(text: 'https://ruposhi.com.bd/product/${p.id}'));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Product link copied to clipboard!'),
+                                      behavior: SnackBarBehavior.floating,
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  );
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.facebook, size: 18, color: Color(0xFF1877F2)),
+                                tooltip: 'Share on Facebook',
+                                onPressed: () {
+                                  final url = Uri.parse('https://www.facebook.com/sharer/sharer.php?u=https://ruposhi.com.bd/product/${p.id}');
+                                  launchUrl(url, mode: LaunchMode.externalApplication);
+                                },
+                              ),
+                              const Spacer(),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.shade50,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.verified_user_outlined, size: 14, color: Colors.green.shade800),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'BSTI Verified',
+                                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.green.shade800),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -672,6 +1046,87 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                   ],
                 ),
               ),
+
+              // ==========================================
+              // RELATED PRODUCTS / "YOU MAY ALSO LIKE" (Bioxin style)
+              // ==========================================
+              () {
+                var related = widget.state.products
+                    .where((item) => item.id != p.id && (item.category == p.category || item.brand == p.brand))
+                    .take(4)
+                    .toList();
+                if (related.isEmpty && widget.state.products.length > 1) {
+                  related = widget.state.products.where((item) => item.id != p.id).take(4).toList();
+                }
+
+                if (related.isEmpty) return const SizedBox.shrink();
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 48),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.state.isBangla ? 'সম্পর্কিত অন্যান্য প্রসাধনী' : 'You May Also Like',
+                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              widget.state.isBangla
+                                  ? 'এই ক্যাটাগরির জনপ্রিয় অন্যান্য আসল পণ্য'
+                                  : 'Customers who viewed this item also loved these authenticated items',
+                              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                            ),
+                          ],
+                        ),
+                        TextButton(
+                          onPressed: () => cubit.setCategory(p.category),
+                          child: Text(
+                            widget.state.isBangla ? 'ক্যাটাগরি দেখুন →' : 'View More in ${p.category} →',
+                            style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.rose600),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final available = constraints.maxWidth;
+                        final double cardWidth;
+                        if (available < 380) {
+                          cardWidth = available;
+                        } else if (available < 660) {
+                          cardWidth = (available - 14) / 2;
+                        } else if (available < 1000) {
+                          cardWidth = (available - 2 * 18) / 3;
+                        } else {
+                          cardWidth = (available - 3 * 20) / 4;
+                        }
+
+                        return Wrap(
+                          spacing: available < 660 ? 14 : 20,
+                          runSpacing: 22,
+                          children: related.map((item) {
+                            return ProductCard(
+                              product: item,
+                              isBangla: widget.state.isBangla,
+                              isB2BActive: widget.state.isB2BAuthenticated,
+                              width: cardWidth,
+                            );
+                          }).toList(),
+                        );
+                      },
+                    ),
+                  ],
+                );
+              }(),
             ],
           ),
         ),

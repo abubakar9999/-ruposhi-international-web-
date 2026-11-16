@@ -65,6 +65,15 @@ class SupabaseService {
             ingredients: map['ingredients'] ?? '',
             usageInstructions: map['usage'] ?? map['usage_instructions'] ?? '',
             imageUrl: map['img'] ?? map['image_url'] ?? '',
+            gallery: () {
+              final g = map['gallery'] ?? map['images'];
+              if (g is List) {
+                return g.map((e) => e.toString()).where((s) => s.trim().isNotEmpty).toList();
+              } else if (g is String && g.trim().isNotEmpty) {
+                return g.split(',').map((e) => e.trim()).where((s) => s.isNotEmpty).toList();
+              }
+              return <String>[];
+            }(),
             isBestSeller: map['is_best_seller'] ?? (map['badge'] == 'Best Seller'),
             isNewArrival: map['is_new_arrival'] ?? (map['badge'] == 'New Arrival'),
             rating: (map['rating'] as num?)?.toDouble() ?? 4.9,
@@ -319,6 +328,7 @@ class SupabaseService {
         'ingredients': product.ingredients,
         'usage': product.usageInstructions,
         'img': product.imageUrl,
+        'gallery': product.gallery,
         'is_best_seller': product.isBestSeller,
         'is_new_arrival': product.isNewArrival,
         'stock': product.stock,
@@ -356,6 +366,7 @@ class SupabaseService {
         'ingredients': product.ingredients,
         'usage': product.usageInstructions,
         'img': product.imageUrl,
+        'gallery': product.gallery,
         'is_best_seller': product.isBestSeller,
         'is_new_arrival': product.isNewArrival,
         'stock': product.stock,

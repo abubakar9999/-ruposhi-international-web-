@@ -29,13 +29,13 @@ class _BulkProductDialogState extends State<BulkProductDialog> {
   }
 
   void _loadSampleBulkTemplate() {
-    // Pipe-delimited bulk template:
-    // Name | Brand | Category | Origin | Flag | RetailPrice | WholesalePrice | MOQ | Stock | ImageUrl | Batch
-    const sample = '''Anua Heartleaf 77% Soothing Toner | Anua | Skincare | South Korea | 🇰🇷 | 2150 | 1650 | 10 | 45 | https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80 | KOR-2026-ANUA-77
-Paula's Choice Skin Perfecting 2% BHA Liquid | Paula's Choice | Skincare | United States | 🇺🇸 | 3450 | 2800 | 8 | 30 | https://images.unsplash.com/photo-1608248597359-0056973e46c7?auto=format&fit=crop&w=600&q=80 | USA-2026-PC-BHA
-Laneige Lip Sleeping Mask Berry | Laneige | Skincare | South Korea | 🇰🇷 | 1950 | 1450 | 12 | 60 | https://images.unsplash.com/photo-1599305090598-fe179d501227?auto=format&fit=crop&w=600&q=80 | KOR-2026-LAN-LIP
-Bioderma Sensibio H2O Micellar Water 500ml | Bioderma | Skincare | France | 🇫🇷 | 2250 | 1750 | 10 | 50 | https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=600&q=80 | FRA-2026-BIO-H2O
-Neutrogena Hydro Boost Water Gel | Neutrogena | Skincare | United States | 🇺🇸 | 1850 | 1400 | 10 | 40 | https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80 | USA-2026-NEU-HYD''';
+    // Pipe-delimited bulk template with Multi-Image Support (comma-separated URLs):
+    // Name | Brand | Category | Origin | Flag | RetailPrice | WholesalePrice | MOQ | Stock | Image URLs (comma-separated for up to 5 angles) | Batch No
+    const sample = '''TIA'M Vita B3 Source (10% Niacinamide + 2% Arbutin) | TIA'M | Serums | South Korea | 🇰🇷 | 1650 | 1180 | 10 | 45 | https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1608248597359-26d11b228f41?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=800&q=80 | TM-VB3-2026-01
+TIA'M Pore Minimizing 21 Serum (20% Niacinamide) | TIA'M | Serums | South Korea | 🇰🇷 | 1750 | 1250 | 10 | 38 | https://images.unsplash.com/photo-1608248597359-26d11b228f41?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80 | TM-PM21-2026-02
+TIA'M Snail & Azulene Water Essence (87% Mucin) | TIA'M | Toner & Essence | South Korea | 🇰🇷 | 1750 | 1250 | 10 | 52 | https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1608248597359-26d11b228f41?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=800&q=80 | TM-SAE-2026-04
+TIA'M B3 Niacin Sunscreen SPF 50+ PA++++ | TIA'M | Sun Care | South Korea | 🇰🇷 | 1750 | 1250 | 10 | 60 | https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1608248597359-26d11b228f41?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?auto=format&fit=crop&w=800&q=80 | TM-B3S-2026-10
+TIA'M Glow 333 Capsule Cream (NMN + Vit C) | TIA'M | Creams & Moisturizers | South Korea | 🇰🇷 | 2150 | 1520 | 8 | 25 | https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1608248597359-26d11b228f41?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?auto=format&fit=crop&w=800&q=80 | TM-G333-2026-11''';
 
     _rawTextCtrl.text = sample;
     _parseText(sample);
@@ -53,18 +53,39 @@ Neutrogena Hydro Boost Water Gel | Neutrogena | Skincare | United States | 🇺�
       final parts = line.split('|').map((s) => s.trim()).toList();
       if (parts.length >= 6) {
         final name = parts[0];
-        final brand = parts.length > 1 ? parts[1] : 'Imported';
-        final category = parts.length > 2 ? parts[2] : 'Skincare';
-        final origin = parts.length > 3 ? parts[3] : 'South Korea';
-        final flag = parts.length > 4 ? parts[4] : '✨';
+        final brand = parts.length > 1 && parts[1].isNotEmpty ? parts[1] : 'TIA\'M';
+        final category = parts.length > 2 && parts[2].isNotEmpty ? parts[2] : 'Skincare';
+        final origin = parts.length > 3 && parts[3].isNotEmpty ? parts[3] : 'South Korea';
+        final flag = parts.length > 4 && parts[4].isNotEmpty ? parts[4] : '🇰🇷';
         final retailPrice = double.tryParse(parts.length > 5 ? parts[5] : '1500') ?? 1500.0;
         final wholesalePrice = double.tryParse(parts.length > 6 ? parts[6] : '1200') ?? 1200.0;
         final moq = int.tryParse(parts.length > 7 ? parts[7] : '10') ?? 10;
         final stock = int.tryParse(parts.length > 8 ? parts[8] : '50') ?? 50;
-        final imgUrl = parts.length > 9 && parts[9].isNotEmpty
-            ? parts[9]
-            : 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80';
-        final batch = parts.length > 10 ? parts[10] : 'BATCH-2026-${i + 1}';
+
+        // Multi-image parsing:
+        // Column 10 can contain multiple comma- or semicolon-separated URLs.
+        // Also supports an optional Column 12 for extra gallery URLs.
+        final List<String> parsedImages = [];
+        if (parts.length > 9 && parts[9].isNotEmpty) {
+          final rawUrls = parts[9].split(RegExp(r'[,;]')).map((s) => s.trim()).where((s) => s.isNotEmpty);
+          parsedImages.addAll(rawUrls);
+        }
+
+        final batch = parts.length > 10 && parts[10].isNotEmpty ? parts[10] : 'BATCH-2026-${i + 1}';
+
+        if (parts.length > 11 && parts[11].isNotEmpty) {
+          final rawExtra = parts[11].split(RegExp(r'[,;]')).map((s) => s.trim()).where((s) => s.isNotEmpty);
+          for (final u in rawExtra) {
+            if (!parsedImages.contains(u)) parsedImages.add(u);
+          }
+        }
+
+        final imgUrl = parsedImages.isNotEmpty
+            ? parsedImages.first
+            : 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=800&q=80';
+        final gallery = parsedImages.length > 1
+            ? parsedImages.sublist(1)
+            : <String>[];
 
         list.add(Product(
           id: 'p_bulk_${DateTime.now().millisecondsSinceEpoch}_$i',
@@ -79,10 +100,12 @@ Neutrogena Hydro Boost Water Gel | Neutrogena | Skincare | United States | 🇺�
           moq: moq,
           stock: stock,
           imageUrl: imgUrl,
+          gallery: gallery,
           batchNo: batch,
           expiryDate: '2028-12',
           skinType: 'All Skin Types',
-          description: 'Official imported authentic cosmetics. Batch checked.',
+          description: 'Official imported authentic cosmetics. Batch checked and BSTI verified.',
+          descriptionBn: 'অফিসিয়াল আমদানিকৃত অথেনটিক কসমেটিকস। ব্যাচ ও বিএসটিআই ভেরিফাইড।',
           ingredients: 'Active botanical and clinical skincare ingredients.',
           usageInstructions: 'Apply daily onto cleansed skin.',
           isNewArrival: true,
@@ -138,11 +161,22 @@ Neutrogena Hydro Boost Water Gel | Neutrogena | Skincare | United States | 🇺�
                 child: const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Format Guide (1 product per line):', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.blue)),
-                    SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(Icons.photo_library, size: 16, color: Colors.blue),
+                        SizedBox(width: 6),
+                        Text('Format Guide (Supports Multiple Images per SKU):', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.blue)),
+                      ],
+                    ),
+                    SizedBox(height: 6),
                     Text(
-                      'Name | Brand | Category | Origin Country | Flag | Retail Price | Wholesale Price | MOQ | Stock | Image URL | Batch No',
+                      'Name | Brand | Category | Origin Country | Flag | Retail Price | Wholesale Price | MOQ | Stock | Image URLs (comma-separated for multiple angles) | Batch No',
                       style: TextStyle(fontSize: 11, fontFamily: 'monospace', color: Colors.blueGrey),
+                    ),
+                    SizedBox(height: 6),
+                    Text(
+                      '💡 Multiple Images: In the 10th column, supply multiple comma-separated (,) URLs for Main Hero, Texture, Packaging, In-Hand, and Authentic Batch Seal angles matching Bioxin standards.',
+                      style: TextStyle(fontSize: 11, color: Color(0xFF1E40AF), fontWeight: FontWeight.w600),
                     ),
                   ],
                 ),
@@ -187,9 +221,9 @@ Neutrogena Hydro Boost Water Gel | Neutrogena | Skincare | United States | 🇺�
 
               const SizedBox(height: 10),
 
-              // Preview list of parsed items
+              // Preview list of parsed items with multi-image badges
               Container(
-                constraints: const BoxConstraints(maxHeight: 180),
+                constraints: const BoxConstraints(maxHeight: 220),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey.shade200),
                   borderRadius: BorderRadius.circular(10),
@@ -200,11 +234,84 @@ Neutrogena Hydro Boost Water Gel | Neutrogena | Skincare | United States | 🇺�
                   separatorBuilder: (_, __) => const Divider(height: 1),
                   itemBuilder: (context, idx) {
                     final p = _parsedProducts[idx];
-                    return ListTile(
-                      dense: true,
-                      leading: Text(p.countryFlag, style: const TextStyle(fontSize: 18)),
-                      title: Text(p.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5)),
-                      subtitle: Text('${p.brand} • ${p.category} • Retail: ৳${p.retailPrice.toStringAsFixed(0)} • Wholesale: ৳${p.wholesalePrice.toStringAsFixed(0)} • Stock: ${p.stock} units', style: const TextStyle(fontSize: 11)),
+                    final allImgs = p.allImages;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              p.imageUrl,
+                              width: 44,
+                              height: 44,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Container(
+                                width: 44,
+                                height: 44,
+                                color: Colors.grey.shade100,
+                                child: Center(child: Text(p.countryFlag, style: const TextStyle(fontSize: 16))),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        p.name,
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: allImgs.length >= 5 ? Colors.green.shade50 : AppTheme.rose50,
+                                        borderRadius: BorderRadius.circular(6),
+                                        border: Border.all(
+                                          color: allImgs.length >= 5 ? Colors.green.shade300 : AppTheme.rose200,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.photo_library,
+                                            size: 11,
+                                            color: allImgs.length >= 5 ? Colors.green.shade800 : AppTheme.rose800,
+                                          ),
+                                          const SizedBox(width: 3),
+                                          Text(
+                                            '${allImgs.length} Images',
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                              color: allImgs.length >= 5 ? Colors.green.shade800 : AppTheme.rose800,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  '${p.brand} • ${p.category} • Retail: ৳${p.retailPrice.toStringAsFixed(0)} • Wholesale: ৳${p.wholesalePrice.toStringAsFixed(0)} • Stock: ${p.stock} units • Batch: ${p.batchNo}',
+                                  style: TextStyle(fontSize: 11, color: Colors.grey.shade700),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   },
                 ),

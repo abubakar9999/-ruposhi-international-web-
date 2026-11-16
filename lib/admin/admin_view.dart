@@ -18,6 +18,7 @@ enum AdminSection {
   coupons,
   customers,
   compliance,
+  banners,
 }
 
 class AdminView extends StatefulWidget {
@@ -35,6 +36,8 @@ class _AdminViewState extends State<AdminView> {
   final TextEditingController _productSearchCtrl = TextEditingController();
   final TextEditingController _orderSearchCtrl = TextEditingController();
   final TextEditingController _customerSearchCtrl = TextEditingController();
+  late TextEditingController _announcementEnCtrl;
+  late TextEditingController _announcementBnCtrl;
 
   String _productCategoryFilter = 'All';
   bool _onlyLowStock = false;
@@ -44,6 +47,8 @@ class _AdminViewState extends State<AdminView> {
   @override
   void initState() {
     super.initState();
+    _announcementEnCtrl = TextEditingController(text: widget.state.announcementEn);
+    _announcementBnCtrl = TextEditingController(text: widget.state.announcementBn);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<StoreCubit>().loadAdminData();
     });
@@ -56,6 +61,8 @@ class _AdminViewState extends State<AdminView> {
     _productSearchCtrl.dispose();
     _orderSearchCtrl.dispose();
     _customerSearchCtrl.dispose();
+    _announcementEnCtrl.dispose();
+    _announcementBnCtrl.dispose();
     super.dispose();
   }
 
@@ -420,6 +427,7 @@ class _AdminViewState extends State<AdminView> {
                           _buildMobileNavItem(AdminSection.coupons, Icons.discount_outlined, 'Coupons'),
                           _buildMobileNavItem(AdminSection.customers, Icons.people_outline, 'Customers'),
                           _buildMobileNavItem(AdminSection.compliance, Icons.ac_unit, 'Compliance'),
+                          _buildMobileNavItem(AdminSection.banners, Icons.view_carousel_outlined, 'Banners'),
                         ],
                       ),
                     ),
@@ -504,6 +512,12 @@ class _AdminViewState extends State<AdminView> {
           icon: Icons.ac_unit,
           title: 'Cold-Chain & BSTI',
           subtitle: '20°C Audit & Cargo AWB',
+        ),
+        _buildSidebarTile(
+          section: AdminSection.banners,
+          icon: Icons.view_carousel_outlined,
+          title: 'Hero Banners & Promos',
+          subtitle: 'Active Homepage Sliders',
         ),
       ],
     );
@@ -628,6 +642,8 @@ class _AdminViewState extends State<AdminView> {
         return _buildCustomersSection(context, cubit);
       case AdminSection.compliance:
         return _buildComplianceSection(context, cubit);
+      case AdminSection.banners:
+        return _buildBannersSection(context, cubit);
     }
   }
 
@@ -753,6 +769,174 @@ class _AdminViewState extends State<AdminView> {
               ],
             );
           },
+        ),
+
+        const SizedBox(height: 28),
+
+        // Quick Operations Hub & Announcement Bar Editor
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Quick Operations Hub
+            Expanded(
+              flex: 1,
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(Icons.bolt, color: AppTheme.rose600, size: 20),
+                        SizedBox(width: 8),
+                        Text(
+                          'Quick Store Operations',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: [
+                        _buildQuickActionBtn(
+                          icon: Icons.add_box_outlined,
+                          label: 'Add SKU',
+                          color: AppTheme.rose600,
+                          onTap: () => setState(() => _currentSection = AdminSection.products),
+                        ),
+                        _buildQuickActionBtn(
+                          icon: Icons.local_shipping_outlined,
+                          label: 'Pending Orders',
+                          color: Colors.blue.shade700,
+                          onTap: () {
+                            setState(() {
+                              _currentSection = AdminSection.orders;
+                              _orderStatusFilter = 'Pending';
+                            });
+                          },
+                        ),
+                        _buildQuickActionBtn(
+                          icon: Icons.confirmation_number_outlined,
+                          label: 'Create Coupon',
+                          color: Colors.purple.shade700,
+                          onTap: () => setState(() => _currentSection = AdminSection.coupons),
+                        ),
+                        _buildQuickActionBtn(
+                          icon: Icons.verified_outlined,
+                          label: 'B2B Approvals',
+                          color: Colors.green.shade700,
+                          onTap: () => setState(() => _currentSection = AdminSection.b2b),
+                        ),
+                        _buildQuickActionBtn(
+                          icon: Icons.view_carousel_outlined,
+                          label: 'Hero Banners',
+                          color: AppTheme.gold600,
+                          onTap: () => setState(() => _currentSection = AdminSection.banners),
+                        ),
+                        _buildQuickActionBtn(
+                          icon: Icons.sync,
+                          label: 'Sync Supabase',
+                          color: Colors.teal.shade700,
+                          onTap: () {
+                            cubit.loadAdminData();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Synchronizing live orders & customers from Supabase...')),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 20),
+
+            // Live Announcement Bar Editor
+            Expanded(
+              flex: 1,
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.campaign_outlined, color: AppTheme.gold600, size: 20),
+                            SizedBox(width: 8),
+                            Text(
+                              'Live Storefront Top Announcement',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                            ),
+                          ],
+                        ),
+                        Text('Realtime Push', style: TextStyle(color: Colors.green, fontSize: 11, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _announcementEnCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Announcement Banner (English)',
+                        prefixIcon: Icon(Icons.language, size: 18),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _announcementBnCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Announcement Banner (বাংলা)',
+                        prefixIcon: Icon(Icons.translate, size: 18),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          cubit.updateAnnouncement(
+                            _announcementEnCtrl.text.trim(),
+                            _announcementBnCtrl.text.trim(),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Top announcement bar updated across storefront!'),
+                              backgroundColor: Colors.green,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.rose900,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        ),
+                        icon: const Icon(Icons.publish, size: 16),
+                        label: const Text('Publish Announcement', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
 
         const SizedBox(height: 28),
@@ -1253,21 +1437,47 @@ class _AdminViewState extends State<AdminView> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Product Thumbnail
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Image.network(
-              product.imageUrl,
-              width: 60,
-              height: 60,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                width: 60,
-                height: 60,
-                color: Colors.grey.shade200,
-                child: const Icon(Icons.image, color: Colors.grey),
+          // Product Thumbnail with Multi-Image count badge
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.network(
+                  product.imageUrl,
+                  width: 60,
+                  height: 60,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    width: 60,
+                    height: 60,
+                    color: Colors.grey.shade200,
+                    child: const Icon(Icons.image, color: Colors.grey),
+                  ),
+                ),
               ),
-            ),
+              Positioned(
+                bottom: 2,
+                right: 2,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.8),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.photo_library, size: 9, color: Colors.white),
+                      const SizedBox(width: 2),
+                      Text(
+                        '${product.allImages.length}',
+                        style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(width: 14),
 
@@ -1420,15 +1630,38 @@ class _AdminViewState extends State<AdminView> {
     final batchCtrl = TextEditingController(text: existing?.batchNo ?? 'KOR-2026-BATCH-01');
     final expiryCtrl = TextEditingController(text: existing?.expiryDate ?? '2028-12');
     final skinTypeCtrl = TextEditingController(text: existing?.skinType ?? 'All Skin Types');
-    final imageCtrl = TextEditingController(
-      text: existing?.imageUrl ?? 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80',
+    final existingImages = existing?.allImages ?? [];
+    final image1Ctrl = TextEditingController(
+      text: existing != null && existing.imageUrl.isNotEmpty
+          ? existing.imageUrl
+          : (existingImages.isNotEmpty ? existingImages[0] : 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80'),
+    );
+    final image2Ctrl = TextEditingController(
+      text: existing != null && existing.gallery.isNotEmpty
+          ? existing.gallery[0]
+          : (existingImages.length > 1 ? existingImages[1] : 'https://images.unsplash.com/photo-1608248597359-26d11b228f41?auto=format&fit=crop&w=600&q=80'),
+    );
+    final image3Ctrl = TextEditingController(
+      text: existing != null && existing.gallery.length > 1
+          ? existing.gallery[1]
+          : (existingImages.length > 2 ? existingImages[2] : 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80'),
+    );
+    final image4Ctrl = TextEditingController(
+      text: existing != null && existing.gallery.length > 2
+          ? existing.gallery[2]
+          : (existingImages.length > 3 ? existingImages[3] : 'https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?auto=format&fit=crop&w=600&q=80'),
+    );
+    final image5Ctrl = TextEditingController(
+      text: existing != null && existing.gallery.length > 3
+          ? existing.gallery[3]
+          : (existingImages.length > 4 ? existingImages[4] : 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=600&q=80'),
     );
     final descCtrl = TextEditingController(text: existing?.description ?? 'Formulated with authentic active ingredients.');
     final ingredientsCtrl = TextEditingController(text: existing?.ingredients ?? 'Snail Secretion Filtrate, Betaine, Butylene Glycol');
 
     bool isBestSeller = existing?.isBestSeller ?? false;
     bool isNewArrival = existing?.isNewArrival ?? false;
-    bool isUploadingImage = false;
+    int? uploadingSlot;
 
     showDialog(
       context: context,
@@ -1491,92 +1724,229 @@ class _AdminViewState extends State<AdminView> {
                     ),
                     const SizedBox(height: 10),
                     TextField(controller: skinTypeCtrl, decoration: const InputDecoration(labelText: 'Skin Type Recommendation')),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 14),
 
                     // ==========================================
-                    // SUPABASE STORAGE IMAGE UPLOAD & COMPRESSION
+                    // 5-IMAGE MULTI-GALLERY & COMPRESSION MANAGER (BIOXIN STANDARD)
                     // ==========================================
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(12),
+                        color: const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(14),
                         border: Border.all(color: const Color(0xFFCBD5E1)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          TextField(
-                            controller: imageCtrl,
-                            decoration: const InputDecoration(
-                              labelText: 'Product Image Public URL',
-                              hintText: 'https://...',
-                              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
                           Row(
                             children: [
-                              ElevatedButton.icon(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF0284C7),
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.rose600,
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                                onPressed: isUploadingImage
-                                    ? null
-                                    : () async {
-                                        setDialogState(() => isUploadingImage = true);
-                                        final res = await ImageUploadService.pickCompressAndUpload();
-                                        setDialogState(() => isUploadingImage = false);
-
-                                        if (res != null) {
-                                          if (res.success) {
-                                            imageCtrl.text = res.publicUrl;
-                                            setDialogState(() {});
-                                            if (ctx.mounted) {
-                                              ScaffoldMessenger.of(ctx).showSnackBar(
-                                                SnackBar(
-                                                  content: Text(
-                                                    'Uploaded & Compressed! ${res.originalSizeFormatted} -> ${res.compressedSizeFormatted} (${res.savingsPercent}% saved).',
-                                                  ),
-                                                  backgroundColor: Colors.green.shade800,
-                                                ),
-                                              );
-                                            }
-                                          } else {
-                                            if (res.publicUrl.isNotEmpty) {
-                                              imageCtrl.text = res.publicUrl;
-                                              setDialogState(() {});
-                                            }
-                                            if (ctx.mounted) {
-                                              ScaffoldMessenger.of(ctx).showSnackBar(
-                                                SnackBar(
-                                                  content: Text(
-                                                    'Notice: ${res.errorMessage ?? "Storage error"}. URL generated, but ensure "product-images" bucket exists in Supabase.',
-                                                  ),
-                                                  backgroundColor: Colors.orange.shade800,
-                                                  duration: const Duration(seconds: 5),
-                                                ),
-                                              );
-                                            }
-                                          }
-                                        }
-                                      },
-                                icon: isUploadingImage
-                                    ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                                    : const Icon(Icons.cloud_upload_outlined, size: 16),
-                                label: Text(
-                                  isUploadingImage ? 'Compressing (<=100KB)...' : 'Upload Image (Auto <= 100KB Compress)',
-                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                                ),
+                                child: const Icon(Icons.photo_library_outlined, size: 16, color: Colors.white),
                               ),
                               const SizedBox(width: 8),
                               const Expanded(
-                                child: Text('Auto-compresses to strictly <= 100 KB before Supabase Storage upload.', style: TextStyle(fontSize: 10.5, color: Colors.blueGrey)),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Multi-Image Product Gallery (5 Bioxin-Standard Angles)',
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.rose950),
+                                    ),
+                                    Text(
+                                      'Supports at least 5 high-res angles with auto <=100KB compression for lightning-fast loads.',
+                                      style: TextStyle(fontSize: 10.5, color: Colors.blueGrey),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
+                          const SizedBox(height: 12),
+                          ...[
+                            {
+                              'slot': 1,
+                              'title': 'Slot 1: Primary Hero Image (Front Bottle / Jar)',
+                              'subtitle': 'Primary storefront & catalog thumbnail',
+                              'ctrl': image1Ctrl,
+                            },
+                            {
+                              'slot': 2,
+                              'title': 'Slot 2: Formula & Texture (Swatch / Droplet)',
+                              'subtitle': 'Bioxin dermatological formula consistency view',
+                              'ctrl': image2Ctrl,
+                            },
+                            {
+                              'slot': 3,
+                              'title': 'Slot 3: Packaging & Box (Side Profile & Seal)',
+                              'subtitle': 'Authenticity & packaging verification angle',
+                              'ctrl': image3Ctrl,
+                            },
+                            {
+                              'slot': 4,
+                              'title': 'Slot 4: Application & In-Hand (Routine / Scale)',
+                              'subtitle': 'In-hand scale & skincare routine application',
+                              'ctrl': image4Ctrl,
+                            },
+                            {
+                              'slot': 5,
+                              'title': 'Slot 5: Ingredients & Batch Seal (Back Label)',
+                              'subtitle': 'Active ingredients & batch code verification',
+                              'ctrl': image5Ctrl,
+                            },
+                          ].map((item) {
+                            final int slotNum = item['slot'] as int;
+                            final String title = item['title'] as String;
+                            final String subtitle = item['subtitle'] as String;
+                            final TextEditingController ctrl = item['ctrl'] as TextEditingController;
+                            final bool isSlotUploading = uploadingSlot == slotNum;
+
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: const Color(0xFFE2E8F0)),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        width: 44,
+                                        height: 44,
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade100,
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                                        ),
+                                        child: ctrl.text.trim().isNotEmpty
+                                            ? ClipRRect(
+                                                borderRadius: BorderRadius.circular(7),
+                                                child: Image.network(
+                                                  ctrl.text.trim(),
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 20, color: Colors.grey),
+                                                ),
+                                              )
+                                            : Center(
+                                                child: Text(
+                                                  '#$slotNum',
+                                                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey, fontSize: 12),
+                                                ),
+                                              ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              title,
+                                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.darkPlum),
+                                            ),
+                                            Text(
+                                              subtitle,
+                                              style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      if (ctrl.text.trim().isNotEmpty)
+                                        IconButton(
+                                          icon: const Icon(Icons.clear, size: 16, color: Colors.grey),
+                                          tooltip: 'Clear slot',
+                                          onPressed: () {
+                                            ctrl.clear();
+                                            setDialogState(() {});
+                                          },
+                                        ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: TextField(
+                                          controller: ctrl,
+                                          style: const TextStyle(fontSize: 12),
+                                          decoration: InputDecoration(
+                                            isDense: true,
+                                            hintText: 'https://...',
+                                            contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                          ),
+                                          onChanged: (_) => setDialogState(() {}),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      ElevatedButton.icon(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: slotNum == 1 ? AppTheme.rose800 : const Color(0xFF0284C7),
+                                          foregroundColor: Colors.white,
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                        ),
+                                        onPressed: isSlotUploading
+                                            ? null
+                                            : () async {
+                                                setDialogState(() => uploadingSlot = slotNum);
+                                                final res = await ImageUploadService.pickCompressAndUpload();
+                                                setDialogState(() => uploadingSlot = null);
+
+                                                if (res != null) {
+                                                  if (res.success) {
+                                                    ctrl.text = res.publicUrl;
+                                                    setDialogState(() {});
+                                                    if (ctx.mounted) {
+                                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                            'Slot $slotNum Uploaded & Compressed! ${res.originalSizeFormatted} -> ${res.compressedSizeFormatted} (${res.savingsPercent}% saved).',
+                                                          ),
+                                                          backgroundColor: Colors.green.shade800,
+                                                        ),
+                                                      );
+                                                    }
+                                                  } else {
+                                                    if (res.publicUrl.isNotEmpty) {
+                                                      ctrl.text = res.publicUrl;
+                                                      setDialogState(() {});
+                                                    }
+                                                    if (ctx.mounted) {
+                                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                            'Notice: ${res.errorMessage ?? "Storage error"}. URL generated, but ensure "product-images" bucket exists in Supabase.',
+                                                          ),
+                                                          backgroundColor: Colors.orange.shade800,
+                                                          duration: const Duration(seconds: 4),
+                                                        ),
+                                                      );
+                                                    }
+                                                  }
+                                                }
+                                              },
+                                        icon: isSlotUploading
+                                            ? const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                            : const Icon(Icons.cloud_upload_outlined, size: 14),
+                                        label: Text(
+                                          isSlotUploading ? 'Compressing...' : 'Upload & Compress',
+                                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            );
+                          }),
                         ],
                       ),
                     ),
@@ -1613,6 +1983,16 @@ class _AdminViewState extends State<AdminView> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: AppTheme.rose800),
                 onPressed: () {
+                  final slot1 = image1Ctrl.text.trim();
+                  final slot2 = image2Ctrl.text.trim();
+                  final slot3 = image3Ctrl.text.trim();
+                  final slot4 = image4Ctrl.text.trim();
+                  final slot5 = image5Ctrl.text.trim();
+
+                  final galleryList = [slot2, slot3, slot4, slot5]
+                      .where((s) => s.isNotEmpty)
+                      .toList();
+
                   final newProduct = Product(
                     id: existing?.id ?? 'p_${DateTime.now().millisecondsSinceEpoch}',
                     name: nameCtrl.text.trim().isNotEmpty ? nameCtrl.text.trim() : 'New Luxury Cosmetic',
@@ -1629,7 +2009,8 @@ class _AdminViewState extends State<AdminView> {
                     batchNo: batchCtrl.text.trim(),
                     expiryDate: expiryCtrl.text.trim(),
                     skinType: skinTypeCtrl.text.trim(),
-                    imageUrl: imageCtrl.text.trim(),
+                    imageUrl: slot1.isNotEmpty ? slot1 : (existing?.imageUrl ?? ''),
+                    gallery: galleryList,
                     description: descCtrl.text.trim(),
                     ingredients: ingredientsCtrl.text.trim(),
                     usageInstructions: 'Apply daily onto cleansed skin.',
@@ -1644,7 +2025,7 @@ class _AdminViewState extends State<AdminView> {
                   }
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(isEdit ? 'Product updated.' : 'New product created!')),
+                    SnackBar(content: Text(isEdit ? 'Product updated with multi-images.' : 'New product created with multi-images!')),
                   );
                 },
                 child: Text(isEdit ? 'Save Changes' : 'Create Product', style: const TextStyle(color: Colors.white)),
@@ -3712,6 +4093,166 @@ class _AdminViewState extends State<AdminView> {
                   ],
                 ),
               )),
+      ],
+    );
+  }
+
+  Widget _buildQuickActionBtn({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withValues(alpha: 0.25)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: color, size: 18),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12.5),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBannersSection(BuildContext context, StoreCubit cubit) {
+    final banners = [
+      {
+        'badge': 'Festive Radiance Campaign 2026',
+        'title': 'Unveil Your Purest Luminous Glow',
+        'desc': '100% authentic global skincare imported from France, South Korea, USA, UK.',
+        'status': 'Active (Hero Slide 1)',
+        'img': 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80',
+      },
+      {
+        'badge': 'New Arrivals • K-Beauty & Luxury Makeup',
+        'title': 'Runway-Ready Velvet & Glass Skin',
+        'desc': 'Dermatologist-approved serums from The Ordinary, COSRX, MAC & Maybelline.',
+        'status': 'Active (Hero Slide 2)',
+        'img': 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=600&q=80',
+      },
+      {
+        'badge': 'Direct Importer • Batch Verified',
+        'title': 'Pure Science Meets Timeless Beauty',
+        'desc': 'Verified batch codes, BSTI compliance, 20°C temperature-controlled warehousing.',
+        'status': 'Active (Hero Slide 3)',
+        'img': 'https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?auto=format&fit=crop&w=600&q=80',
+      },
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Hero Sliders & Promotional Banners', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                Text('Manage homepage hero carousel, campaign badges, and call-to-actions.', style: TextStyle(color: Colors.grey, fontSize: 13)),
+              ],
+            ),
+            ElevatedButton.icon(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Campaign editor ready. All 3 current campaign sliders are live on storefront.')),
+                );
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.rose900, foregroundColor: Colors.white),
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text('+ Add Campaign Banner'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        ...banners.map((b) => Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      b['img']!,
+                      width: 100,
+                      height: 75,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(width: 100, height: 75, color: Colors.grey.shade200),
+                    ),
+                  ),
+                  const SizedBox(width: 18),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: AppTheme.rose50,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                b['badge']!,
+                                style: const TextStyle(color: AppTheme.rose600, fontSize: 11, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: Colors.green.shade50,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                b['status']!,
+                                style: TextStyle(color: Colors.green.shade800, fontSize: 10.5, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Text(b['title']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                        const SizedBox(height: 3),
+                        Text(b['desc']!, style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined, size: 20, color: Colors.blueGrey),
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Editing banner: ${b['title']}')),
+                      );
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.visibility_outlined, size: 20, color: AppTheme.rose600),
+                    onPressed: () => cubit.navigateTo(AppView.home),
+                  ),
+                ],
+              ),
+            )),
       ],
     );
   }

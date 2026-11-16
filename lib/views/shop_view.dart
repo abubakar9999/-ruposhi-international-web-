@@ -15,6 +15,7 @@ class ShopCatalogView extends StatelessWidget {
     final products = state.filteredProducts;
 
     const categories = ['All', 'Skincare', 'Makeup', 'Haircare', 'Fragrance'];
+    const skinConcerns = ['All Concerns', 'Acne', 'Anti-Aging', 'Dark Spots', 'Dry Skin', 'Sensitive', 'Oily Skin'];
     const brands = [
       'All',
       'COSRX',
@@ -218,6 +219,40 @@ class ShopCatalogView extends StatelessWidget {
 
                     const SizedBox(height: 12),
 
+                    // Skin Concern Pills (Bioxin style)
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: skinConcerns.map((sc) {
+                          final queryVal = sc == 'All Concerns' ? 'All' : sc;
+                          final isSelected = state.selectedSkinConcern.toLowerCase() == queryVal.toLowerCase();
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: ChoiceChip(
+                              avatar: queryVal != 'All'
+                                  ? const Icon(Icons.spa_outlined, size: 14, color: AppTheme.rose600)
+                                  : null,
+                              label: Text(sc),
+                              selected: isSelected,
+                              selectedColor: AppTheme.rose900,
+                              labelStyle: TextStyle(
+                                color: isSelected ? Colors.white : AppTheme.rose950,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                fontSize: 12,
+                              ),
+                              backgroundColor: AppTheme.rose50,
+                              side: BorderSide(
+                                color: isSelected ? AppTheme.rose900 : AppTheme.borderSubtle,
+                              ),
+                              onSelected: (_) => cubit.setSkinConcern(queryVal),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
                     // Brand Filter Pills
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
@@ -287,6 +322,7 @@ class ShopCatalogView extends StatelessWidget {
                             cubit.setSearch('');
                             cubit.setCategory('All');
                             cubit.setBrand('All');
+                            cubit.setSkinConcern('All');
                           },
                           child: const Text('Reset All Filters'),
                         ),
