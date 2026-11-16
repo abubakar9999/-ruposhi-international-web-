@@ -391,28 +391,37 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: isSmallMobile ? 30 : 40,
-            height: isSmallMobile ? 30 : 40,
-            decoration: BoxDecoration(
-              gradient: AppTheme.logoGradient,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: AppTheme.rose600.withValues(alpha: 0.35),
-                  blurRadius: 8,
-                  offset: const Offset(0, 3),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset(
+              'assets/images/logo_mark.png',
+              width: isSmallMobile ? 32 : 40,
+              height: isSmallMobile ? 32 : 40,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => Container(
+                width: isSmallMobile ? 30 : 40,
+                height: isSmallMobile ? 30 : 40,
+                decoration: BoxDecoration(
+                  gradient: AppTheme.logoGradient,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.rose600.withValues(alpha: 0.35),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Center(
-              child: Text(
-                'R',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: isSmallMobile ? 15 : 20,
-                  fontFamily: 'Playfair Display',
+                child: Center(
+                  child: Text(
+                    'R',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: isSmallMobile ? 15 : 20,
+                      fontFamily: 'Playfair Display',
+                    ),
+                  ),
                 ),
               ),
             ),

@@ -170,19 +170,28 @@ class _B2BWholesaleViewState extends State<B2BWholesaleView> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    width: 56,
-                    height: 56,
+                    width: 60,
+                    height: 60,
                     decoration: BoxDecoration(
-                      color: AppTheme.midnightPlum,
+                      color: Colors.white,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: AppTheme.midnightPlum.withValues(alpha: 0.2),
+                          color: AppTheme.midnightPlum.withValues(alpha: 0.15),
                           blurRadius: 10,
+                          offset: const Offset(0, 3),
                         ),
                       ],
                     ),
-                    child: const Icon(Icons.business_center, color: AppTheme.goldLight, size: 28),
+                    padding: const EdgeInsets.all(6),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(30),
+                      child: Image.asset(
+                        'assets/images/logo_mark.png',
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => const Icon(Icons.business_center, color: AppTheme.textDark, size: 28),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -336,7 +345,6 @@ class _B2BWholesaleViewState extends State<B2BWholesaleView> {
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
-
                 if (widget.state.b2bError != null) ...[
                   const SizedBox(height: 12),
                   Container(
@@ -361,7 +369,6 @@ class _B2BWholesaleViewState extends State<B2BWholesaleView> {
                     ),
                   ),
                 ],
-
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () => cubit.loginB2B(_usernameController.text, _passwordController.text),
@@ -387,7 +394,6 @@ class _B2BWholesaleViewState extends State<B2BWholesaleView> {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 16),
                 Container(
                   padding: const EdgeInsets.all(14),
@@ -458,9 +464,7 @@ class _B2BWholesaleViewState extends State<B2BWholesaleView> {
                           labelText: 'Business Type',
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                        items: ['Wholesaler', 'Salon & Spa', 'Pharmacy', 'Distributor']
-                            .map((t) => DropdownMenuItem(value: t, child: Text(t, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis)))
-                            .toList(),
+                        items: ['Wholesaler', 'Salon & Spa', 'Pharmacy', 'Distributor'].map((t) => DropdownMenuItem(value: t, child: Text(t, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis))).toList(),
                         onChanged: (val) {
                           if (val != null) setState(() => _regBusinessType = val);
                         },
@@ -497,11 +501,9 @@ class _B2BWholesaleViewState extends State<B2BWholesaleView> {
                     labelText: 'Estimated Monthly Volume',
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  items: [
-                    '৳50,000 - ৳2,00,000 / month',
-                    '৳2,00,000 - ৳5,00,000 / month',
-                    '৳5,00,000+ / month (Master Distributor)'
-                  ].map((v) => DropdownMenuItem(value: v, child: Text(v, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis))).toList(),
+                  items: ['৳50,000 - ৳2,00,000 / month', '৳2,00,000 - ৳5,00,000 / month', '৳5,00,000+ / month (Master Distributor)']
+                      .map((v) => DropdownMenuItem(value: v, child: Text(v, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis)))
+                      .toList(),
                   onChanged: (val) {
                     if (val != null) setState(() => _regOrderVolume = val);
                   },
@@ -604,10 +606,7 @@ class _B2BWholesaleViewState extends State<B2BWholesaleView> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            activeDealer?.businessName ??
-                                (widget.state.isBangla
-                                    ? 'অনুমোদিত ডিলার প্রাইস শিট ও বাল্ক অর্ডার পোর্টাল'
-                                    : 'Approved B2B Dealer Price Sheet & Consignment Portal'),
+                            activeDealer?.businessName ?? (widget.state.isBangla ? 'অনুমোদিত ডিলার প্রাইস শিট ও বাল্ক অর্ডার পোর্টাল' : 'Approved B2B Dealer Price Sheet & Consignment Portal'),
                             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
@@ -684,11 +683,7 @@ class _B2BWholesaleViewState extends State<B2BWholesaleView> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  activeDealer != null
-                                      ? '${activeDealer.businessName} • Wholesale Portal'
-                                      : (widget.state.isBangla
-                                          ? 'অনুমোদিত ডিলার প্রাইস শিট ও বাল্ক অর্ডার পোর্টাল'
-                                          : 'Approved B2B Dealer Price Sheet & Consignment Portal'),
+                                  activeDealer != null ? '${activeDealer.businessName} • Wholesale Portal' : (widget.state.isBangla ? 'অনুমোদিত ডিলার প্রাইস শিট ও বাল্ক অর্ডার পোর্টাল' : 'Approved B2B Dealer Price Sheet & Consignment Portal'),
                                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,

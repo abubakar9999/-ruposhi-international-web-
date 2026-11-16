@@ -104,23 +104,28 @@ class _AdminViewState extends State<AdminView> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Brand Icon & Badge
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      gradient: AppTheme.logoGradient,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppTheme.rose600.withValues(alpha: 0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: const Center(
-                      child: Icon(Icons.admin_panel_settings, color: Colors.white, size: 30),
+                  // Brand Logo
+                  Image.asset(
+                    'assets/images/logo.png',
+                    height: 56,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        gradient: AppTheme.logoGradient,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.rose600.withValues(alpha: 0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: Icon(Icons.admin_panel_settings, color: Colors.white, size: 30),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -267,12 +272,27 @@ class _AdminViewState extends State<AdminView> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: const BoxDecoration(
-                          gradient: AppTheme.logoGradient,
-                          shape: BoxShape.circle,
+                        padding: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 4,
+                            ),
+                          ],
                         ),
-                        child: const Text('R', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: Image.asset(
+                            'assets/images/logo_mark.png',
+                            width: 26,
+                            height: 26,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => const Text('R', style: TextStyle(color: AppTheme.rose900, fontWeight: FontWeight.bold, fontSize: 16)),
+                          ),
+                        ),
                       ),
                       const SizedBox(width: 10),
                       Column(

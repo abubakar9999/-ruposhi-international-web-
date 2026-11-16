@@ -32,29 +32,35 @@ class FooterSection extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: const BoxDecoration(
-                                color: AppTheme.primaryRose,
-                                shape: BoxShape.circle,
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.15),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
                               ),
-                              child: const Icon(Icons.auto_awesome, color: Colors.white, size: 16),
-                            ),
-                            const SizedBox(width: 10),
-                            const Flexible(
-                              child: Text(
-                                'RUPOSHI INTERNATIONAL',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                  letterSpacing: 1.0,
+                            ],
+                          ),
+                          child: Image.asset(
+                            'assets/images/logo.png',
+                            height: 32,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.auto_awesome, color: AppTheme.rose900, size: 16),
+                                SizedBox(width: 8),
+                                Text(
+                                  'RUPOSHI INTERNATIONAL',
+                                  style: TextStyle(color: AppTheme.rose900, fontWeight: FontWeight.bold, fontSize: 13),
                                 ),
-                              ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                         const SizedBox(height: 12),
                         Text(

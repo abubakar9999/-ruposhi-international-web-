@@ -83,12 +83,24 @@ class _StorefrontShellState extends State<StorefrontShell> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: const BoxDecoration(
-                            color: AppTheme.primaryRose,
-                            shape: BoxShape.circle,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.15),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
-                          child: const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+                          child: Image.asset(
+                            'assets/images/logo.png',
+                            height: 38,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => const Icon(Icons.auto_awesome, color: AppTheme.primaryRose, size: 28),
+                          ),
                         ),
                         const SizedBox(height: 12),
                         const Text(

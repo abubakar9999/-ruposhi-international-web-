@@ -1,11 +1,11 @@
 {
-    "name": "ruposhi_international_web",
-    "short_name": "ruposhi_international_web",
+    "name": "Ruposhi International",
+    "short_name": "Ruposhi",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#FFFFFF",
+    "theme_color": "#881337",
+    "description": "Official Importer & B2B Wholesale Distributor of Authentic Luxury Cosmetics in Bangladesh.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
